@@ -6,8 +6,10 @@ import com.github.julyss2019.mcsp.julyguild.gui.BasePageableGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
+import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
 public class MainGUI extends BasePageableGUI {
@@ -31,7 +33,19 @@ public class MainGUI extends BasePageableGUI {
                 .title("&a&l宗门")
                 .item(4, 7, CommonItem.getPreviousPageItem())
                 .item(4, 8, CommonItem.getNextPageItem())
-                .item(5, 0, new ItemBuilder().material(Material.ENDER_PORTAL_FRAME).displayName("&f我的宗门").colored().build())
+                .item(5, 0,
+                        guildPlayer.isInGuild()
+                                ? new ItemBuilder().material(Material.ENDER_PORTAL_FRAME).displayName("&f我的宗门").colored().build()
+                                : new ItemBuilder().material(Material.EMERALD).displayName("&f创建宗门").colored().build(), new ItemListener() {
+                            @Override
+                            public void onClicked(InventoryClickEvent event) {
+                                if (guildPlayer.isInGuild()) {
+
+                                } else {
+
+                                }
+                            }
+                        })
                 .item(5, 4, new ItemBuilder().material(Material.SKULL_ITEM).displayName("&f个人信息").lores(settings.getPlayerInfoItemLores()).colored().build()).build();
 
     }

@@ -1,17 +1,56 @@
 package com.github.julyss2019.mcsp.julyguild.guild;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
-import com.github.julyss2019.mcsp.julyguild.guild.Guild;
+import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
+import com.github.julyss2019.mcsp.julylibrary.utils.YamlUtil;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 public class GuildManager {
     private static JulyGuild plugin = JulyGuild.getInstance();
     private Map<String, Guild> guildMap = new HashMap<>();
 
     public GuildManager() {}
+
+    public List<Guild> getGuilds() {
+        return getGuilds(false);
+    }
+
+    public boolean createGuild(@NotNull GuildPlayer guildOwner) {
+        if (guildOwner.isInGuild()) {
+            throw new IllegalArgumentException("主人已经有工会了!");
+        }
+
+        String uuid = UUID.randomUUID().toString();
+        File file = new File(plugin.getDataFolder(), "guilds" + File.separator + uuid);
+
+        if (!file.exists()) {
+            try {
+                if (!file.createNewFile()) {
+                    return false;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
+
+        yml.set("uuid", uuid);
+        yml.set("owner", guildOwner.getName());
+        return YamlUtil.saveYaml(yml, file);
+    }
+
+    public List<Guild> getGuilds(boolean sorted) {
+        List<Guild> guilds = new ArrayList<>(guildMap.values());
+
+        return guilds;
+    }
 
     /**
      * 卸载公会
@@ -28,7 +67,7 @@ public class GuildManager {
     private void loadGuild(File file) {
         Guild guild = new Guild(file);
 
-        guild.init();
+        guild.load();
         guildMap.put(guild.getUUID(), guild);
     }
 

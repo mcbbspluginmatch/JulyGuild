@@ -1,2 +1,6 @@
+create_guild:
+  cost:
+    money: 100
+    points: 10
 player_info_item_lores:
   - 'L1'

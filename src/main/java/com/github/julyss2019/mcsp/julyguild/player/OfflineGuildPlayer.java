@@ -56,4 +56,8 @@ public class OfflineGuildPlayer {
     public Player getBukkitPlayer() {
         return Bukkit.getPlayer(name);
     }
+
+    public boolean isInGuild() {
+        return getGuild() != null;
+    }
 }
