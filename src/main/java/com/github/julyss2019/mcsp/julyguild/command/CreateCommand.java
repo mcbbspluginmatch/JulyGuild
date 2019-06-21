@@ -7,11 +7,13 @@ import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import com.github.julyss2019.mcsp.julylibrary.message.TitleBuilder;
+import com.github.julyss2019.mcsp.julylibrary.utils.ItemUtil;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
-import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
@@ -60,7 +62,7 @@ public class CreateCommand implements Command {
 
                     if (guildManager.createGuild(guildPlayer, guildName)) {
                         JulyMessage.sendColoredMessage(cs, "&d恭喜 &e" + playerName + " &d创建 &e" + guildName + " &d成功!");
-                        JulyMessage.sendTitle(bukkitPlayer, new TitleBuilder().text("&d创建工会成功").colored().build());
+                        JulyMessage.sendTitle(bukkitPlayer, new TitleBuilder().text("&d创建宗门成功").colored().build());
                         return true;
                     } else {
                         JulyMessage.sendColoredMessage(cs, "&c创建宗门失败: 请联系管理员.");
@@ -83,19 +85,35 @@ public class CreateCommand implements Command {
 
                     if (guildManager.createGuild(guildPlayer, guildName)) {
                         JulyMessage.sendColoredMessage(cs, "&d恭喜 &e" + playerName + " &d创建 &e" + guildName + " &d成功!");
-                        JulyMessage.sendTitle(bukkitPlayer, new TitleBuilder().text("&d创建工会成功").colored().build());
+                        JulyMessage.sendTitle(bukkitPlayer, new TitleBuilder().text("&d创建宗门成功").colored().build());
                         return true;
                     } else {
                         JulyMessage.sendColoredMessage(cs, "&c创建宗门失败: 请联系管理员.");
                         return true;
                     }
                 case "item":
-                    if (settings.isCreateGuildCostItemEnabled()) {
+                    if (!settings.isCreateGuildCostItemEnabled()) {
                         JulyMessage.sendColoredMessage(cs, "&e非法参数.");
                         return true;
                     }
 
+                    for (ItemStack itemStack : bukkitPlayer.getInventory().getContents()) {
+                        if (ItemUtil.containsLore(itemStack, settings.getCreateGuildCostItemKeyLore())) {
+                            itemStack.setType(Material.AIR);
 
+                            if (guildManager.createGuild(guildPlayer, guildName)) {
+                                JulyMessage.sendColoredMessage(cs, "&d恭喜 &e" + playerName + " &d创建 &e" + guildName + " &d成功!");
+                                JulyMessage.sendTitle(bukkitPlayer, new TitleBuilder().text("&d创建宗门成功").colored().build());
+                                return true;
+                            } else {
+                                JulyMessage.sendColoredMessage(cs, "&c创建宗门失败: 请联系管理员.");
+                                return true;
+                            }
+                        }
+                    }
+
+                    JulyMessage.sendColoredMessage(cs, "&c要创建宗门, 你还需要 &e建帮令x1&c.");
+                    return true;
             }
         }
         return false;

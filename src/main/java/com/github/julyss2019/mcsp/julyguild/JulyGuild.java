@@ -8,6 +8,8 @@ import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julylibrary.command.JulyCommandExecutor;
 import com.github.julyss2019.mcsp.julylibrary.config.JulyConfig;
+import com.github.julyss2019.mcsp.julylibrary.logger.FileLogger;
+import com.github.julyss2019.mcsp.julylibrary.logger.JulyFileLogger;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
@@ -24,10 +26,11 @@ public class JulyGuild extends JavaPlugin {
     private GuildManager guildManager;
     private GuildPlayerManager guildPlayerManager;
     private Settings settings;
-    private String[] initFolderPaths = new String[] {"players", "guilds"};
+    private String[] initFolderPaths = new String[] {"players", "guilds", "logs"};
     private JulyCommandExecutor julyCommandExecutor;
     private PlayerPointsAPI playerPointsAPI;
     private Economy vaultAPI;
+    private FileLogger fileLogger;
 
     public void onEnable() {
         instance = this;
@@ -43,6 +46,7 @@ public class JulyGuild extends JavaPlugin {
         this.guildManager = new GuildManager();
         this.guildPlayerManager = new GuildPlayerManager();
         this.julyCommandExecutor = new JulyCommandExecutor(this);
+        this.fileLogger = JulyFileLogger.getLogger(new File(getDataFolder(), "logs"), null, 60);
 
         getCommand("guild").setExecutor(julyCommandExecutor);
         registerCommands();

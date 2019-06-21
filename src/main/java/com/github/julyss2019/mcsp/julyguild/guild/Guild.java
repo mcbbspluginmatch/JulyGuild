@@ -6,6 +6,7 @@ import com.github.julyss2019.mcsp.julyguild.guild.player.GuildOwner;
 import com.github.julyss2019.mcsp.julyguild.guild.player.Permission;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julylibrary.utils.YamlUtil;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -25,6 +26,8 @@ public class Guild {
     private YamlConfiguration yml;
     private int level;
     private String name;
+    private Material icon = Material.SIGN;
+    private int maxMemberCount;
 
     protected Guild(File file) {
         this.file = file;
@@ -74,6 +77,10 @@ public class Guild {
         return this;
     }
 
+    public int getMemberCount() {
+        return memberMap.size();
+    }
+
     public GuildOwner getOwner() {
         return owner;
     }
@@ -97,5 +104,29 @@ public class Guild {
 
     public void setLevel(int level) {
         this.level = level;
+    }
+
+    public Material getIcon() {
+        return icon;
+    }
+
+    public int getMaxMemberCount() {
+        return maxMemberCount;
+    }
+
+    /**
+     * 设置最大成员数
+     * @param maxMemberCount
+     * @return
+     */
+    public boolean setMaxMemberCount(int maxMemberCount) {
+        yml.set("max_member_count", maxMemberCount);
+
+        if (YamlUtil.saveYaml(yml, file)) {
+            this.maxMemberCount = maxMemberCount;
+            return true;
+        }
+
+        return false;
     }
 }

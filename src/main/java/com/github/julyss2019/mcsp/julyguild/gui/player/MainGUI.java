@@ -4,6 +4,8 @@ import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.config.Settings;
 import com.github.julyss2019.mcsp.julyguild.gui.BasePageableGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
+import com.github.julyss2019.mcsp.julyguild.guild.Guild;
+import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.chat.ChatListener;
 import com.github.julyss2019.mcsp.julylibrary.chat.JulyChatFilter;
@@ -18,9 +20,12 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.List;
+
 public class MainGUI extends BasePageableGUI {
     private static JulyGuild plugin = JulyGuild.getInstance();
-    private Settings settings = plugin.getSettings();
+    private static Settings settings = plugin.getSettings();
+    private static GuildManager guildManager = plugin.getGuildManager();
     private Inventory inventory;
     private Player bukkitPlayer;
 
@@ -35,7 +40,7 @@ public class MainGUI extends BasePageableGUI {
     public void setCurrentPage(int page) {
         super.setCurrentPage(page);
 
-        this.inventory = new InventoryBuilder()
+        InventoryBuilder inventoryBuilder = new InventoryBuilder()
                 .row(6)
                 .colored()
                 .title("&a&l宗门")
@@ -91,13 +96,38 @@ public class MainGUI extends BasePageableGUI {
                                 }
                             }
                         })
-                .item(5, 4, new ItemBuilder().material(Material.SKULL_ITEM).displayName("&f个人信息").lores(settings.getPlayerInfoItemLores()).colored().build()).build();
+                .item(5, 4, new ItemBuilder().material(Material.SKULL_ITEM).displayName("&f个人信息").lores(settings.getPlayerInfoItemLores()).colored().build());
 
+        List<Guild> guilds = guildManager.getGuilds(true);
+        int guildSize = guilds.size();
+        int itemCounter = page * 52;
+        int loopCount = guildSize - itemCounter < 52 ? guildSize - itemCounter : 52;
+
+        System.out.println(guildSize);
+        System.out.println(loopCount);
+
+        for (int i = 0; i < loopCount; i++) {
+            Guild guild = guilds.get(itemCounter++);
+
+            inventoryBuilder.item(0, new ItemBuilder()
+                    .addLore("&7| &fLv." + guild.getLevel())
+                    .addLore("&7| &f会长 " + guild.getOwner().getName())
+                    .addLore("&7| &f人数 " + guild.getMemberCount() + "/" + guild.getMaxMemberCount())
+                    .addLore("&7| &f点击查看基本信息")
+                    .material(guild.getIcon())
+                    .displayName(guild.getName())
+                    .colored()
+                    .build());
+        }
+
+        this.inventory = inventoryBuilder.build();
     }
 
     @Override
     public int getTotalPage() {
-        return super.getTotalPage();
+        int guildSize = guildManager.getGuilds().size();
+
+        return guildSize % 52 == 0 ? guildSize / 52 : guildSize / 52 + 1;
     }
 
     @Override
