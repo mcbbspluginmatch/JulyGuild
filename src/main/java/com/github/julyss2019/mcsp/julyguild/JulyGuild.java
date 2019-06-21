@@ -51,7 +51,7 @@ public class JulyGuild extends JavaPlugin {
         getCommand("guild").setExecutor(julyCommandExecutor);
         registerCommands();
         JulyMessage.setPrefix(this, "§a[宗门] ");
-        getLogger().info("插件初始化完毕!");
+        getLogger().info("插件初始化完毕!1");
     }
 
     private boolean selfCheck() {
