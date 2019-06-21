@@ -16,10 +16,19 @@ public class GuildManager {
 
     public GuildManager() {}
 
+    /**
+     * 得到工会列表
+     * @return
+     */
     public List<Guild> getGuilds() {
         return getGuilds(false);
     }
 
+    /**
+     * 创建工会
+     * @param guildOwner 工会主人
+     * @return
+     */
     public boolean createGuild(@NotNull GuildPlayer guildOwner) {
         if (guildOwner.isInGuild()) {
             throw new IllegalArgumentException("主人已经有工会了!");
@@ -43,9 +52,20 @@ public class GuildManager {
 
         yml.set("uuid", uuid);
         yml.set("owner", guildOwner.getName());
-        return YamlUtil.saveYaml(yml, file);
+
+        if (YamlUtil.saveYaml(yml, file)) {
+            guildMap.put(uuid, getGuild(uuid));
+            return true;
+        }
+
+        return false;
     }
 
+    /**
+     * 得到工会列表
+     * @param sorted 排序
+     * @return
+     */
     public List<Guild> getGuilds(boolean sorted) {
         List<Guild> guilds = new ArrayList<>(guildMap.values());
 

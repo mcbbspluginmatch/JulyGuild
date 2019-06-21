@@ -1,6 +1,15 @@
 create_guild:
+  name_regex: '[\u4e00-\u9fa5_a-zA-Z0-9_]{1,10}'
+  name_not_valid_msg: '公会名只能由中文英文数字组成, 且长度小于10个字符.'
   cost:
-    money: 100
+    money:
+      amount: 1000
+      enabled: true
     points: 10
+      amount: 1000
+      enabled: true
+    item:
+      enabled: true
+      key_lore: '创建工会'
 player_info_item_lores:
   - 'L1'

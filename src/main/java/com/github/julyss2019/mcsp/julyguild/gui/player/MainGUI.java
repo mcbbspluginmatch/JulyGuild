@@ -5,21 +5,27 @@ import com.github.julyss2019.mcsp.julyguild.config.Settings;
 import com.github.julyss2019.mcsp.julyguild.gui.BasePageableGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
+import com.github.julyss2019.mcsp.julylibrary.chat.ChatListener;
+import com.github.julyss2019.mcsp.julylibrary.chat.JulyChatFilter;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.Inventory;
 
 public class MainGUI extends BasePageableGUI {
     private static JulyGuild plugin = JulyGuild.getInstance();
     private Settings settings = plugin.getSettings();
     private Inventory inventory;
+    private Player bukkitPlayer;
 
     public MainGUI(GuildPlayer guildPlayer) {
         super(guildPlayer);
 
+        this.bukkitPlayer = guildPlayer.getBukkitPlayer();
         setCurrentPage(0);
     }
 
@@ -42,7 +48,13 @@ public class MainGUI extends BasePageableGUI {
                                 if (guildPlayer.isInGuild()) {
 
                                 } else {
-
+                                    JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
+                                        @Override
+                                        public void onChat(AsyncPlayerChatEvent event) {
+                                            bukkitPlayer.performCommand("guild create " + event.getMessage());
+                                            JulyChatFilter.unregisterChatFilter(bukkitPlayer);
+                                        }
+                                    });
                                 }
                             }
                         })
