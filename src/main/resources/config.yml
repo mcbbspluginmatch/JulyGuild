@@ -1,12 +1,14 @@
+config_version: 1.0.0
 create_guild:
-  name_regex: '[\u4e00-\u9fa5_a-zA-Z0-9_]{1,10}'
-  name_not_valid_msg: '公会名只能由中文英文数字组成, 且长度小于10个字符.'
+  name_regex: '[\\u4e00-\\u9fa5_a-zA-Z0-9_]{1,10}' # 注意转义
+  name_not_valid_msg: '&c公会名只能由中文英文数字组成, 且长度大于1小于10个字符.'
+  colored_no_per_msg: "&c你没有权限使用彩色代码作为宗门名."
   cost:
     money:
       amount: 1000
       enabled: true
-    points: 10
-      amount: 1000
+    points:
+      amount: 100
       enabled: true
     item:
       enabled: true

@@ -24,6 +24,7 @@ public class Guild {
     private File file;
     private YamlConfiguration yml;
     private int level;
+    private String name;
 
     protected Guild(File file) {
         this.file = file;
@@ -31,6 +32,10 @@ public class Guild {
 
     public File getFile() {
         return file;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Guild load() {
@@ -54,6 +59,7 @@ public class Guild {
 
         this.uuid = yml.getString("uuid");
         this.owner = new GuildOwner(yml.getString("owner"));
+        this.name = yml.getString("name");
 
         for (String memberName : yml.getStringList("members")) {
             Permission permission = Permission.valueOf(yml.getString("members." + memberName + ".permission"));

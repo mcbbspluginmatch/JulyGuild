@@ -14,15 +14,17 @@ public class Settings {
     @Config(path = "create_guild.cost.money.amount")
     private int createGuildCostMoneyAmount;
     @Config(path = "create_guild.cost.money.enabled")
-    private int createGuildCostMoneyEnabled;
+    private boolean createGuildCostMoneyEnabled;
     @Config(path = "create_guild.cost.points.amount")
     private int createGuildCostPointsAmount;
     @Config(path = "create_guild.cost.points.enabled")
-    private int createGuildCostPointsEnabled;
+    private boolean createGuildCostPointsEnabled;
     @Config(path = "create_guild.cost.item.key_lore")
-    private int createGuildCostItemKeyLore;
+    private String createGuildCostItemKeyLore;
     @Config(path = "create_guild.cost.item.enabled")
-    private int createGuildCostItemEnabled;
+    private boolean createGuildCostItemEnabled;
+    @Config(path = "create_guild.colored_no_per_msg")
+    private String createGuildColoredNoPerMsg;
 
     public List<String> getPlayerInfoItemLores() {
         return playerInfoItemLores;
@@ -40,7 +42,7 @@ public class Settings {
         return createGuildCostMoneyAmount;
     }
 
-    public int getCreateGuildCostMoneyEnabled() {
+    public boolean isCreateGuildCostMoneyEnabled() {
         return createGuildCostMoneyEnabled;
     }
 
@@ -48,15 +50,19 @@ public class Settings {
         return createGuildCostPointsAmount;
     }
 
-    public int getCreateGuildCostPointsEnabled() {
+    public boolean isCreateGuildCostPointsEnabled() {
         return createGuildCostPointsEnabled;
     }
 
-    public int getCreateGuildCostItemKeyLore() {
+    public String getCreateGuildCostItemKeyLore() {
         return createGuildCostItemKeyLore;
     }
 
-    public int getCreateGuildCostItemEnabled() {
+    public boolean isCreateGuildCostItemEnabled() {
         return createGuildCostItemEnabled;
+    }
+
+    public String getCreateGuildColoredNoPerMsg() {
+        return createGuildColoredNoPerMsg;
     }
 }

@@ -29,7 +29,7 @@ public class GuildManager {
      * @param guildOwner 工会主人
      * @return
      */
-    public boolean createGuild(@NotNull GuildPlayer guildOwner) {
+    public boolean createGuild(@NotNull GuildPlayer guildOwner, @NotNull String guildName) {
         if (guildOwner.isInGuild()) {
             throw new IllegalArgumentException("主人已经有工会了!");
         }
@@ -50,6 +50,7 @@ public class GuildManager {
 
         YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
 
+        yml.set("name", guildName);
         yml.set("uuid", uuid);
         yml.set("owner", guildOwner.getName());
 

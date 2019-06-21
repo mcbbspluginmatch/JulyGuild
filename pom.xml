@@ -7,6 +7,14 @@
     <groupId>groupId</groupId>
     <artifactId>JulyGuild</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <mac>/Users/user/Desktop/july_ss/code/java_api</mac>
+        <win>G:\july_ss\code\java_api</win>
+        <api_folder>${mac}</api_folder>
+    </properties>
+
+
     <build>
         <plugins>
             <plugin>
@@ -21,6 +29,20 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>Vault</groupId>
+            <artifactId>-</artifactId>
+            <version>-</version>
+            <scope>system</scope>
+            <systemPath>${api_folder}/minecraft/plugins/Vault.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>PlayerPoints</groupId>
+            <artifactId>-</artifactId>
+            <version>-</version>
+            <scope>system</scope>
+            <systemPath>${api_folder}/minecraft/plugins/PlayerPoints.jar</systemPath>
+        </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>

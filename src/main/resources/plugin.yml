@@ -4,5 +4,8 @@ author: July_ss
 version: 1.0.0
 depend:
 - JulyLibrary
+- Vault
+softdepend:
+- PlayerPoints
 commands:
   guild:
