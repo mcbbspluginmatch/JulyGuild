@@ -12,4 +12,7 @@ public interface Pageable extends GUI {
     void setCurrentPage(int page); // 打开指定页
     int getTotalPage(); // 得到总数
     int getCurrentPage(); // 得到当前页数
+    default boolean isValidPage(int p) {
+        return p >= 0 && p < getTotalPage();
+    }
 }

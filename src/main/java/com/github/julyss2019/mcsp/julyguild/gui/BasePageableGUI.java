@@ -14,6 +14,11 @@ public class BasePageableGUI extends BaseGUI implements Pageable {
     }
 
     @Override
+    public void build() {
+        setCurrentPage(0);
+    }
+
+    @Override
     public void nextPage() {
         if (!hasNext()) {
             throw new IllegalArgumentException("没有下一页了");

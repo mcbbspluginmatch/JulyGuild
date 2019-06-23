@@ -5,7 +5,7 @@ version: 1.0.0
 depend:
 - JulyLibrary
 - Vault
-softdepend:
 - PlayerPoints
+- PlaceholderAPI
 commands:
   guild:

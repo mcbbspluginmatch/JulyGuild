@@ -10,6 +10,12 @@ public class GuildPlayer extends OfflineGuildPlayer {
         super(player.getName());
     }
 
+    public GuildPlayer load() {
+        super.load();
+
+        return this;
+    }
+
     public GUI getUsingGUI() {
         return usingGUI;
     }

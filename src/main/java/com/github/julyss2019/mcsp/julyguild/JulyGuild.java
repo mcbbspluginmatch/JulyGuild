@@ -3,14 +3,19 @@ package com.github.julyss2019.mcsp.julyguild;
 import com.github.julyss2019.mcsp.julyguild.command.Command;
 import com.github.julyss2019.mcsp.julyguild.command.CreateCommand;
 import com.github.julyss2019.mcsp.julyguild.command.MainGUICommand;
+import com.github.julyss2019.mcsp.julyguild.command.TestCommand;
 import com.github.julyss2019.mcsp.julyguild.config.Settings;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;
+import com.github.julyss2019.mcsp.julyguild.listener.GUIListener;
+import com.github.julyss2019.mcsp.julyguild.listener.MainGUIListener;
+import com.github.julyss2019.mcsp.julyguild.log.GuildLog;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julylibrary.command.JulyCommandExecutor;
 import com.github.julyss2019.mcsp.julylibrary.config.JulyConfig;
 import com.github.julyss2019.mcsp.julylibrary.logger.FileLogger;
 import com.github.julyss2019.mcsp.julylibrary.logger.JulyFileLogger;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
+import com.google.gson.Gson;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
@@ -21,7 +26,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 
 public class JulyGuild extends JavaPlugin {
-    public static final String CONFIG_VERSION = "1.0.0";
+    public static final String CONFIG_VERSION = "1.0.4";
+    private static final Gson gson = new Gson();
     private static JulyGuild instance;
     private GuildManager guildManager;
     private GuildPlayerManager guildPlayerManager;
@@ -43,26 +49,37 @@ public class JulyGuild extends JavaPlugin {
         }
 
         this.playerPointsAPI = ((PlayerPoints) Bukkit.getPluginManager().getPlugin("PlayerPoints")).getAPI();
-        this.guildManager = new GuildManager();
-        this.guildPlayerManager = new GuildPlayerManager();
+        this.fileLogger = JulyFileLogger.getLogger(new File(getDataFolder(), "logs"), null, 5);
         this.julyCommandExecutor = new JulyCommandExecutor(this);
-        this.fileLogger = JulyFileLogger.getLogger(new File(getDataFolder(), "logs"), null, 60);
+        guildPlayerManager = new GuildPlayerManager();
+        guildManager = new GuildManager();
 
+        guildManager.loadGuilds();
         getCommand("guild").setExecutor(julyCommandExecutor);
         registerCommands();
+        registerListeners();
         JulyMessage.setPrefix(this, "§a[宗门] ");
-        getLogger().info("插件初始化完毕!1");
+        getLogger().info("插件初始化完毕!");
+        new PlaceholderAPIExpansion().register();
+
+    }
+
+    private void registerListeners() {
+        Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
+        Bukkit.getPluginManager().registerEvents(new MainGUIListener(), this);
+    }
+
+    public void writeGuildLog(FileLogger.LoggerLevel loggerLevel, GuildLog log) {
+        fileLogger.log(loggerLevel, gson.toJson(log));
+    }
+
+    public FileLogger getFileLogger() {
+        return fileLogger;
     }
 
     private boolean selfCheck() {
         if (!setupEconomy()) {
             getLogger().severe("Vault Hook 失败!");
-            setEnabled(false);
-            return false;
-        }
-
-        if (settings.isCreateGuildCostPointsEnabled() && !Bukkit.getPluginManager().isPluginEnabled("PlayerPoints")) {
-            getLogger().severe("PlayerPoints Hook 失败!");
             setEnabled(false);
             return false;
         }
@@ -83,6 +100,7 @@ public class JulyGuild extends JavaPlugin {
     private void registerCommands() {
         registerCommand(new MainGUICommand());
         registerCommand(new CreateCommand());
+        registerCommand(new TestCommand());
     }
 
     private void registerCommand(Command command) {

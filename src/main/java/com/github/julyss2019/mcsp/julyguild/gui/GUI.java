@@ -5,7 +5,10 @@ import org.bukkit.inventory.Inventory;
 
 public interface GUI {
     GuildPlayer getGuildPlayer();
+
     Inventory getInventory();
+
+    void build();
 
     default void close() {
         getGuildPlayer().getBukkitPlayer().closeInventory();

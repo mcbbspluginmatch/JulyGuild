@@ -1,7 +1,12 @@
 package com.github.julyss2019.mcsp.julyguild.guild;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
+import com.github.julyss2019.mcsp.julyguild.gui.GUI;
+import com.github.julyss2019.mcsp.julyguild.gui.player.MainGUI;
+import com.github.julyss2019.mcsp.julyguild.guild.log.GuildCreateLog;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
+import com.github.julyss2019.mcsp.julylibrary.logger.FileLogger;
 import com.github.julyss2019.mcsp.julylibrary.utils.YamlUtil;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -9,15 +14,18 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GuildManager {
     private static JulyGuild plugin = JulyGuild.getInstance();
+    private static GuildPlayerManager guildPlayerManager = plugin.getGuildPlayerManager();
+    private static FileLogger fileLogger = plugin.getFileLogger();
     private Map<String, Guild> guildMap = new HashMap<>();
 
     public GuildManager() {}
 
     /**
-     * 得到工会列表
+     * 得到宗会列表（不排序）
      * @return
      */
     public List<Guild> getGuilds() {
@@ -25,17 +33,17 @@ public class GuildManager {
     }
 
     /**
-     * 创建工会
-     * @param guildOwner 工会主人
+     * 创建宗会
+     * @param guildOwner 宗会主人
      * @return
      */
     public boolean createGuild(@NotNull GuildPlayer guildOwner, @NotNull String guildName) {
         if (guildOwner.isInGuild()) {
-            throw new IllegalArgumentException("主人已经有工会了!");
+            throw new IllegalArgumentException("主人已经有宗会了!");
         }
 
         String uuid = UUID.randomUUID().toString();
-        File file = new File(plugin.getDataFolder(), "guilds" + File.separator + uuid);
+        File file = new File(plugin.getDataFolder(), "guilds" + File.separator + uuid + ".yml");
 
         if (!file.exists()) {
             try {
@@ -49,28 +57,51 @@ public class GuildManager {
         }
 
         YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
+        long creationTime = System.currentTimeMillis();
 
         yml.set("name", guildName);
         yml.set("uuid", uuid);
         yml.set("owner", guildOwner.getName());
+        yml.set("creation_time", creationTime);
 
         if (YamlUtil.saveYaml(yml, file)) {
+            loadGuild(file);
             guildMap.put(uuid, getGuild(uuid));
+            plugin.writeGuildLog(FileLogger.LoggerLevel.INFO, new GuildCreateLog(creationTime, uuid, guildOwner.getName(), guildName, true));
+            guildOwner.setGuild(getGuild(uuid));
+
+            // 更新所有玩家的GUI
+            for (GuildPlayer guildPlayer : guildPlayerManager.getOnlineGuildPlayers()) {
+                GUI usingGUI = guildPlayer.getUsingGUI();
+
+                if (usingGUI instanceof MainGUI) {
+                    usingGUI.close();
+                    ((MainGUI) usingGUI).setCurrentPage(0); // 刷新
+                    usingGUI.open();
+                }
+            }
+
             return true;
         }
 
+        plugin.writeGuildLog(FileLogger.LoggerLevel.INFO, new GuildCreateLog(creationTime, uuid, guildOwner.getName(), guildName, false));
         return false;
     }
 
     /**
-     * 得到工会列表
+     * 得到宗会列表
      * @param sorted 排序
      * @return
      */
     public List<Guild> getGuilds(boolean sorted) {
         List<Guild> guilds = new ArrayList<>(guildMap.values());
 
-        return guilds;
+        return sorted ? guilds.stream().sorted(new Comparator<Guild>() {
+            @Override
+            public int compare(Guild o1, Guild o2) {
+                return o1.getLevel() > o2.getLevel() ? -1 : 0;
+            }
+        }).collect(Collectors.toList()) : guilds;
     }
 
     /**
@@ -79,6 +110,13 @@ public class GuildManager {
      */
     private void unloadGuild(Guild guild) {
         guildMap.remove(guild.getUUID());
+    }
+
+    private void loadGuild(String uuid) {
+        Guild guild = new Guild(new File(plugin.getDataFolder(), "guilds" + File.separator + uuid + ".yml"));
+
+        guild.load();
+        guildMap.put(guild.getUUID(), guild);
     }
 
     /**

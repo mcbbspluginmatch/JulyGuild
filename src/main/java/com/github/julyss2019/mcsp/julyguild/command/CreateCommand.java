@@ -35,12 +35,12 @@ public class CreateCommand implements Command {
             GuildPlayer guildPlayer = guildPlayerManager.getGuildPlayer(bukkitPlayer);
 
             if (guildPlayer.isInGuild()) {
-                JulyMessage.sendColoredMessage(cs, "&c你已经有一个宗门或在一个宗门里了.");
+                JulyMessage.sendColoredMessage(cs, "&c你已经在一个宗门里了.");
                 return true;
             }
 
-            if (!guildName.matches(settings.getCreateGuildNameRegex())) {
-                JulyMessage.sendColoredMessage(cs, settings.getCreateGuildNameNotValidMsg());
+            if (!guildName.matches(settings.getGuildCreateNameRegex())) {
+                JulyMessage.sendColoredMessage(cs, settings.getGuildCreateNameNotValidMsg());
                 return true;
             }
 
@@ -48,15 +48,15 @@ public class CreateCommand implements Command {
 
             switch (costType.toLowerCase()) {
                 case "money":
-                    if (!settings.isCreateGuildCostMoneyEnabled()) {
+                    if (!settings.isGuildCreateCostMoneyEnabled()) {
                         JulyMessage.sendColoredMessage(cs, "&e非法参数.");
                         return true;
                     }
 
                     double playerMoney = vault.getBalance(bukkitPlayer);
 
-                    if (playerMoney < settings.getCreateGuildCostMoneyAmount()) {
-                        JulyMessage.sendColoredMessage(cs, "&c要创建宗门, 你还需要 &e" + (settings.getCreateGuildCostMoneyAmount() - playerMoney) + "个 &c金币!");
+                    if (playerMoney < settings.getGuildCreateCostMoneyAmount()) {
+                        JulyMessage.sendColoredMessage(cs, "&c要创建宗门, 你还需要 &e" + (settings.getGuildCreateCostMoneyAmount() - playerMoney) + "个 &c金币!");
                         return true;
                     }
 
@@ -69,19 +69,19 @@ public class CreateCommand implements Command {
                         return true;
                     }
                 case "points":
-                    if (!settings.isCreateGuildCostPointsEnabled()) {
+                    if (!settings.isGuildCreateCostPointsEnabled()) {
                         JulyMessage.sendColoredMessage(cs, "&e非法参数.");
                         return true;
                     }
 
                     int playerPoints = playerPointsAPI.look(bukkitPlayer.getUniqueId());
 
-                    if (playerPoints < settings.getCreateGuildCostMoneyAmount()) {
-                        JulyMessage.sendColoredMessage(cs, "&c要创建宗门, 你还需要 &e" + (settings.getCreateGuildCostMoneyAmount() - playerPoints) + "个 &c点券!");
+                    if (playerPoints < settings.getGuildCreateCostPointsAmount()) {
+                        JulyMessage.sendColoredMessage(cs, "&c要创建宗门, 你还需要 &e" + (settings.getGuildCreateCostPointsAmount() - playerPoints) + "个 &c点券!");
                         return true;
                     }
 
-                    playerPointsAPI.take(playerUUID, settings.getCreateGuildCostPointsAmount());
+                    playerPointsAPI.take(playerUUID, settings.getGuildCreateCostPointsAmount());
 
                     if (guildManager.createGuild(guildPlayer, guildName)) {
                         JulyMessage.sendColoredMessage(cs, "&d恭喜 &e" + playerName + " &d创建 &e" + guildName + " &d成功!");
@@ -92,17 +92,17 @@ public class CreateCommand implements Command {
                         return true;
                     }
                 case "item":
-                    if (!settings.isCreateGuildCostItemEnabled()) {
+                    if (!settings.isGuildCreateCostItemEnabled()) {
                         JulyMessage.sendColoredMessage(cs, "&e非法参数.");
                         return true;
                     }
 
                     for (ItemStack itemStack : bukkitPlayer.getInventory().getContents()) {
-                        if (ItemUtil.containsLore(itemStack, settings.getCreateGuildCostItemKeyLore())) {
+                        if (ItemUtil.containsLore(itemStack, settings.getGuildCreateCostItemKeyLore())) {
                             itemStack.setType(Material.AIR);
 
                             if (guildManager.createGuild(guildPlayer, guildName)) {
-                                JulyMessage.sendColoredMessage(cs, "&d恭喜 &e" + playerName + " &d创建 &e" + guildName + " &d成功!");
+                                JulyMessage.sendColoredMessage(cs, "&d恭喜 &e" + playerName + " &d创建宗会 &e" + guildName + " &d成功!");
                                 JulyMessage.sendTitle(bukkitPlayer, new TitleBuilder().text("&d创建宗门成功").colored().build());
                                 return true;
                             } else {
