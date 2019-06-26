@@ -1,30 +1,36 @@
 package com.github.julyss2019.mcsp.julyguild.guild;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
+import com.github.julyss2019.mcsp.julyguild.guild.exception.GuildLoadException;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildOwner;
 import com.github.julyss2019.mcsp.julyguild.guild.player.Permission;
+import com.github.julyss2019.mcsp.julyguild.guild.request.RequestType;
+import com.github.julyss2019.mcsp.julyguild.guild.request.player.BasePlayerRequest;
+import com.github.julyss2019.mcsp.julyguild.guild.request.player.JoinRequest;
+import com.github.julyss2019.mcsp.julyguild.guild.request.player.PlayerRequest;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.utils.YamlUtil;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Guild {
     private static JulyGuild plugin = JulyGuild.getInstance();
     private static GuildPlayerManager guildPlayerManager = plugin.getGuildPlayerManager();
+    private static GuildManager guildManager = plugin.getGuildManager();
     private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy/MM/dd");
     private File file;
     private YamlConfiguration yml;
 
+    private boolean valid;
+    private boolean deleted;
     private String uuid;
     private GuildOwner owner;
     private String name;
@@ -33,15 +39,19 @@ public class Guild {
     private Material icon = Material.SIGN;
     private int maxMemberCount;
     private long creationTime;
-    private String announcement;
+    private List<String> announcements;
+    private Map<String, List<PlayerRequest>> playerRequestMap = new HashMap<>();
 
     protected Guild(File file) {
         this.file = file;
+
+        load();
     }
 
     public boolean isOwner(OfflineGuildPlayer offlineGuildPlayer) {
-        return offlineGuildPlayer.equals(owner);
+        return offlineGuildPlayer.equals(owner.getOfflineGuildPlayer());
     }
+
 
     /**
      * 工会文件
@@ -67,32 +77,66 @@ public class Guild {
         memberMap.clear();
 
         if (!file.exists()) {
-            throw new GuildException("宗会不存在!");
+            throw new GuildLoadException("宗会不存在!");
         }
 
         this.yml = YamlConfiguration.loadConfiguration(file);
 
-        if (yml.getBoolean("deleted")) {
-            throw new IllegalArgumentException("该宗会已被删除.");
-        }
-
+        this.deleted = yml.getBoolean("deleted");
         this.uuid = yml.getString("uuid");
-        this.owner = new GuildOwner(yml.getString("owner"));
+        this.owner = new GuildOwner(guildPlayerManager.getOfflineGuildPlayer(yml.getString("owner")));
         this.name = yml.getString("name");
         this.level = yml.getInt("level");
         this.maxMemberCount = yml.getInt("max_member_count");
+        this.icon = Material.valueOf(yml.getString("icon", Material.SIGN.name()));
+        this.announcements = yml.getStringList("announcements");
+        this.creationTime = yml.getLong("creation_time");
 
         for (String memberName : yml.getStringList("members")) {
             Permission permission = Permission.valueOf(yml.getString("members." + memberName + ".permission"));
 
             switch (permission) {
                 case MEMBER:
-                    memberMap.put(memberName, new GuildMember(memberName));
+                    memberMap.put(memberName, new GuildMember(guildPlayerManager.getOfflineGuildPlayer(memberName)));
                     break;
             }
         }
 
+        if (yml.isConfigurationSection("player_requests")) {
+            // 载入玩家请求
+            for (String uuid : yml.getConfigurationSection("player_requests").getKeys(false)) {
+                ConfigurationSection requestSection = yml.getConfigurationSection("player_requests").getConfigurationSection(uuid);
+                RequestType requestType = RequestType.valueOf(requestSection.getString("type"));
+                BasePlayerRequest request = null;
+                String playerName = requestSection.getString("player");
+
+                switch (requestType) {
+                    case JOIN:
+                        request = new JoinRequest();
+                        break;
+                }
+
+                request.setOfflineGuildPlayer(guildPlayerManager.getOfflineGuildPlayer(playerName));
+                request.setTime(requestSection.getLong("time"));
+                request.setUUID(UUID.fromString(uuid));
+
+                if (!playerRequestMap.containsKey(playerName)) {
+                    playerRequestMap.put(playerName, new ArrayList<>());
+                }
+
+                playerRequestMap.get(playerName).add(request);
+            }
+        }
+
         return this;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public boolean isValid() {
+        return valid;
     }
 
     /**
@@ -112,20 +156,45 @@ public class Guild {
     }
 
     /**
-     * 得到成员
+     * 得到成员：包含主人，不排序
      * @return
      */
     public List<GuildMember> getMembers() {
-        return new ArrayList<>(memberMap.values());
+        return getMembers(true, false);
+    }
+
+    /**
+     * 得到成员
+     * @return
+     */
+    public List<GuildMember> getMembers(boolean withOwner, boolean sorted) {
+        List<GuildMember> guildMembers = new ArrayList<>(memberMap.values());
+
+        if (withOwner) {
+            guildMembers.add(owner);
+        }
+
+        if (sorted) {
+            guildMembers.sort((o1, o2) -> isOwner(o1.getOfflineGuildPlayer()) ? -1 : isOwner(o2.getOfflineGuildPlayer()) ? 1 : 0);
+        }
+
+        return guildMembers;
     }
 
     /**
      * 删除工会
      * @return
      */
-    public boolean delete() {
+    public void delete() {
         yml.set("deleted", "true");
-        return YamlUtil.saveYaml(yml, file);
+        YamlUtil.saveYaml(yml, file);
+
+        for (GuildMember guildMember : getMembers(true, false)) {
+            guildMember.getOfflineGuildPlayer().setGuild(null);
+        }
+
+        guildManager.unloadGuild(this);
+        this.valid = false;
     }
 
     /**
@@ -149,6 +218,8 @@ public class Guild {
      * @param level
      */
     public void setLevel(int level) {
+        yml.set("level", level);
+        YamlUtil.saveYaml(yml, file);
         this.level = level;
     }
 
@@ -173,15 +244,10 @@ public class Guild {
      * @param maxMemberCount
      * @return
      */
-    public boolean setMaxMemberCount(int maxMemberCount) {
+    public void setMaxMemberCount(int maxMemberCount) {
         yml.set("max_member_count", maxMemberCount);
-
-        if (YamlUtil.saveYaml(yml, file)) {
-            this.maxMemberCount = maxMemberCount;
-            return true;
-        }
-
-        return false;
+        YamlUtil.saveYaml(yml, file);
+        this.maxMemberCount = maxMemberCount;
     }
 
     public long getCreationTime() {
@@ -213,5 +279,54 @@ public class Guild {
         }
 
         return result;
+    }
+
+    public void setIcon(Material icon) {
+        yml.set("icon", icon.name());
+        YamlUtil.saveYaml(yml, file);
+        this.icon = icon;
+    }
+
+    public void setAnnouncements(List<String> announcements) {
+        yml.set("announcements", announcements);
+        YamlUtil.saveYaml(yml, file);
+        this.announcements = announcements;
+    }
+
+    public boolean hasRequest(GuildPlayer guildPlayer, RequestType requestType) {
+        String playerName = guildPlayer.getName();
+
+        if (playerRequestMap.containsKey(playerName)) {
+            for (PlayerRequest request : playerRequestMap.get(playerName)) {
+                if (request.getType() == requestType) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public String addRequest(PlayerRequest playerRequest) {
+        String uuid = UUID.randomUUID().toString();
+        String playerName = playerRequest.getOfflineGuildPlayer().getName();
+
+        yml.set("player_requests." + uuid + ".player", playerRequest.getOfflineGuildPlayer().getName());
+        yml.set("player_requests." + uuid + ".type", playerRequest.getType().name());
+        yml.set("player_requests." + uuid + ".time", playerRequest.getTime());
+        YamlUtil.saveYaml(yml, file);
+
+        if (!playerRequestMap.containsKey(playerName)) {
+            playerRequestMap.put(playerName, new ArrayList<>());
+        }
+
+        List<PlayerRequest> playerRequests = playerRequestMap.get(playerRequest.getOfflineGuildPlayer().getName());
+
+        playerRequests.add(playerRequest);
+        return uuid;
+    }
+
+    public List<String> getAnnouncements() {
+        return announcements;
     }
 }

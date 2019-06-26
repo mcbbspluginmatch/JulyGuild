@@ -29,6 +29,8 @@ public class Settings {
     private List<String> guiMainGuiGuildLores;
     @Config(path = "gui.main_gui.player_info_lores")
     private List<String> guiMainGuiGuildPlayerInfoLores;
+    @Config(path = "guild.create.cost.item.amount")
+    private int guildCreateCostItemAmount;
 
     public String getGuiMainGuiGuildDisplayName() {
         return guiMainGuiGuildDisplayName;
@@ -76,5 +78,9 @@ public class Settings {
 
     public String getGuildCreateColoredNoPerMsg() {
         return guildCreateColoredNoPerMsg;
+    }
+
+    public int getGuildCreateCostItemAmount() {
+        return guildCreateCostItemAmount;
     }
 }

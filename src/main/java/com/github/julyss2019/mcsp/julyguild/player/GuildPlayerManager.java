@@ -14,11 +14,13 @@ public class GuildPlayerManager {
     private Map<String, GuildPlayer> guildPlayerMap = new HashMap<>();
 
     public OfflineGuildPlayer getOfflineGuildPlayer(String name) {
-        if (!offlineGuildPlayerMap.containsKey(name)) {
-            offlineGuildPlayerMap.put(name, new OfflineGuildPlayer(name).load());
+        String lowerCaseName = name.toLowerCase();
+
+        if (!offlineGuildPlayerMap.containsKey(lowerCaseName)) {
+            offlineGuildPlayerMap.put(lowerCaseName, new OfflineGuildPlayer(name).load());
         }
 
-        return offlineGuildPlayerMap.get(name);
+        return offlineGuildPlayerMap.get(lowerCaseName);
     }
 
     public GuildPlayer getGuildPlayer(String playerName) {
@@ -29,7 +31,7 @@ public class GuildPlayerManager {
         String playerName = player.getName();
 
         if (!guildPlayerMap.containsKey(playerName)) {
-            guildPlayerMap.put(playerName, new GuildPlayer(player).load());
+            guildPlayerMap.put(playerName, new GuildPlayer(player));
         }
 
         return guildPlayerMap.get(playerName);

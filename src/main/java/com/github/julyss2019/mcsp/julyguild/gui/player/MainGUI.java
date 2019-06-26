@@ -73,7 +73,7 @@ public class MainGUI extends BasePageableGUI {
                 @Override
                 public void onClicked(InventoryClickEvent event) {
                     close();
-                    new MyGuildGUI(guildPlayer).open();
+                    new GuildMineGUI(guildPlayer).open();
                 }
             });
         } else {
@@ -86,31 +86,25 @@ public class MainGUI extends BasePageableGUI {
                             JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
                                 @Override
                                 public void onChat(AsyncPlayerChatEvent event) {
+                                    event.setCancelled(true);
+
                                     String guildName = event.getMessage();
+
+                                    if (!guildName.matches(settings.getGuildCreateNameRegex())) {
+                                        JulyMessage.sendColoredMessage(bukkitPlayer, settings.getGuildCreateNameNotValidMsg());
+                                        return;
+                                    }
+
+                                    if (guildName.contains("§") && !bukkitPlayer.hasPermission("JulyGuild.create.colored")) {
+                                        JulyMessage.sendColoredMessage(bukkitPlayer, "&c你没有权限使用彩色的宗门名!");
+                                        return;
+                                    }
 
                                     new BukkitRunnable() {
                                         @Override
                                         public void run() {
-                                            JulyMessage.sendColoredMessage(bukkitPlayer, "&e要创建 &c" + guildName + " &e宗门, 请支付: ");
-
-                                            if (settings.isGuildCreateCostMoneyEnabled()) {
-                                                JulyMessage.sendBlankLine(bukkitPlayer);
-                                                JulyMessage.sendRawMessage(bukkitPlayer, "[\"\",{\"text\":\"   点我使用 §d金币x" + settings.getGuildCreateCostMoneyAmount() + " §b支付\",\"color\":\"aqua\",\"italic\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/guild create MONEY " + guildName + "\"}}]");
-                                                JulyMessage.sendBlankLine(bukkitPlayer);
-                                            }
-
-                                            if (settings.isGuildCreateCostPointsEnabled()) {
-                                                JulyMessage.sendBlankLine(bukkitPlayer);
-                                                JulyMessage.sendRawMessage(bukkitPlayer, "[\"\",{\"text\":\"   点我使用 §d点券x" + settings.getGuildCreateCostPointsAmount() + " §b支付\",\"color\":\"aqua\",\"italic\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/guild create POINTS " + guildName + "\"}}]");
-                                                JulyMessage.sendBlankLine(bukkitPlayer);
-                                            }
-
-                                            if (settings.isGuildCreateCostItemEnabled()) {
-                                                JulyMessage.sendBlankLine(bukkitPlayer);
-                                                JulyMessage.sendRawMessage(bukkitPlayer, "[\"\",{\"text\":\"   点我使用 §d建帮令x1 §b支付\",\"color\":\"aqua\",\"italic\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/guild create ITEM " + guildName + "\"}}]");
-                                                JulyMessage.sendBlankLine(bukkitPlayer);
-                                            }
-
+                                            close();
+                                            new GuildCreateGUI(guildPlayer, guildName).open();
                                             JulyChatFilter.unregisterChatFilter(bukkitPlayer);
                                         }
                                     }.runTaskLater(plugin, 1L);

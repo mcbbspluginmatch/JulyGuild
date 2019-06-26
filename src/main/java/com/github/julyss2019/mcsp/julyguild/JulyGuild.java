@@ -1,7 +1,6 @@
 package com.github.julyss2019.mcsp.julyguild;
 
 import com.github.julyss2019.mcsp.julyguild.command.Command;
-import com.github.julyss2019.mcsp.julyguild.command.CreateCommand;
 import com.github.julyss2019.mcsp.julyguild.command.MainGUICommand;
 import com.github.julyss2019.mcsp.julyguild.command.TestCommand;
 import com.github.julyss2019.mcsp.julyguild.config.Settings;
@@ -26,7 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 
 public class JulyGuild extends JavaPlugin {
-    public static final String CONFIG_VERSION = "1.0.4";
+    public static final String CONFIG_VERSION = "1.0.6";
     private static final Gson gson = new Gson();
     private static JulyGuild instance;
     private GuildManager guildManager;
@@ -55,13 +54,17 @@ public class JulyGuild extends JavaPlugin {
         guildManager = new GuildManager();
 
         guildManager.loadGuilds();
+        getLogger().info("载入了 " + guildManager.getGuilds().size() + "个 宗门.");
         getCommand("guild").setExecutor(julyCommandExecutor);
         registerCommands();
         registerListeners();
         JulyMessage.setPrefix(this, "§a[宗门] ");
-        getLogger().info("插件初始化完毕!");
-        new PlaceholderAPIExpansion().register();
 
+        if (!new PlaceholderAPIExpansion().register()) {
+            getLogger().warning("PlaceholderAPI Hook 失败!");
+        }
+
+        getLogger().info("插件初始化完毕!");
     }
 
     private void registerListeners() {
@@ -99,7 +102,6 @@ public class JulyGuild extends JavaPlugin {
 
     private void registerCommands() {
         registerCommand(new MainGUICommand());
-        registerCommand(new CreateCommand());
         registerCommand(new TestCommand());
     }
 

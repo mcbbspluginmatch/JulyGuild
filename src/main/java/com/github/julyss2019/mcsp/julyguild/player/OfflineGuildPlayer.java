@@ -10,17 +10,21 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class OfflineGuildPlayer {
     private static JulyGuild plugin = JulyGuild.getInstance();
     private static GuildManager guildManager = plugin.getGuildManager();
     private String name;
-    private Guild guild;
     private File file;
     private YamlConfiguration yml;
 
-    public OfflineGuildPlayer(String name) {
+    protected OfflineGuildPlayer(String name) {
         this.name = name;
+
+        load();
     }
 
     /**
@@ -41,7 +45,6 @@ public class OfflineGuildPlayer {
         }
 
         this.yml = YamlConfiguration.loadConfiguration(file);
-        this.guild = guildManager.getGuild(yml.getString("guild"));
         return this;
     }
 
@@ -50,18 +53,12 @@ public class OfflineGuildPlayer {
     }
 
     public Guild getGuild() {
-        return guild;
+        return guildManager.getGuild(yml.getString("guild"));
     }
 
-    public boolean setGuild(Guild guild) {
-        yml.set("guild", guild.getUUID());
-
-        if (YamlUtil.saveYaml(yml, file)) {
-            this.guild = guild;
-            return true;
-        }
-
-        return false;
+    public void setGuild(Guild guild) {
+        yml.set("guild", guild == null ? null : guild.getUUID());
+        YamlUtil.saveYaml(yml, file);
     }
 
     public Player getBukkitPlayer() {
@@ -76,5 +73,18 @@ public class OfflineGuildPlayer {
 
     public boolean isInGuild() {
         return getGuild() != null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof OfflineGuildPlayer)) return false;
+        OfflineGuildPlayer that = (OfflineGuildPlayer) o;
+        return name.equals(that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

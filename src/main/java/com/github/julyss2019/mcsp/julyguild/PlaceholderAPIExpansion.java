@@ -5,6 +5,9 @@ import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 
+/**
+ * PAPI扩张
+ */
 public class PlaceholderAPIExpansion extends PlaceholderExpansion {
     private static JulyGuild plugin = JulyGuild.getInstance();
     private static GuildPlayerManager guildPlayerManager = plugin.getGuildPlayerManager();
@@ -28,11 +31,16 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player p, String params) {
         GuildPlayer guildPlayer = guildPlayerManager.getGuildPlayer(p);
 
-        switch (params) {
+        switch (params.toLowerCase()) {
             case "player_in":
                 return guildPlayer.isInGuild() ? guildPlayer.getGuild().getName() : "无";
         }
 
         return null;
+    }
+
+    @Override
+    public boolean canRegister() {
+        return true;
     }
 }
