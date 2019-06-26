@@ -5,14 +5,8 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 public class CommonItem {
-    private static ItemStack nextPageItem = new ItemBuilder().material(Material.BOOK).displayName("&c下一页").colored().build();
-    private static ItemStack previousPageItem = new ItemBuilder().material(Material.BOOK).displayName("&c上一页").colored().build();
-
-    public static ItemStack getNextPageItem() {
-        return nextPageItem;
-    }
-
-    public static ItemStack getPreviousPageItem() {
-        return previousPageItem;
-    }
+    public static final ItemStack NEXT_PAGE = new ItemBuilder().material(Material.BOOK).displayName("&c下一页").colored().build();
+    public static final ItemStack PREVIOUS_PAGE = new ItemBuilder().material(Material.BOOK).displayName("&c上一页").colored().build();
+    public static final ItemStack BACK_TO_MAIN = new ItemBuilder().material(Material.BOOK_AND_QUILL).displayName("&c返回至主界面").colored().build();
+    public static final ItemStack BACK = new ItemBuilder().material(Material.BOOK_AND_QUILL).displayName("&c返回").colored().build();
 }

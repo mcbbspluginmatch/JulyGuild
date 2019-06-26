@@ -1,6 +1,7 @@
 package com.github.julyss2019.mcsp.julyguild.guild;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
+import com.github.julyss2019.mcsp.julyguild.config.Settings;
 import com.github.julyss2019.mcsp.julyguild.guild.exception.GuildLoadException;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildOwner;
@@ -12,6 +13,7 @@ import com.github.julyss2019.mcsp.julyguild.guild.request.player.PlayerRequest;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.util.Util;
 import com.github.julyss2019.mcsp.julylibrary.utils.YamlUtil;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -23,9 +25,9 @@ import java.util.*;
 
 public class Guild {
     private static JulyGuild plugin = JulyGuild.getInstance();
+    private static Settings settings = plugin.getSettings();
     private static GuildPlayerManager guildPlayerManager = plugin.getGuildPlayerManager();
     private static GuildManager guildManager = plugin.getGuildManager();
-    private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy/MM/dd");
     private File file;
     private YamlConfiguration yml;
 
@@ -48,8 +50,16 @@ public class Guild {
         load();
     }
 
+    public boolean isOwner(GuildMember guildMember) {
+        return owner.equals(guildMember);
+    }
+
     public boolean isOwner(OfflineGuildPlayer offlineGuildPlayer) {
         return offlineGuildPlayer.equals(owner.getOfflineGuildPlayer());
+    }
+
+    public GuildMember getMember(GuildPlayer guildPlayer) {
+        return memberMap.get(guildPlayer.getName());
     }
 
 
@@ -83,11 +93,12 @@ public class Guild {
         this.yml = YamlConfiguration.loadConfiguration(file);
 
         this.deleted = yml.getBoolean("deleted");
+        this.valid = !deleted;
         this.uuid = yml.getString("uuid");
-        this.owner = new GuildOwner(guildPlayerManager.getOfflineGuildPlayer(yml.getString("owner")));
+        this.owner = new GuildOwner(this, guildPlayerManager.getOfflineGuildPlayer(yml.getString("owner")));
         this.name = yml.getString("name");
         this.level = yml.getInt("level");
-        this.maxMemberCount = yml.getInt("max_member_count");
+        this.maxMemberCount = yml.getInt("max_member_count", settings.getGuildDefMaxMemberCount());
         this.icon = Material.valueOf(yml.getString("icon", Material.SIGN.name()));
         this.announcements = yml.getStringList("announcements");
         this.creationTime = yml.getLong("creation_time");
@@ -97,7 +108,7 @@ public class Guild {
 
             switch (permission) {
                 case MEMBER:
-                    memberMap.put(memberName, new GuildMember(guildPlayerManager.getOfflineGuildPlayer(memberName)));
+                    memberMap.put(memberName, new GuildMember(this, guildPlayerManager.getOfflineGuildPlayer(memberName)));
                     break;
             }
         }
@@ -144,7 +155,7 @@ public class Guild {
      * @return
      */
     public int getMemberCount() {
-        return memberMap.size();
+        return memberMap.size() + 1;
     }
 
     /**
@@ -179,6 +190,43 @@ public class Guild {
         }
 
         return guildMembers;
+    }
+
+    /**
+     * 添加成员
+     * @param offlineGuildPlayer
+     */
+    public void addMember(OfflineGuildPlayer offlineGuildPlayer) {
+        String playerName = offlineGuildPlayer.getName();
+
+        if (!memberMap.containsKey(playerName) || offlineGuildPlayer.equals(owner.getOfflineGuildPlayer())) {
+            throw new IllegalArgumentException("成员已存在");
+        }
+
+        yml.set("members." + playerName + ".permission", Permission.MEMBER.name());
+        yml.set("members." + playerName + ".join_time" + playerName, System.currentTimeMillis());
+        YamlUtil.saveYaml(yml, file);
+        memberMap.put(playerName, new GuildMember(this, offlineGuildPlayer));
+    }
+
+    /**
+     * 删除成员
+     * @param guildMember
+     */
+    public void removeMember(GuildMember guildMember) {
+        String memberName = guildMember.getName();
+
+        if (guildMember instanceof GuildOwner) {
+            throw new IllegalArgumentException("不能删除宗主成员");
+        }
+
+        if (!memberMap.containsKey(memberName)) {
+            throw new IllegalArgumentException("成员不存在");
+        }
+
+        yml.set("members." + memberName, null);
+        YamlUtil.saveYaml(yml, file);
+        memberMap.remove(memberName);
     }
 
     /**
@@ -268,11 +316,12 @@ public class Guild {
         String result = s;
         Map<String, String> variableMap = new HashMap<>();
 
+        variableMap.put("%GUILD_RANK%", String.valueOf(guildManager.getRank(this)));
         variableMap.put("%GUILD_LEVEL%", String.valueOf(getLevel()));
         variableMap.put("%GUILD_OWNER%", getOwner().getName());
         variableMap.put("%GUILD_MEMBER_COUNT%", String.valueOf(getMemberCount()));
         variableMap.put("%GUILD_MAX_MEMBER_COUNT%", String.valueOf(getMaxMemberCount()));
-        variableMap.put("%GUILD_CREATION_TIME%", SDF.format(getCreationTime()));
+        variableMap.put("%GUILD_CREATION_TIME%", Util.SDF.format(getCreationTime()));
 
         for (Map.Entry<String, String> entry : variableMap.entrySet()) {
             result = result.replace(entry.getKey(), entry.getValue());
@@ -328,5 +377,13 @@ public class Guild {
 
     public List<String> getAnnouncements() {
         return announcements;
+    }
+
+    public YamlConfiguration getYml() {
+        return yml;
+    }
+
+    public void save() {
+        YamlUtil.saveYaml(yml, file);
     }
 }

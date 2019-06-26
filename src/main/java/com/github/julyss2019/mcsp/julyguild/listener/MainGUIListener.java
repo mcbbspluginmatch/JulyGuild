@@ -26,12 +26,15 @@ public class MainGUIListener implements Listener {
 
         if (gui instanceof MainGUI && (slot >= 0 && slot <= 42)) {
             MainGUI mainGUI = (MainGUI) gui;
-            Guild guild = guildManager.getGuilds(true).get(slot);
-            GUI newGUI = new GuildInfoGUI(guildPlayer, guild, mainGUI.getCurrentPage());
 
-            gui.close();
-            guildPlayer.setUsingGUI(newGUI);
-            newGUI.open();
+            if (slot < guildManager.getGuildCount()) {
+                Guild guild = guildManager.getGuilds(true).get(slot);
+                GUI newGUI = new GuildInfoGUI(guildPlayer, guild, mainGUI.getCurrentPage());
+
+                gui.close();
+                guildPlayer.setUsingGUI(newGUI);
+                newGUI.open();
+            }
         }
     }
 }

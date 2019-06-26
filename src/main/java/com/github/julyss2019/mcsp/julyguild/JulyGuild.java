@@ -25,7 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 
 public class JulyGuild extends JavaPlugin {
-    public static final String CONFIG_VERSION = "1.0.6";
+    public static final String CONFIG_VERSION = "1.0.8";
     private static final Gson gson = new Gson();
     private static JulyGuild instance;
     private GuildManager guildManager;

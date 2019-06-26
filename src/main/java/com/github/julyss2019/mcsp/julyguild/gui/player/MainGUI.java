@@ -46,7 +46,7 @@ public class MainGUI extends BasePageableGUI {
         // 如果大于1页则提供翻页按钮
         if (getTotalPage() > 1) {
             inventoryBuilder
-                    .item(4, 7, CommonItem.getPreviousPageItem(), new ItemListener() {
+                    .item(4, 7, CommonItem.PREVIOUS_PAGE, new ItemListener() {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
                             if (hasPrecious()) {
@@ -56,7 +56,7 @@ public class MainGUI extends BasePageableGUI {
                             }
                         }
                     })
-                    .item(4, 8, CommonItem.getNextPageItem(), new ItemListener() {
+                    .item(4, 8, CommonItem.NEXT_PAGE, new ItemListener() {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
                             if (hasNext()) {

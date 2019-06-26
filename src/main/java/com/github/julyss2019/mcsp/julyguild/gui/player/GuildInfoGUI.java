@@ -4,6 +4,7 @@ import com.github.julyss2019.mcsp.julyguild.gui.BaseGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildAdmin;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
+import com.github.julyss2019.mcsp.julyguild.guild.player.GuildOwner;
 import com.github.julyss2019.mcsp.julyguild.guild.request.RequestType;
 import com.github.julyss2019.mcsp.julyguild.guild.request.player.JoinRequest;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
@@ -14,6 +15,9 @@ import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuildInfoGUI extends BaseGUI {
     private Guild guild;
@@ -34,8 +38,16 @@ public class GuildInfoGUI extends BaseGUI {
 
     @Override
     public void build() {
-        this.inventory = new InventoryBuilder().title(guild.getName()).row(6)
-                .item(2, 4, new ItemBuilder().material(Material.MAGMA_CREAM).displayName("&a申请加入宗门").colored().build(), new ItemListener() {
+        List<String> memberLores = new ArrayList<>();
+
+        for (GuildMember guildMember : guild.getMembers(true, true)) {
+            if (memberLores.size() < 10) {
+                memberLores.add("&7- " + ((guildMember instanceof GuildOwner) ? "&c[宗主] " : (guildMember instanceof GuildAdmin) ? "&a[管理员] " : "&f[成员] ") + guildMember.getName());
+            }
+        }
+
+        this.inventory = new InventoryBuilder().title(guild.getName()).row(3)
+                .item(1, 4, new ItemBuilder().material(Material.MAGMA_CREAM).displayName("&a申请加入宗门").colored().build(), new ItemListener() {
                     @Override
                     public void onClicked(InventoryClickEvent event) {
                         if (guild.hasRequest(guildPlayer, RequestType.JOIN)) {
@@ -53,10 +65,20 @@ public class GuildInfoGUI extends BaseGUI {
                         }
                     }
                 })
-                .item(3, 3, new ItemBuilder().material(Material.SKULL_ITEM).durability((short) 3).displayName("&f玩家列表").colored().build())
-                .item(3, 4, new ItemBuilder().material(Material.ITEM_FRAME).displayName("&f宗门公告").colored().build())
-                .item(3, 5, new ItemBuilder().material(Material.SKULL_ITEM).durability((short) 5).displayName("&f宗主").colored().build())
-                .item(53, new ItemBuilder().material(Material.BOOK_AND_QUILL).displayName("&c返回至主界面").colored().build(), new ItemListener() {
+                .item(1, 3, new ItemBuilder().material(Material.SKULL_ITEM).durability((short) 3).displayName("&f成员列表")
+                        .addLore("&a▸ &b点击查看详细信息 &a◂")
+                        .addLore("")
+                        .addLores(memberLores)
+                        .addLore(guild.getMemberCount() > 10 ? "&7和 &e" + (guild.getMemberCount() - 10) + "个 &7成员..." : null)
+                        .colored().build(), new ItemListener() {
+                    @Override
+                    public void onClicked(InventoryClickEvent event) {
+                        close();
+                        new GuildMemberGUI(guild, guildPlayer).open();
+                    }
+                })
+                .item(1, 5, new ItemBuilder().material(Material.ITEM_FRAME).displayName("&f宗门公告").colored().lores(guild.getAnnouncements()).build())
+                .item(2, 8, new ItemBuilder().material(Material.BOOK_AND_QUILL).displayName("&c返回至主界面").colored().build(), new ItemListener() {
                     @Override
                     public void onClicked(InventoryClickEvent event) {
                         close();

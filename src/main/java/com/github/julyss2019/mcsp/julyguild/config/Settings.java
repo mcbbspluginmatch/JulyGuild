@@ -31,6 +31,24 @@ public class Settings {
     private List<String> guiMainGuiGuildPlayerInfoLores;
     @Config(path = "guild.create.cost.item.amount")
     private int guildCreateCostItemAmount;
+    @Config(path = "guild.announcement.split_char")
+    private String guildAnnouncementSplitChar;
+    @Config(path = "guild.announcement.max_count")
+    private int guildAnnountcementMaxCount;
+    @Config(path = "guild.def_max_member_count")
+    private int guildDefMaxMemberCount;
+
+    public int getGuildDefMaxMemberCount() {
+        return guildDefMaxMemberCount;
+    }
+
+    public String getGuildAnnouncementSplitChar() {
+        return guildAnnouncementSplitChar;
+    }
+
+    public int getGuildAnnountcementMaxCount() {
+        return guildAnnountcementMaxCount;
+    }
 
     public String getGuiMainGuiGuildDisplayName() {
         return guiMainGuiGuildDisplayName;

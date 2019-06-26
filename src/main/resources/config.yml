@@ -1,4 +1,4 @@
-config_version: 1.0.6
+config_version: 1.0.8
 guild:
   request:
     join:
@@ -6,12 +6,12 @@ guild:
     invite:
       timeout: 300 # 秒，邀请超时
   announcement:
-    split_chat: '#' # 换行符
+    split_char: '#' # 换行符
     max_count: 5 # 最大公告数量
   def_max_member_count: 5
   create:
     name_regex: '[\\u4e00-\\u9fa5_a-zA-Z0-9_§]{1,10}' # 注意转义
-    name_not_valid_msg: '&c公会名只能由中文英文数字组成, 且长度大于1小于10个字符.'
+    name_not_valid_msg: '&c宗门名只能由中文英文数字组成, 且长度大于1小于10个字符.'
     colored_no_per_msg: "&c你没有权限使用彩色代码作为宗门名."
     cost:
       money:
@@ -23,15 +23,18 @@ guild:
       item:
         enabled: true
         amount: 1
-        key_lore: '创建宗会'
+        key_lore: '创建宗门'
 gui:
   main_gui:
     guild: # 工会信息
       display_name: '&a%GUILD_NAME%'
       lores:
-        - '&7- &f等级 %GUILD_LEVEL%'
-        - '&7- &f宗主 %GUILD_OWNER%'
-        - '&7- &f人数 %GUILD_MEMBER_COUNT%/%GUILD_MAX_MEMBER_COUNT%'
-        - '&7- &f创建时间 %GUILD_CREATION_TIME%'
+        - '     &b▹ &eTop.%GUILD_RANK% &b◃'
+        - ' '
+        - '&7- &4等级 &b▹ &c%GUILD_LEVEL%'
+        - '&7- &d宗主 &b▹ &d%GUILD_OWNER%'
+        - '&7- &9人数 &b▹ &9%GUILD_MEMBER_COUNT%/%GUILD_MAX_MEMBER_COUNT%'
+        - '&7- &a创建时间 &b▹ &a%GUILD_CREATION_TIME%'
     player_info_lores: # 个人信息
-      - '&7- &f所在工会 %GUILD_PLAYER_IN%'
+      - '&b▹ &e%player_name% &b◃'
+      - '&7- &e宗门 &b▹ &e%GUILD_PLAYER_IN%'

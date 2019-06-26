@@ -25,6 +25,10 @@ public class GuildManager {
 
     public GuildManager() {}
 
+    public int getRank(Guild guild) {
+        return getGuilds(true).indexOf(guild) + 1;
+    }
+
     /**
      * 得到宗会列表（不排序）
      * @return
@@ -82,6 +86,10 @@ public class GuildManager {
         }
 
         plugin.writeGuildLog(FileLogger.LoggerLevel.INFO, new GuildCreateLog(creationTime, uuid, guildOwner.getName(), guildName, false));
+    }
+
+    public int getGuildCount() {
+        return getGuilds().size();
     }
 
     /**
