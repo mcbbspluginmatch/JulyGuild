@@ -103,6 +103,10 @@ public class Guild {
         this.announcements = yml.getStringList("announcements");
         this.creationTime = yml.getLong("creation_time");
 
+        if (announcements.size() == 0) {
+            announcements.add("&d欢迎加入!");
+        }
+
         for (String memberName : yml.getStringList("members")) {
             Permission permission = Permission.valueOf(yml.getString("members." + memberName + ".permission"));
 

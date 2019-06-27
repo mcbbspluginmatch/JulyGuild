@@ -15,9 +15,11 @@ import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.item.SkullItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
@@ -130,6 +132,8 @@ public class MainGUI extends BasePageableGUI {
                     .material(guild.getIcon())
                     .displayName(guild.getName())
                     .colored()
+                    .enchant(Enchantment.DURABILITY, 1)
+                    .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                     .build());
         }
 

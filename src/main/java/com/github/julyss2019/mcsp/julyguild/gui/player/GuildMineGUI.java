@@ -16,9 +16,11 @@ import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,11 +54,43 @@ public class GuildMineGUI extends BaseGUI {
         }
 
         inventoryBuilder
-                .item(1, 4, new ItemBuilder().material(Material.SIGN).displayName("&f个人信息").colored().lores(PlaceholderAPI.setPlaceholders(bukkitPlayer, settings.getGuiMainGuiGuildPlayerInfoLores())).build())
-                .item(2, 3, new ItemBuilder().material(Material.PAINTING).displayName("&f宗门公告").lores(guild.getAnnouncements()).colored().build())
-                .item(2, 4, new ItemBuilder().material(Material.SKULL_ITEM).durability((short) 3).displayName("&f宗门成员").lores(memberLores).lores().colored().build())
-                .item(2, 5, new ItemBuilder().material(Material.GOLD_NUGGET).displayName("&e贡献金币").colored().build())
-                .item(3, 4, new ItemBuilder().material(Material.CHEST).displayName("&f宗门仓库").colored().build())
+                .item(1, 4, new ItemBuilder().
+                        material(Material.SIGN)
+                        .displayName("&f个人信息").colored()
+                        .lores(PlaceholderAPI.setPlaceholders(bukkitPlayer, settings.getGuiMainGuiGuildPlayerInfoLores()))
+                        .enchant(Enchantment.DURABILITY, 1)
+                        .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                        .build())
+                .item(2, 3, new ItemBuilder()
+                        .material(Material.PAINTING)
+                        .displayName("&f宗门公告")
+                        .lores(guild.getAnnouncements())
+                        .colored()
+                        .enchant(Enchantment.DURABILITY, 1)
+                        .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                        .build())
+                .item(2, 4, new ItemBuilder()
+                        .material(Material.TOTEM)
+                        .displayName("&f宗门成员")
+                        .lores(memberLores)
+                        .colored()
+                        .enchant(Enchantment.DURABILITY, 1)
+                        .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                        .build())
+                .item(2, 5, new ItemBuilder()
+                        .material(Material.GOLD_NUGGET)
+                        .displayName("&e贡献金币")
+                        .enchant(Enchantment.DURABILITY, 1)
+                        .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                        .colored()
+                        .build())
+                .item(3, 4, new ItemBuilder()
+                        .material(Material.YELLOW_SHULKER_BOX)
+                        .displayName("&f宗门仓库")
+                        .colored()
+                        .enchant(Enchantment.DURABILITY, 1)
+                        .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                        .build())
                 .item(53, CommonItem.BACK_TO_MAIN, new ItemListener() {
                     @Override
                     public void onClicked(InventoryClickEvent event) {
@@ -65,10 +99,14 @@ public class GuildMineGUI extends BaseGUI {
                     }
                 });
 
-
         if (guild.isOwner(guildPlayer)) {
             inventoryBuilder
-                    .item(45, new ItemBuilder().material(Material.ENDER_PORTAL_FRAME).displayName("&f管理宗门").colored().build(), new ItemListener() {
+                    .item(45, new ItemBuilder()
+                            .material(Material.ENDER_PORTAL_FRAME)
+                            .displayName("&f管理宗门")
+                            .enchant(Enchantment.DURABILITY, 1)
+                            .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                            .colored().build(), new ItemListener() {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
                             close();

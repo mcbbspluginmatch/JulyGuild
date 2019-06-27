@@ -1,5 +1,6 @@
-config_version: 1.0.8
+config_version: 1.0.9
 guild:
+  #rank_formula: '%LEVEL% + %%'
   request:
     join:
       timeout: 3600 # 秒，请求加入超时
@@ -29,12 +30,13 @@ gui:
     guild: # 工会信息
       display_name: '&a%GUILD_NAME%'
       lores:
-        - '     &b▹ &eTop.%GUILD_RANK% &b◃'
+        - '&b『&eTop.%GUILD_RANK%&b』'
         - ' '
         - '&7- &4等级 &b▹ &c%GUILD_LEVEL%'
         - '&7- &d宗主 &b▹ &d%GUILD_OWNER%'
         - '&7- &9人数 &b▹ &9%GUILD_MEMBER_COUNT%/%GUILD_MAX_MEMBER_COUNT%'
         - '&7- &a创建时间 &b▹ &a%GUILD_CREATION_TIME%'
     player_info_lores: # 个人信息
-      - '&b▹ &e%player_name% &b◃'
+      - '&b『&e%player_name%&b』'
+      - ''
       - '&7- &e宗门 &b▹ &e%GUILD_PLAYER_IN%'

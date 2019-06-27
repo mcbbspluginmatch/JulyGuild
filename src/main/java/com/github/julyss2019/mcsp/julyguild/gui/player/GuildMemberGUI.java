@@ -27,7 +27,7 @@ public class GuildMemberGUI extends BasePageableGUI {
 
     @Override
     public void setCurrentPage(int page) {
-        InventoryBuilder inventoryBuilder = new InventoryBuilder().title(guild.getName() + " - &e&l成员列表").colored().row(6);
+        InventoryBuilder inventoryBuilder = new InventoryBuilder().title(guild.getName() + " &7&l- &e&l成员列表").colored().row(6);
 
         inventoryBuilder.item(53, CommonItem.BACK, new ItemListener() {
             @Override
