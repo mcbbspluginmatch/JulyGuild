@@ -9,8 +9,8 @@ import org.bukkit.inventory.Inventory;
 public class BasePageableGUI extends BaseGUI implements Pageable {
     private int currentPage;
 
-    public BasePageableGUI(GuildPlayer guildPlayer) {
-        super(guildPlayer);
+    public BasePageableGUI(GUIType guiType, GuildPlayer guildPlayer) {
+        super(guiType, guildPlayer);
     }
 
     @Override

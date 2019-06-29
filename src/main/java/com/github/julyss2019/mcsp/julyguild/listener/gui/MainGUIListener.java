@@ -1,4 +1,4 @@
-package com.github.julyss2019.mcsp.julyguild.listener;
+package com.github.julyss2019.mcsp.julyguild.listener.gui;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.gui.GUI;
@@ -13,6 +13,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
+import java.util.List;
+
 public class MainGUIListener implements Listener {
     private static JulyGuild plugin = JulyGuild.getInstance();
     private static GuildManager guildManager = plugin.getGuildManager();
@@ -26,9 +28,10 @@ public class MainGUIListener implements Listener {
 
         if (gui instanceof MainGUI && (slot >= 0 && slot <= 42)) {
             MainGUI mainGUI = (MainGUI) gui;
+            List<Guild> guilds = mainGUI.getGuilds();
 
-            if (slot < guildManager.getGuildCount()) {
-                Guild guild = guildManager.getGuilds(true).get(slot);
+            if (slot < guilds.size()) {
+                Guild guild = guilds.get(slot);
                 GUI newGUI = new GuildInfoGUI(guildPlayer, guild, mainGUI.getCurrentPage());
 
                 gui.close();

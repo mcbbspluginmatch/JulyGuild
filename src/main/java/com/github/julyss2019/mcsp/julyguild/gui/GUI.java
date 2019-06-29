@@ -21,4 +21,6 @@ public interface GUI {
             getGuildPlayer().setUsingGUI(this);
         }
     }
+
+    GUIType getType();
 }

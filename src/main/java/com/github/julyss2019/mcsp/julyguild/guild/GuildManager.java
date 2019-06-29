@@ -2,11 +2,13 @@ package com.github.julyss2019.mcsp.julyguild.guild;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.gui.GUI;
+import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
 import com.github.julyss2019.mcsp.julyguild.gui.player.MainGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.exception.GuildCreateException;
 import com.github.julyss2019.mcsp.julyguild.guild.log.GuildCreateLog;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
+import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.logger.FileLogger;
 import com.github.julyss2019.mcsp.julylibrary.utils.YamlUtil;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -25,26 +27,16 @@ public class GuildManager {
 
     public GuildManager() {}
 
-    public int getRank(Guild guild) {
-        return getGuilds(true).indexOf(guild) + 1;
-    }
-
     /**
-     * 得到宗会列表（不排序）
-     * @return
-     */
-    public List<Guild> getGuilds() {
-        return getGuilds(false);
-    }
-
-    /**
-     * 创建宗会
-     * @param guildOwner 宗会主人
+     * 创建宗门
+     * @param guildOwner 宗门主人
      * @return
      */
     public void createGuild(@NotNull GuildPlayer guildOwner, @NotNull String guildName) {
-        if (guildOwner.isInGuild()) {
-            throw new IllegalArgumentException("主人已经有宗会了!");
+        OfflineGuildPlayer offlineGuildPlayer = guildOwner.getOfflineGuildPlayer();
+
+        if (guildOwner.getOfflineGuildPlayer().isInGuild()) {
+            throw new IllegalArgumentException("主人已经有宗门了!");
         }
 
         String uuid = UUID.randomUUID().toString();
@@ -65,42 +57,36 @@ public class GuildManager {
 
         yml.set("name", guildName);
         yml.set("uuid", uuid);
-        yml.set("owner", guildOwner.getName());
+        yml.set("owner.join_time", System.currentTimeMillis());
+        yml.set("owner.name", offlineGuildPlayer.getName());
         yml.set("creation_time", creationTime);
 
         YamlUtil.saveYaml(yml, file);
         loadGuild(file);
-        guildMap.put(uuid, getGuild(uuid));
-        plugin.writeGuildLog(FileLogger.LoggerLevel.INFO, new GuildCreateLog(creationTime, uuid, guildOwner.getName(), guildName, true));
-        guildOwner.setGuild(getGuild(uuid));
+        offlineGuildPlayer.setGuild(getGuild(uuid));
 
         // 更新所有玩家的GUI
         for (GuildPlayer guildPlayer : guildPlayerManager.getOnlineGuildPlayers()) {
-            GUI usingGUI = guildPlayer.getUsingGUI();
-
-            if (usingGUI instanceof MainGUI) {
-                usingGUI.close();
-                ((MainGUI) usingGUI).setCurrentPage(0); // 刷新
-                usingGUI.open();
-            }
+            guildPlayer.updateGUI(GUIType.MAIN);
         }
 
-        plugin.writeGuildLog(FileLogger.LoggerLevel.INFO, new GuildCreateLog(creationTime, uuid, guildOwner.getName(), guildName, false));
+        plugin.writeGuildLog(FileLogger.LoggerLevel.INFO, new GuildCreateLog(creationTime, uuid, guildOwner.getName(), guildName, true));
     }
 
     public int getGuildCount() {
-        return getGuilds().size();
+        return guildMap.size();
+    }
+
+    public Collection<Guild> getGuilds() {
+        return guildMap.values();
     }
 
     /**
-     * 得到宗会列表
-     * @param sorted 排序
+     * 得到宗门列表
      * @return
      */
-    public List<Guild> getGuilds(boolean sorted) {
-        List<Guild> guilds = new ArrayList<>(guildMap.values());
-
-        return sorted ? guilds.stream().sorted((o1, o2) -> o1.getLevel() > o2.getLevel() ? -1 : 0).collect(Collectors.toList()) : guilds;
+    public List<Guild> getSortedGuilds() {
+        return new ArrayList<>(guildMap.values()).stream().sorted((o1, o2) -> o1.getRank() > o2.getRank() ? -1 : 0).collect(Collectors.toList());
     }
 
     /**
@@ -108,13 +94,12 @@ public class GuildManager {
      * @param guild
      */
     public void unloadGuild(Guild guild) {
-        guildMap.remove(guild.getUUID());
-    }
+        guildMap.remove(guild.getUUID().toString());
+        JulyGuild.getInstance().getCacheGuildManager().updateSortedGuilds();
 
-    private void loadGuild(String uuid) {
-        Guild guild = new Guild(new File(plugin.getDataFolder(), "guilds" + File.separator + uuid + ".yml"));
-
-        guildMap.put(guild.getUUID(), guild);
+        for (GuildPlayer guildPlayer : guildPlayerManager.getOnlineGuildPlayers()) {
+            guildPlayer.updateGUI(GUIType.MAIN);
+        }
     }
 
     /**
@@ -124,11 +109,18 @@ public class GuildManager {
     private void loadGuild(File file) {
         Guild guild = new Guild(file);
 
-        guild.load();
+        guild.init();
 
         // 如果没有删除则存入Map
         if (!guild.isDeleted()) {
-            guildMap.put(guild.getUUID(), guild);
+            guildMap.put(guild.getUUID().toString(), guild);
+        }
+
+        guild.load();
+        JulyGuild.getInstance().getCacheGuildManager().updateSortedGuilds();
+
+        for (GuildPlayer guildPlayer : guildPlayerManager.getOnlineGuildPlayers()) {
+            guildPlayer.updateGUI(GUIType.MAIN);
         }
     }
 

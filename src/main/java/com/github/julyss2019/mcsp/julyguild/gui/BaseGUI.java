@@ -1,15 +1,20 @@
 package com.github.julyss2019.mcsp.julyguild.gui;
 
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 public class BaseGUI implements GUI {
+    private GUIType type;
     protected GuildPlayer guildPlayer;
+    protected OfflineGuildPlayer offlineGuildPlayer;
     protected Player bukkitPlayer;
 
-    public BaseGUI(GuildPlayer guildPlayer) {
+    public BaseGUI(GUIType guiType, GuildPlayer guildPlayer) {
+        this.type = guiType;
         this.guildPlayer = guildPlayer;
+        this.offlineGuildPlayer = guildPlayer.getOfflineGuildPlayer();
         this.bukkitPlayer = guildPlayer.getBukkitPlayer();
     }
 
@@ -25,4 +30,9 @@ public class BaseGUI implements GUI {
 
     @Override
     public void build() {}
+
+    @Override
+    public GUIType getType() {
+        return type;
+    }
 }

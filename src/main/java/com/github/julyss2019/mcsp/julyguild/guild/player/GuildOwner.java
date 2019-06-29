@@ -5,7 +5,7 @@ import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
 
 public class GuildOwner extends GuildAdmin {
     public GuildOwner(Guild guild, OfflineGuildPlayer player) {
-        super(guild, player);
+        super(guild, player, guild.getYml().getConfigurationSection("owner"));
     }
 
     @Override

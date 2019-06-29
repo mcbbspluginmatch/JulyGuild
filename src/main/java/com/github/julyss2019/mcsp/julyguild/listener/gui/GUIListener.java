@@ -1,4 +1,4 @@
-package com.github.julyss2019.mcsp.julyguild.listener;
+package com.github.julyss2019.mcsp.julyguild.listener.gui;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;

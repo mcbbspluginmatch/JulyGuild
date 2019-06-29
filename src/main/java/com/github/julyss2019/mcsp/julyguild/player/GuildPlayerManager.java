@@ -31,13 +31,13 @@ public class GuildPlayerManager {
         String playerName = player.getName();
 
         if (!guildPlayerMap.containsKey(playerName)) {
-            guildPlayerMap.put(playerName, new GuildPlayer(player));
+            guildPlayerMap.put(playerName, new GuildPlayer(player).load());
         }
 
         return guildPlayerMap.get(playerName);
     }
 
     public List<GuildPlayer> getOnlineGuildPlayers() {
-        return guildPlayerMap.values().stream().filter(OfflineGuildPlayer::isOnline).collect(Collectors.toList());
+        return guildPlayerMap.values().stream().filter(GuildPlayer::isOnline).collect(Collectors.toList());
     }
 }

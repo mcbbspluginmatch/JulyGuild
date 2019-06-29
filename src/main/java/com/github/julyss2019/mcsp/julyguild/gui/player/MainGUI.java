@@ -1,9 +1,12 @@
 package com.github.julyss2019.mcsp.julyguild.gui.player;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
-import com.github.julyss2019.mcsp.julyguild.config.Settings;
+import com.github.julyss2019.mcsp.julyguild.config.GUISettings;
+import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.BasePageableGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
+import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
+import com.github.julyss2019.mcsp.julyguild.guild.CacheGuildManager;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
@@ -14,6 +17,7 @@ import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.item.SkullItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
+import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -26,12 +30,14 @@ import java.util.List;
 
 public class MainGUI extends BasePageableGUI {
     private static JulyGuild plugin = JulyGuild.getInstance();
-    private static Settings settings = plugin.getSettings();
-    private static GuildManager guildManager = plugin.getGuildManager();
+    private static GuildSettings guildSettings = plugin.getGuildSettings();
+    private static GUISettings guiSettings = plugin.getGuiSettings();
+    private static CacheGuildManager cacheGuildManager = plugin.getCacheGuildManager();
     private Inventory inventory;
+    private List<Guild> guilds;
 
     public MainGUI(GuildPlayer guildPlayer) {
-        super(guildPlayer);
+        super(GUIType.MAIN, guildPlayer);
 
         setCurrentPage(0);
     }
@@ -70,8 +76,14 @@ public class MainGUI extends BasePageableGUI {
                     });
         }
 
-        if (guildPlayer.isInGuild()) {
-            inventoryBuilder.item(5, 4, new SkullItemBuilder().owner(guildPlayer.getName()).displayName("&f我的宗门").colored().build(), new ItemListener() {
+        if (offlineGuildPlayer.isInGuild()) {
+            inventoryBuilder.item(5, 4, new SkullItemBuilder()
+                    .texture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjIxYWIzMWE0MjczOWEzNTI3ZDMwNWNjOTU2YWVlNGQ2YmEzNDU1NTQzODFhNmE0YzRmZjA2YTFjMTlmZGQ0In19fQ==")
+                    .displayName("&f我的宗门")
+                    .enchant(Enchantment.DURABILITY, 1)
+                    .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                    .colored()
+                    .build(), new ItemListener() {
                 @Override
                 public void onClicked(InventoryClickEvent event) {
                     close();
@@ -79,7 +91,12 @@ public class MainGUI extends BasePageableGUI {
                 }
             });
         } else {
-            inventoryBuilder.item(5, 2, new ItemBuilder().material(Material.EMERALD).displayName("&f创建宗门").colored().build()
+            inventoryBuilder.item(5, 2, new ItemBuilder()
+                            .material(Material.NETHER_STAR)
+                            .displayName("&d创建宗门").colored()
+                            .enchant(Enchantment.DURABILITY, 1)
+                            .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                            .build()
                     , new ItemListener() {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
@@ -89,11 +106,12 @@ public class MainGUI extends BasePageableGUI {
                                 @Override
                                 public void onChat(AsyncPlayerChatEvent event) {
                                     event.setCancelled(true);
+                                    JulyChatFilter.unregisterChatFilter(bukkitPlayer);
 
                                     String guildName = event.getMessage();
 
-                                    if (!guildName.matches(settings.getGuildCreateNameRegex())) {
-                                        JulyMessage.sendColoredMessage(bukkitPlayer, settings.getGuildCreateNameNotValidMsg());
+                                    if (!guildName.matches(guildSettings.getGuildCreateNameRegex())) {
+                                        JulyMessage.sendColoredMessage(bukkitPlayer, guildSettings.getGuildCreateNameNotValidMsg());
                                         return;
                                     }
 
@@ -116,10 +134,16 @@ public class MainGUI extends BasePageableGUI {
                             });
                         }
                     });
-            inventoryBuilder.item(5, 6, new ItemBuilder().colored().material(Material.GOLDEN_APPLE).displayName("&f加入宗门").addLore("&7- &f单击上方的公会图标来加入工会").build());
+            inventoryBuilder.item(5, 6, new ItemBuilder()
+                    .colored()
+                    .material(Material.EMERALD)
+                    .enchant(Enchantment.DURABILITY, 1)
+                    .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                    .displayName("&a加入宗门")
+                    .addLore("&7- &f单击上方的图标以查看信息或加入宗门").build());
         }
 
-        List<Guild> guilds = guildManager.getGuilds(true);
+        this.guilds = cacheGuildManager.getSortedGuilds();
         int guildSize = guilds.size();
         int itemCounter = page * 43;
         int loopCount = guildSize - itemCounter < 43 ? guildSize - itemCounter : 43;
@@ -127,10 +151,9 @@ public class MainGUI extends BasePageableGUI {
         for (int i = 0; i < loopCount; i++) {
             Guild guild = guilds.get(itemCounter++);
 
-            inventoryBuilder.item(i, new ItemBuilder()
-                    .lores(guild.replaceVariables(settings.getGuiMainGuiGuildLores()))
-                    .material(guild.getIcon())
-                    .displayName(guild.getName())
+            inventoryBuilder.item(i, new ItemBuilder(guild.getCurrentIcon().getItemStack())
+                    .lores(PlaceholderAPI.setPlaceholders(bukkitPlayer, guiSettings.getMainGUIRankingListLores()))
+                    .displayName(PlaceholderAPI.setPlaceholders(bukkitPlayer, guiSettings.getMainGUIRankingListDisplayName()))
                     .colored()
                     .enchant(Enchantment.DURABILITY, 1)
                     .addItemFlag(ItemFlag.HIDE_ENCHANTS)
@@ -142,7 +165,7 @@ public class MainGUI extends BasePageableGUI {
 
     @Override
     public int getTotalPage() {
-        int guildSize = guildManager.getGuilds().size();
+        int guildSize = guilds == null ? 0 : guilds.size();
 
         return guildSize % 43 == 0 ? guildSize / 43 : guildSize / 43 + 1;
     }
@@ -150,5 +173,9 @@ public class MainGUI extends BasePageableGUI {
     @Override
     public Inventory getInventory() {
         return inventory;
+    }
+
+    public List<Guild> getGuilds() {
+        return guilds;
     }
 }

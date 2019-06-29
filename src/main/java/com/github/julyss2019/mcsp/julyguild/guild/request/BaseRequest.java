@@ -1,18 +1,16 @@
-package com.github.julyss2019.mcsp.julyguild.guild.request.player;
+package com.github.julyss2019.mcsp.julyguild.guild.request;
 
-import com.github.julyss2019.mcsp.julyguild.guild.request.RequestType;
 import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
 
 import java.util.UUID;
 
-public class BasePlayerRequest implements PlayerRequest {
+public class BaseRequest implements Request {
     private RequestType requestType;
     private OfflineGuildPlayer offlineGuildPlayer;
     private long time;
     private UUID uuid;
 
-
-    public BasePlayerRequest(RequestType requestType) {
+    public BaseRequest(RequestType requestType) {
         this.requestType = requestType;
     }
 
@@ -36,7 +34,7 @@ public class BasePlayerRequest implements PlayerRequest {
         this.uuid = uuid;
     }
 
-    public BasePlayerRequest(RequestType requestType, OfflineGuildPlayer offlineGuildPlayer, long time, UUID uuid) {
+    public BaseRequest(RequestType requestType, OfflineGuildPlayer offlineGuildPlayer, long time, UUID uuid) {
         this.requestType = requestType;
         this.offlineGuildPlayer = offlineGuildPlayer;
         this.time = time;
@@ -49,7 +47,7 @@ public class BasePlayerRequest implements PlayerRequest {
     }
 
     @Override
-    public long getTime() {
+    public long getCreationTime() {
         return time;
     }
 
@@ -61,5 +59,15 @@ public class BasePlayerRequest implements PlayerRequest {
     @Override
     public RequestType getType() {
         return requestType;
+    }
+
+    @Override
+    public boolean isTimeout() {
+        return false;
+    }
+
+    @Override
+    public boolean isOnlyOne() {
+        return false;
     }
 }

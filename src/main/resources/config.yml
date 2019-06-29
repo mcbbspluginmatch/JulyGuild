@@ -1,5 +1,39 @@
-config_version: 1.0.9
+config_version: 1.1.9
 guild:
+  promote:
+    # 金币升级公式
+    money_formula: '1000*(1+0.05)^%GUILD_MEMBER_COUNT%'
+    # 金币最大能升级到的人数
+    money_max_member_count: 10
+    # 点券升级公式
+    point_formula: '5*(1+0.05)^%GUILD_MEMBER_COUNT%'
+    # 金币最大能升级到的人数
+    point_max_member_count: 50
+  def_icon:
+    material: APPLE
+    durability: 0
+  icon:
+    items:
+      '1':
+        material: STONE
+        durability: 0
+        display_name: '&f石头'
+        lores:
+          - 'l1'
+        cost:
+          type: POINTS
+          amount: 1000
+      '2':
+        material: DIAMOND
+        durability: 0
+        cost:
+          type: MONEY
+          amount: 1000
+        display_name: '&f钻石'
+        lores:
+          - 'l1'
+  donate_min_money: 10000
+  def_max_admin_count: 3
   #rank_formula: '%LEVEL% + %%'
   request:
     join:
@@ -26,17 +60,36 @@ guild:
         amount: 1
         key_lore: '创建宗门'
 gui:
-  main_gui:
-    guild: # 工会信息
-      display_name: '&a%GUILD_NAME%'
+  # 全局
+  global:
+    # 宗门信息
+    guild_info:
+      display_name: '&f宗门信息'
       lores:
-        - '&b『&eTop.%GUILD_RANK%&b』'
+        - '&b『Top.%GUILD_RANKING%&b』'
         - ' '
-        - '&7- &4等级 &b▹ &c%GUILD_LEVEL%'
         - '&7- &d宗主 &b▹ &d%GUILD_OWNER%'
-        - '&7- &9人数 &b▹ &9%GUILD_MEMBER_COUNT%/%GUILD_MAX_MEMBER_COUNT%'
-        - '&7- &a创建时间 &b▹ &a%GUILD_CREATION_TIME%'
-    player_info_lores: # 个人信息
-      - '&b『&e%player_name%&b』'
-      - ''
-      - '&7- &e宗门 &b▹ &e%GUILD_PLAYER_IN%'
+        - '&7- &a人数 &b▹ &a%GUILD_MEMBER_COUNT%/%GUILD_MAX_MEMBER_COUNT%'
+        - '&7- &eGDP &b▹ &e%GUILD_BALANCE%'
+        - '&7- &9创建时间 &b▹ &9%GUILD_CREATION_TIME%'
+  main_gui:
+    # 排行榜
+    ranking_list:
+      display_name: '&f%GUILD_NAME%'
+      lores:
+        - '&b『&bTop.%GUILD_RANKING%&b』'
+        - ' '
+        - '&7- &d宗主 &b▹ &d%GUILD_OWNER%'
+        - '&7- &a人数 &b▹ &a%GUILD_MEMBER_COUNT%/%GUILD_MAX_MEMBER_COUNT%'
+        - '&7- &eGDP &b▹ &e¥%GUILD_BALANCE%'
+        - '&7- &9创建时间 &b▹ &9%GUILD_CREATION_TIME%'
+  mine_gui:
+    player_info:
+      display_name: '&f个人信息'
+      lores:
+        - '&b• &7%player_name%&b •'
+        - ' '
+        - '&7- &a所在宗门 &b▹ &a%GUILD_NAME%'
+        - '&7- &d职务 &b▹ &d%GUILD_MEMBER_PER%'
+        - '&7- &e金币贡献 &b▹ &e%GUILD_MEMBER_DONATE_MONEY%'
+        - '&7- &9入宗时间 &b▹ &9%GUILD_MEMBER_JOIN_TIME%'

@@ -1,12 +1,15 @@
 package com.github.julyss2019.mcsp.julyguild.gui.player;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
-import com.github.julyss2019.mcsp.julyguild.config.Settings;
+import com.github.julyss2019.mcsp.julyguild.config.GUISettings;
+import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.BaseGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
+import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
+import com.github.julyss2019.mcsp.julyguild.guild.player.GuildAdmin;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
-import com.github.julyss2019.mcsp.julyguild.guild.player.GuildOwner;
+import com.github.julyss2019.mcsp.julyguild.guild.player.Permission;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.chat.ChatListener;
 import com.github.julyss2019.mcsp.julylibrary.chat.JulyChatFilter;
@@ -15,6 +18,7 @@ import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -27,14 +31,20 @@ import java.util.List;
 
 public class GuildMineGUI extends BaseGUI {
     private static JulyGuild plugin = JulyGuild.getInstance();
-    private static Settings settings = plugin.getSettings();
+    private static GuildSettings guildSettings = plugin.getGuildSettings();
+    private static GUISettings guiSettings = plugin.getGuiSettings();
+    private static Economy vault = plugin.getVaultAPI();
     private Inventory inventory;
     private Guild guild;
+    private String playerName;
+    private GuildMember member;
 
     public GuildMineGUI(GuildPlayer guildPlayer) {
-        super(guildPlayer);
+        super(GUIType.MINE, guildPlayer);
 
-        this.guild = guildPlayer.getGuild();
+        this.guild = offlineGuildPlayer.getGuild();
+        this.playerName = guildPlayer.getName();
+        this.member = guild.getMember(playerName);
         build();
     }
 
@@ -43,25 +53,40 @@ public class GuildMineGUI extends BaseGUI {
         InventoryBuilder inventoryBuilder = new InventoryBuilder().title("&e&l我的宗门").colored().row(6);
 
         List<String> memberLores = new ArrayList<>();
+        List<GuildMember> guildMembers = guild.getMembers();
 
-        for (GuildMember guildMember : guild.getMembers(true, true)) {
-            if (guildMember instanceof GuildOwner) {
-                memberLores.add("&7- &c" + guildMember.getName());
+        Guild.sortMembers(guildMembers);
+
+        for (GuildMember guildMember : guild.getMembers()) {
+            Permission permission = guildMember.getPermission();
+
+            if (memberLores.size() < 10) {
+                memberLores.add("&7- " + permission.getColor() + "[" + permission.getChineseName() + "] " + guildMember.getName());
             } else {
-                memberLores.add("&7- &f" + guildMember.getName());
+                break;
             }
-
         }
 
         inventoryBuilder
-                .item(1, 4, new ItemBuilder().
+                // 宗门信息
+                .item(2, 5, new ItemBuilder().
                         material(Material.SIGN)
-                        .displayName("&f个人信息").colored()
-                        .lores(PlaceholderAPI.setPlaceholders(bukkitPlayer, settings.getGuiMainGuiGuildPlayerInfoLores()))
+                        .displayName(PlaceholderAPI.setPlaceholders(bukkitPlayer, guiSettings.getGlobalGuildInfoDisplayName()))
+                        .lores(PlaceholderAPI.setPlaceholders(bukkitPlayer, guiSettings.getGlobalGuildInfoLores()))
+                        .colored()
                         .enchant(Enchantment.DURABILITY, 1)
                         .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                         .build())
-                .item(2, 3, new ItemBuilder()
+                // 个人信息
+                .item(2, 3, new ItemBuilder().
+                        material(Material.SIGN)
+                        .displayName(PlaceholderAPI.setPlaceholders(bukkitPlayer, guiSettings.getMineGUIPlayerInfoDisplayName()))
+                        .lores(PlaceholderAPI.setPlaceholders(bukkitPlayer, guiSettings.getMineGUIPlayerInfoLores()))
+                        .colored()
+                        .enchant(Enchantment.DURABILITY, 1)
+                        .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                        .build())
+                .item(1, 4, new ItemBuilder()
                         .material(Material.PAINTING)
                         .displayName("&f宗门公告")
                         .lores(guild.getAnnouncements())
@@ -72,25 +97,65 @@ public class GuildMineGUI extends BaseGUI {
                 .item(2, 4, new ItemBuilder()
                         .material(Material.TOTEM)
                         .displayName("&f宗门成员")
-                        .lores(memberLores)
-                        .colored()
+                        .addLore("&B• &7点击查看详细信息 &b•")
+                        .addLore("")
+                        .addLores(memberLores)
+                        .addLore(guild.getMemberCount() > 10 ? "&7和 &e" + (guild.getMemberCount() - 10) + "个 &7成员..." : null)
                         .enchant(Enchantment.DURABILITY, 1)
                         .addItemFlag(ItemFlag.HIDE_ENCHANTS)
-                        .build())
-                .item(2, 5, new ItemBuilder()
-                        .material(Material.GOLD_NUGGET)
-                        .displayName("&e贡献金币")
-                        .enchant(Enchantment.DURABILITY, 1)
-                        .addItemFlag(ItemFlag.HIDE_ENCHANTS)
-                        .colored()
-                        .build())
+                        .colored().build(), new ItemListener() {
+                            @Override
+                            public void onClicked(InventoryClickEvent event) {
+                                close();
+                                new GuildMemberGUI(guild, guildPlayer).open();
+                            }
+                        }
+                )
                 .item(3, 4, new ItemBuilder()
-                        .material(Material.YELLOW_SHULKER_BOX)
-                        .displayName("&f宗门仓库")
-                        .colored()
-                        .enchant(Enchantment.DURABILITY, 1)
-                        .addItemFlag(ItemFlag.HIDE_ENCHANTS)
-                        .build())
+                                .material(Material.GOLD_NUGGET)
+                                .displayName("&e贡献金币")
+                                .enchant(Enchantment.DURABILITY, 1)
+                                .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                                .colored()
+                                .build(), new ItemListener() {
+                    @Override
+                    public void onClicked(InventoryClickEvent event) {
+                        close();
+                        JulyMessage.sendColoredMessage(bukkitPlayer, "&d赞助金币可提升宗门排名.");
+                        JulyMessage.sendColoredMessage(bukkitPlayer, "&e请在聊天栏输入并发送要赞助的金币数量: ");
+                        JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
+                            @Override
+                            public void onChat(AsyncPlayerChatEvent event) {
+                                JulyChatFilter.unregisterChatFilter(bukkitPlayer);
+                                event.setCancelled(true);
+
+                                int amount;
+
+                                try {
+                                    amount = Integer.parseInt(event.getMessage());
+                                } catch (Exception e) {
+                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c数量不正确!");
+                                    return;
+                                }
+
+                                if (amount < guildSettings.getDonateMinMoney()) {
+                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c最小赞助额为 &e" + guildSettings.getDonateMinMoney() + "&c.");
+                                    return;
+                                }
+
+                                if (vault.getBalance(bukkitPlayer) < amount) {
+                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c金币不足.");
+                                    return;
+                                }
+
+                                vault.withdrawPlayer(bukkitPlayer, amount);
+                                member.donateBalance(amount);
+                                guild.depositBalance(amount);
+                                guild.broadcastMessage("&d" + member.getPermission().getChineseName() + " &e" + guildPlayer.getName() + " &d为宗门赞助了 &e¥" + amount + "&d!");
+                            }
+                        });
+                    }
+                })
                 .item(53, CommonItem.BACK_TO_MAIN, new ItemListener() {
                     @Override
                     public void onClicked(InventoryClickEvent event) {
@@ -99,7 +164,8 @@ public class GuildMineGUI extends BaseGUI {
                     }
                 });
 
-        if (guild.isOwner(guildPlayer)) {
+
+        if (member instanceof GuildAdmin) {
             inventoryBuilder
                     .item(45, new ItemBuilder()
                             .material(Material.ENDER_PORTAL_FRAME)
@@ -113,9 +179,18 @@ public class GuildMineGUI extends BaseGUI {
                             new GuildManageGUI(guildPlayer).open();
                         }
                     });
-        } else {
+        }
+
+        Permission permission = member.getPermission();
+
+        if (permission == Permission.MEMBER || permission == Permission.ADMIN) {
             inventoryBuilder
-                    .item(53, new ItemBuilder().material(Material.DARK_OAK_DOOR_ITEM).displayName("&c退出宗门").colored().build(), new ItemListener() {
+                    .item(5, permission == Permission.MEMBER ? 0 : 1, new ItemBuilder()
+                            .material(Material.IRON_DOOR)
+                            .displayName("&c退出宗门")
+                            .colored()
+                            .build()
+                    , new ItemListener() {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
                             close();
@@ -126,7 +201,7 @@ public class GuildMineGUI extends BaseGUI {
                                     event.setCancelled(true);
 
                                     if (event.getMessage().equals("confirm")) {
-                                        guild.removeMember(guild.getMember(guildPlayer));
+                                        guild.removeMember(guild.getMember(playerName));
                                         JulyMessage.sendColoredMessage(bukkitPlayer, "&d退出宗门成功.");
                                     } else {
                                         JulyMessage.sendColoredMessage(bukkitPlayer, "&e退出宗门失败.");
@@ -138,7 +213,6 @@ public class GuildMineGUI extends BaseGUI {
 
                         }
                     });
-
         }
 
         this.inventory = inventoryBuilder.build();

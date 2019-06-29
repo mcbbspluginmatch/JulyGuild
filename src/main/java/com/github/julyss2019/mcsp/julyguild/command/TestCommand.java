@@ -23,9 +23,6 @@ public class TestCommand implements Command {
 
         int i = 0;
 
-        for (Guild guild : guildManager.getGuilds(false)) {
-            guild.setLevel(i++);
-        }
 
         return true;
     }

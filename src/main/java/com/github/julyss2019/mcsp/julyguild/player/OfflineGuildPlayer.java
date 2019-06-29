@@ -17,14 +17,14 @@ import java.util.Set;
 public class OfflineGuildPlayer {
     private static JulyGuild plugin = JulyGuild.getInstance();
     private static GuildManager guildManager = plugin.getGuildManager();
+    private static GuildPlayerManager guildPlayerManager = plugin.getGuildPlayerManager();
     private String name;
     private File file;
     private YamlConfiguration yml;
+    private Guild guild;
 
     protected OfflineGuildPlayer(String name) {
         this.name = name;
-
-        load();
     }
 
     /**
@@ -45,6 +45,7 @@ public class OfflineGuildPlayer {
         }
 
         this.yml = YamlConfiguration.loadConfiguration(file);
+        this.guild = guildManager.getGuild(yml.getString("guild"));
         return this;
     }
 
@@ -53,12 +54,13 @@ public class OfflineGuildPlayer {
     }
 
     public Guild getGuild() {
-        return guildManager.getGuild(yml.getString("guild"));
+        return guild;
     }
 
     public void setGuild(Guild guild) {
         yml.set("guild", guild == null ? null : guild.getUUID());
-        YamlUtil.saveYaml(yml, file);
+        save();
+        this.guild = guild;
     }
 
     public Player getBukkitPlayer() {
@@ -71,8 +73,12 @@ public class OfflineGuildPlayer {
         return tmp != null && tmp.isOnline();
     }
 
+    public GuildPlayer getGuildPlayer() {
+        return !isOnline() ? null : guildPlayerManager.getGuildPlayer(getBukkitPlayer());
+    }
+
     public boolean isInGuild() {
-        return getGuild() != null;
+        return guild != null;
     }
 
     @Override
@@ -86,5 +92,9 @@ public class OfflineGuildPlayer {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    public void save() {
+        YamlUtil.saveYaml(yml, file);
     }
 }
