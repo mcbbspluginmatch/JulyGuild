@@ -6,6 +6,7 @@ import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
 import com.github.julyss2019.mcsp.julyguild.util.Util;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 /**
@@ -32,7 +33,7 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
     }
 
     @Override
-    public String onPlaceholderRequest(Player p, String params) {
+    public String onRequest(OfflinePlayer p, String params) {
         String playerName = p.getName();
         OfflineGuildPlayer offlineGuildPlayer = guildPlayerManager.getOfflineGuildPlayer(playerName);
         Guild guild = offlineGuildPlayer.getGuild();
@@ -70,6 +71,11 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
         }
 
         return null;
+    }
+
+    @Override
+    public String onPlaceholderRequest(Player p, String params) {
+        return onPlaceholderRequest(p, params);
     }
 
     @Override

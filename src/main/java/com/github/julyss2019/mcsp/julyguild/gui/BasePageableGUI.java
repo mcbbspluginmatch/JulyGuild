@@ -51,7 +51,7 @@ public class BasePageableGUI extends BaseGUI implements Pageable {
     // 需要子类来覆盖
     @Override
     public void setCurrentPage(int page) {
-        if (page < 0 || page > getTotalPage()) {
+        if (page < 0 || page >= getTotalPage()) {
             throw new IllegalArgumentException("页数不合法: " + page);
         }
     }

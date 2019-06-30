@@ -10,9 +10,7 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 public class OfflineGuildPlayer {
     private static JulyGuild plugin = JulyGuild.getInstance();
@@ -58,7 +56,7 @@ public class OfflineGuildPlayer {
     }
 
     public void setGuild(Guild guild) {
-        yml.set("guild", guild == null ? null : guild.getUUID());
+        yml.set("guild", guild == null ? null : guild.getUUID().toString());
         save();
         this.guild = guild;
     }

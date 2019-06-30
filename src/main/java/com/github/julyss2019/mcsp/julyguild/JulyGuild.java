@@ -3,14 +3,13 @@ package com.github.julyss2019.mcsp.julyguild;
 import com.github.julyss2019.mcsp.julyguild.command.Command;
 import com.github.julyss2019.mcsp.julyguild.command.MainGUICommand;
 import com.github.julyss2019.mcsp.julyguild.command.TestCommand;
+import com.github.julyss2019.mcsp.julyguild.config.ConfigGuildIcon;
 import com.github.julyss2019.mcsp.julyguild.config.GUISettings;
 import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
 import com.github.julyss2019.mcsp.julyguild.guild.CacheGuildManager;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;
-import com.github.julyss2019.mcsp.julyguild.listener.gui.GUIListener;
-import com.github.julyss2019.mcsp.julyguild.listener.gui.GuildMemberManageGUIListener;
-import com.github.julyss2019.mcsp.julyguild.listener.gui.GuildRequestGUIListener;
-import com.github.julyss2019.mcsp.julyguild.listener.gui.MainGUIListener;
+import com.github.julyss2019.mcsp.julyguild.listener.TpAllListener;
+import com.github.julyss2019.mcsp.julyguild.listener.GUIListener;
 import com.github.julyss2019.mcsp.julyguild.log.GuildLog;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julylibrary.command.JulyCommandExecutor;
@@ -24,13 +23,15 @@ import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 
 public class JulyGuild extends JavaPlugin {
-    public static final String CONFIG_VERSION = "1.1.9";
+    public static final String CONFIG_VERSION = "1.2.3";
     private static final Gson gson = new Gson();
     private static JulyGuild instance;
     private GuildManager guildManager;
@@ -44,6 +45,7 @@ public class JulyGuild extends JavaPlugin {
     private Economy vaultAPI;
     private FileLogger fileLogger;
     private PlaceholderAPIExpansion placeholderAPIExpansion;
+    private TpAllListener tpAllListener;
 
     @Override
     public void onEnable() {
@@ -63,6 +65,7 @@ public class JulyGuild extends JavaPlugin {
         this.guildManager = new GuildManager();
         this.cacheGuildManager = new CacheGuildManager();
         this.placeholderAPIExpansion = new PlaceholderAPIExpansion();
+        this.tpAllListener = new TpAllListener();
 
         guildManager.loadGuilds();
         cacheGuildManager.updateSortedGuilds();
@@ -71,7 +74,7 @@ public class JulyGuild extends JavaPlugin {
         getCommand("guild").setExecutor(julyCommandExecutor);
         registerCommands();
         registerListeners();
-        JulyMessage.setPrefix(this, "§a[宗门] ");
+        JulyMessage.setPrefix(this, "§a[宗门] §f");
 
         if (!placeholderAPIExpansion.register()) {
             getLogger().warning("PlaceholderAPI Hook 失败!");
@@ -95,9 +98,11 @@ public class JulyGuild extends JavaPlugin {
 
     private void registerListeners() {
         Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
-        Bukkit.getPluginManager().registerEvents(new MainGUIListener(), this);
-        Bukkit.getPluginManager().registerEvents(new GuildRequestGUIListener(), this);
-        Bukkit.getPluginManager().registerEvents(new GuildMemberManageGUIListener(), this);
+        Bukkit.getPluginManager().registerEvents(tpAllListener, this);
+    }
+
+    public TpAllListener getTpAllListener() {
+        return tpAllListener;
     }
 
     public void writeGuildLog(FileLogger.LoggerLevel loggerLevel, GuildLog log) {
@@ -166,6 +171,27 @@ public class JulyGuild extends JavaPlugin {
 
         guildSettings = (GuildSettings) JulyConfig.loadConfig(this, getConfig(), GuildSettings.class);
         guiSettings = (GUISettings) JulyConfig.loadConfig(this, getConfig().getConfigurationSection("gui"), GUISettings.class);
+        loadSpecialConfig();
+    }
+
+    private void loadSpecialConfig() {
+        if (getConfig().contains("guild.icon.items")) {
+            ConfigurationSection iconItemSection = getConfig().getConfigurationSection("guild.icon.items");
+
+            for (String key : iconItemSection.getKeys(false)) {
+                ConfigurationSection itemSection = iconItemSection.getConfigurationSection(key);
+                ConfigGuildIcon configGuildIcon = new ConfigGuildIcon();
+
+                configGuildIcon.setMaterial(Material.valueOf(itemSection.getString("material")));
+                configGuildIcon.setDurability((short) itemSection.getInt("durability"));
+                configGuildIcon.setDisplayName(itemSection.getString("display_name"));
+                configGuildIcon.setLores(itemSection.getStringList("lores"));
+                configGuildIcon.setCostType(ConfigGuildIcon.CostType.valueOf(itemSection.getString("cost.type")));
+                configGuildIcon.setFee(itemSection.getInt("cost.amount"));
+
+                guildSettings.getConfigGuildIcons().add(configGuildIcon);
+            }
+        }
     }
 
     public GuildSettings getGuildSettings() {

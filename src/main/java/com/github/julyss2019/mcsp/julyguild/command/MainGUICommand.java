@@ -1,7 +1,7 @@
 package com.github.julyss2019.mcsp.julyguild.command;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
-import com.github.julyss2019.mcsp.julyguild.gui.player.MainGUI;
+import com.github.julyss2019.mcsp.julyguild.gui.player.pageable.MainGUI;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -19,5 +19,10 @@ public class MainGUICommand implements Command {
     @Override
     public String getFirstArg() {
         return "main";
+    }
+
+    @Override
+    public String getDescription() {
+        return "打开主界面";
     }
 }

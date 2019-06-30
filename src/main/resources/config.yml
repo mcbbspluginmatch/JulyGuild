@@ -1,12 +1,18 @@
-config_version: 1.1.9
+config_version: 1.2.3
 guild:
+  # 全员传送
+  tp_all:
+    timeout: 15 # 请求超时时间
+    interval: 60 # 传送间隔限制
+    shift_count_interval: 1000 # 毫秒
+    shift_count: 3 # shift次数
   promote:
     # 金币升级公式
-    money_formula: '1000*(1+0.05)^%GUILD_MEMBER_COUNT%'
+    money_formula: '1000*(1+0.05)^%GUILD_MAX_MEMBER_COUNT%'
     # 金币最大能升级到的人数
     money_max_member_count: 10
     # 点券升级公式
-    point_formula: '5*(1+0.05)^%GUILD_MEMBER_COUNT%'
+    point_formula: '5*(1+0.05)^%GUILD_MAX_MEMBER_COUNT%'
     # 金币最大能升级到的人数
     point_max_member_count: 50
   def_icon:
@@ -19,7 +25,8 @@ guild:
         durability: 0
         display_name: '&f石头'
         lores:
-          - 'l1'
+          - '&7- &d消耗 &b▹ &d{type}'
+          - '&7- &e价格 &b▹ &e{amount}'
         cost:
           type: POINTS
           amount: 1000
@@ -31,15 +38,14 @@ guild:
           amount: 1000
         display_name: '&f钻石'
         lores:
-          - 'l1'
+          - '&7- &d消耗 &b▹ &d{type}'
+          - '&7- &e价格 &b▹ &e{amount}'
   donate_min_money: 10000
   def_max_admin_count: 3
   #rank_formula: '%LEVEL% + %%'
   request:
     join:
       timeout: 3600 # 秒，请求加入超时
-    invite:
-      timeout: 300 # 秒，邀请超时
   announcement:
     split_char: '#' # 换行符
     max_count: 5 # 最大公告数量
@@ -84,6 +90,7 @@ gui:
         - '&7- &eGDP &b▹ &e¥%GUILD_BALANCE%'
         - '&7- &9创建时间 &b▹ &9%GUILD_CREATION_TIME%'
   mine_gui:
+    # 个人信息
     player_info:
       display_name: '&f个人信息'
       lores:

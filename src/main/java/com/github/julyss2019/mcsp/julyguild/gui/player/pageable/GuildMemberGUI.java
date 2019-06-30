@@ -1,8 +1,9 @@
-package com.github.julyss2019.mcsp.julyguild.gui.player;
+package com.github.julyss2019.mcsp.julyguild.gui.player.pageable;
 
 import com.github.julyss2019.mcsp.julyguild.gui.BasePageableGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
+import com.github.julyss2019.mcsp.julyguild.gui.player.GuildInfoGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
 import com.github.julyss2019.mcsp.julyguild.guild.player.Permission;
@@ -29,6 +30,8 @@ public class GuildMemberGUI extends BasePageableGUI {
 
     @Override
     public void setCurrentPage(int page) {
+        super.setCurrentPage(page);
+
         InventoryBuilder inventoryBuilder = new InventoryBuilder().title(guild.getName() + " &7&l- &e&l宗门成员(第" + (getCurrentPage() + 1) + "页)").colored().row(6);
 
         inventoryBuilder.item(53, CommonItem.BACK, new ItemListener() {
@@ -42,7 +45,7 @@ public class GuildMemberGUI extends BasePageableGUI {
             }
         });
 
-        if (guild.getMemberCount() > 51) {
+        if (getTotalPage() > 1) {
             inventoryBuilder.item(51, CommonItem.PREVIOUS_PAGE, new ItemListener() {
                 @Override
                 public void onClicked(InventoryClickEvent event) {
@@ -72,7 +75,7 @@ public class GuildMemberGUI extends BasePageableGUI {
         int loopCount = memberSize - itemCounter < 51 ? memberSize - itemCounter : 51;
 
         for (int i = 0; i < loopCount; i++) {
-            GuildMember member = members.get(i);
+            GuildMember member = members.get(itemCounter++);
             Permission permission = member.getPermission();
 
             inventoryBuilder.item(i, new SkullItemBuilder()
@@ -93,7 +96,7 @@ public class GuildMemberGUI extends BasePageableGUI {
     public int getTotalPage() {
         int memberSize = guild.getMemberCount();
 
-        return memberSize % 51 == 0 ? memberSize / 51 : memberSize / 51 + 1;
+        return memberSize == 0 ? 1 : memberSize % 51 == 0 ? memberSize / 51 : memberSize / 51 + 1;
     }
 
     @Override

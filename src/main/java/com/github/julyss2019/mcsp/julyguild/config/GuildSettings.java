@@ -5,6 +5,7 @@ import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GuildSettings {
@@ -36,8 +37,10 @@ public class GuildSettings {
     private int guildDefMaxMemberCount;
     @Config(path = "guild.request.join.timeout")
     private int guildRequestJoinTimeout;
-    @Config(path = "guild.request.invite.timeout")
+
+    //@Config(path = "guild.request.invite.timeout")
     private int guildRequestInviteTimeout;
+
     @Config(path = "guild.def_max_admin_count")
     private int guildDefMaxAdminCount;
 
@@ -49,6 +52,68 @@ public class GuildSettings {
 
     @Config(path = "guild.def_icon.durability")
     private short defIconDurability;
+
+    @Config(path = "guild.promote.money_formula")
+    private String promoteMoneyFormula;
+
+    @Config(path = "guild.promote.money_max_member_count")
+    private int promoteMoneyMaxMemberCount;
+
+    @Config(path = "guild.promote.point_formula")
+    private String promotePointFormula;
+
+    @Config(path = "guild.promote.point_max_member_count")
+    private int promotePointMaxMemberCount;
+
+    @Config(path = "guild.tp_all.interval")
+    private int tpAllInterval;
+
+    @Config(path = "guild.tp_all.shift_count_interval")
+    private int tpAllShiftCountInterval;
+
+    @Config(path = "guild.tp_all.shift_count")
+    private int tpAllShiftCount;
+
+    @Config(path = "guild.tp_all.timeout")
+    private int tpAllShiftTimeout;
+
+    public int getTpAllShiftTimeout() {
+        return tpAllShiftTimeout;
+    }
+
+    public int getTpAllInterval() {
+        return tpAllInterval;
+    }
+
+    public int getTpAllShiftCountInterval() {
+        return tpAllShiftCountInterval;
+    }
+
+    public int getTpAllShiftCount() {
+        return tpAllShiftCount;
+    }
+
+    private List<ConfigGuildIcon> configGuildIcons = new ArrayList<>();
+
+    public List<ConfigGuildIcon> getConfigGuildIcons() {
+        return configGuildIcons;
+    }
+
+    public String getPromoteMoneyFormula() {
+        return promoteMoneyFormula;
+    }
+
+    public int getPromoteMoneyMaxMemberCount() {
+        return promoteMoneyMaxMemberCount;
+    }
+
+    public String getPromotePointFormula() {
+        return promotePointFormula;
+    }
+
+    public int getPromotePointMaxMemberCount() {
+        return promotePointMaxMemberCount;
+    }
 
     public Material getDefIconMaterial() {
         return defIconMaterial;

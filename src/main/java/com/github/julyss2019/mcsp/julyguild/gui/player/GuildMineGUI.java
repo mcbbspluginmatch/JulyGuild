@@ -6,6 +6,8 @@ import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.BaseGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
+import com.github.julyss2019.mcsp.julyguild.gui.player.pageable.GuildMemberGUI;
+import com.github.julyss2019.mcsp.julyguild.gui.player.pageable.MainGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildAdmin;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
@@ -36,20 +38,17 @@ public class GuildMineGUI extends BaseGUI {
     private static Economy vault = plugin.getVaultAPI();
     private Inventory inventory;
     private Guild guild;
-    private String playerName;
-    private GuildMember member;
 
     public GuildMineGUI(GuildPlayer guildPlayer) {
         super(GUIType.MINE, guildPlayer);
 
         this.guild = offlineGuildPlayer.getGuild();
-        this.playerName = guildPlayer.getName();
-        this.member = guild.getMember(playerName);
         build();
     }
 
     @Override
     public void build() {
+        GuildMember member = guild.getMember(playerName);
         InventoryBuilder inventoryBuilder = new InventoryBuilder().title("&e&l我的宗门").colored().row(6);
 
         List<String> memberLores = new ArrayList<>();

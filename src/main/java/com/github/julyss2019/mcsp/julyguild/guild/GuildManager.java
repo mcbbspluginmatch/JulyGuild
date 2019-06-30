@@ -1,9 +1,7 @@
 package com.github.julyss2019.mcsp.julyguild.guild;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
-import com.github.julyss2019.mcsp.julyguild.gui.GUI;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
-import com.github.julyss2019.mcsp.julyguild.gui.player.MainGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.exception.GuildCreateException;
 import com.github.julyss2019.mcsp.julyguild.guild.log.GuildCreateLog;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;

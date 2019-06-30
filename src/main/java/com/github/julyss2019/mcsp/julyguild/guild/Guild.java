@@ -39,8 +39,8 @@ public class Guild {
     private int maxMemberCount;
     private long creationTime;
     private List<String> announcements;
-    private Map<String, Request> uuidRequestMap = new HashMap<>();
-    private Map<String, List<Request>> playerRequestMap = new HashMap<>();
+    private Map<String, GuildRequest> uuidRequestMap = new HashMap<>();
+    private Map<String, List<GuildRequest>> playerRequestMap = new HashMap<>();
     private double balance;
     private Map<String, GuildIcon> iconMap = new HashMap<>();
     private GuildIcon currentIcon;
@@ -91,19 +91,19 @@ public class Guild {
             // 载入玩家请求
             for (String uuid : yml.getConfigurationSection("requests").getKeys(false)) {
                 ConfigurationSection requestSection = yml.getConfigurationSection("requests").getConfigurationSection(uuid);
-                RequestType requestType = RequestType.valueOf(requestSection.getString("type"));
-                BaseRequest request = null;
+                GuildRequestType guildRequestType = GuildRequestType.valueOf(requestSection.getString("type"));
+                BaseGuildRequest request = null;
                 String playerName = requestSection.getString("player");
 
-                switch (requestType) {
+                switch (guildRequestType) {
                     case JOIN:
-                        request = new JoinRequest();
+                        request = new JoinGuildRequest();
                         break;
                 }
 
-                request.setOfflineGuildPlayer(guildPlayerManager.getOfflineGuildPlayer(playerName));
+                request.setRequester(guildPlayerManager.getOfflineGuildPlayer(playerName));
                 request.setTime(requestSection.getLong("time"));
-                request.setUUID(UUID.fromString(uuid));
+                request.setUuid(UUID.fromString(uuid));
 
                 uuidRequestMap.put(uuid, request);
 
@@ -115,9 +115,9 @@ public class Guild {
             }
         }
 
-        if (yml.contains("iconMap")) {
-            for (String uuid : yml.getConfigurationSection("iconMap").getKeys(false)) {
-                ConfigurationSection iconSection = yml.getConfigurationSection("iconMap").getConfigurationSection(uuid);
+        if (yml.contains("icons")) {
+            for (String uuid : yml.getConfigurationSection("icons").getKeys(false)) {
+                ConfigurationSection iconSection = yml.getConfigurationSection("icons").getConfigurationSection(uuid);
                 GuildIcon icon = new GuildIcon(Material.valueOf(iconSection.getString("material")), (short) iconSection.getInt("durability"), UUID.fromString(uuid));
 
                 iconMap.put(uuid, icon);
@@ -131,6 +131,45 @@ public class Guild {
         }
 
         return this;
+    }
+
+    public void setOwner(GuildMember newOwner) {
+        GuildMember oldOwner = owner;
+        String newOwnerName = newOwner.getName();
+
+        if (newOwner.equals(owner)) {
+            throw new IllegalArgumentException("成员已是宗主");
+        }
+
+        if (!memberMap.containsKey(newOwnerName)) {
+            throw new IllegalArgumentException("成员不存在");
+        }
+
+        yml.set("owner.name", newOwner.getName());
+        yml.set("owner.join_time", System.currentTimeMillis());
+        save();
+        memberMap.remove(oldOwner.getName()); // 删除旧宗主
+        this.owner = new GuildOwner(this, guildPlayerManager.getOfflineGuildPlayer(newOwnerName));
+        memberMap.put(newOwnerName, owner);
+        addMember(oldOwner.getOfflineGuildPlayer());
+
+        if (newOwner.isOnline()) {
+            newOwner.getOfflineGuildPlayer().getGuildPlayer().updateGUI(GUIType.values());
+        }
+    }
+
+    public boolean isMember(String name) {
+        return memberMap.containsKey(name);
+    }
+
+    public boolean isOwnedIcon(Material material, short durability) {
+        for (GuildIcon guildIcon : getIcons()) {
+            if (guildIcon.getMaterial() == material && guildIcon.getDurability() == durability) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public GuildIcon getCurrentIcon() {
@@ -152,14 +191,14 @@ public class Guild {
     public void giveGuildIcon(GuildIcon guildIcon) {
         String uuid = guildIcon.getUuid().toString();
 
-        yml.set("iconMap." + uuid + ".material", guildIcon.getMaterial().name());
-        yml.set("iconMap." + uuid + ".durability", guildIcon.getDurability());
+        yml.set("icons." + uuid + ".material", guildIcon.getMaterial().name());
+        yml.set("icons." + uuid + ".durability", guildIcon.getDurability());
         save();
         iconMap.put(uuid, guildIcon);
     }
 
-    public Collection<GuildIcon> getIcons() {
-        return iconMap.values();
+    public List<GuildIcon> getIcons() {
+        return new ArrayList<>(iconMap.values());
     }
 
     public void depositBalance(double amount) {
@@ -416,12 +455,12 @@ public class Guild {
     /**
      * 是否有请求
      * @param offlineGuildPlayer
-     * @param requestType
+     * @param guildRequestType
      * @return
      */
-    public boolean hasRequest(OfflineGuildPlayer offlineGuildPlayer, RequestType requestType) {
-        for (Request request : getRequests(false)) {
-            if (request.getOfflineGuildPlayer().equals(offlineGuildPlayer) && requestType == request.getType()) {
+    public boolean hasRequest(OfflineGuildPlayer offlineGuildPlayer, GuildRequestType guildRequestType) {
+        for (GuildRequest guildRequest : getRequests()) {
+            if (guildRequest.getRequester().equals(offlineGuildPlayer) && guildRequestType == guildRequest.getType()) {
                 return true;
             }
         }
@@ -431,15 +470,15 @@ public class Guild {
 
     /**
      * 删除玩家的请求
-     * @param request
+     * @param guildRequest
      */
-    public void removeRequest(Request request) {
-        String uuid = request.getUUID().toString();
+    public void removeRequest(GuildRequest guildRequest) {
+        String uuid = guildRequest.getUUID().toString();
 
         yml.set("requests." + uuid, null);
         save();
         uuidRequestMap.remove(uuid);
-        updateMembersGUI(GUIType.PLAYER_REQUEST);
+        updateMembersGUI(GUIType.PLAYER_JOIN_REQUEST);
     }
 
     /**
@@ -457,22 +496,26 @@ public class Guild {
 
     /**
      * 添加玩家的请求
-     * @param request
+     * @param guildRequest
      * @return
      */
-    public String addRequest(Request request) {
-        if (request.isOnlyOne() && hasRequest(request.getOfflineGuildPlayer(), request.getType())) {
+    public String addRequest(GuildRequest guildRequest) {
+        if (guildRequest.isOnlyOne() && hasRequest(guildRequest.getRequester(), guildRequest.getType())) {
             throw new IllegalArgumentException("&e请求类型只允许存在一个!");
         }
 
-        String uuid = request.getUUID().toString();
+        String uuid = guildRequest.getUUID().toString();
 
-        yml.set("requests." + uuid + ".player", request.getOfflineGuildPlayer().getName());
-        yml.set("requests." + uuid + ".type", request.getType().name());
-        yml.set("requests." + uuid + ".time", request.getCreationTime());
+        yml.set("requests." + uuid + ".player", guildRequest.getRequester().getName());
+        yml.set("requests." + uuid + ".type", guildRequest.getType().name());
+        yml.set("requests." + uuid + ".time", guildRequest.getCreationTime());
+
+        if (guildRequest instanceof JoinGuildRequest) {
+            updateMembersGUI(GUIType.PLAYER_JOIN_REQUEST);
+        }
+
         save();
-        uuidRequestMap.put(uuid, request);
-        updateMembersGUI(GUIType.PLAYER_REQUEST);
+        uuidRequestMap.put(uuid, guildRequest);
         return uuid;
     }
 
@@ -480,27 +523,12 @@ public class Guild {
      * 得到请求（不排序）
      * @return
      */
-    public List<Request> getRequests() {
-        return getRequests(false);
+    public List<GuildRequest> getRequests() {
+        return new ArrayList<>(uuidRequestMap.values());
     }
 
-    public List<Request> getPlayerRequests(String playerName) {
+    public List<GuildRequest> getPlayerRequests(String playerName) {
         return playerRequestMap.get(playerName);
-    }
-
-    /**
-     * 得到请求
-     * @param sorted 排序
-     * @return
-     */
-    public List<Request> getRequests(boolean sorted) {
-        List<Request> result = new ArrayList<>(uuidRequestMap.values());
-
-        if (sorted) {
-            result.sort((o1, o2) -> o1.getCreationTime() < o2.getCreationTime() ? -1 : 0);
-        }
-
-        return result;
     }
 
     /**

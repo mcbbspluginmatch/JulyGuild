@@ -1,11 +1,15 @@
-package com.github.julyss2019.mcsp.julyguild.gui.player;
+package com.github.julyss2019.mcsp.julyguild.gui.player.pageable;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.config.GUISettings;
 import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.BasePageableGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
+import com.github.julyss2019.mcsp.julyguild.gui.GUI;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
+import com.github.julyss2019.mcsp.julyguild.gui.player.GuildCreateGUI;
+import com.github.julyss2019.mcsp.julyguild.gui.player.GuildInfoGUI;
+import com.github.julyss2019.mcsp.julyguild.gui.player.GuildMineGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.CacheGuildManager;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;
@@ -13,11 +17,14 @@ import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.chat.ChatListener;
 import com.github.julyss2019.mcsp.julylibrary.chat.JulyChatFilter;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
+import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryListener;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.item.SkullItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import me.clip.placeholderapi.PlaceholderAPI;
+import org.black_ixx.playerpoints.PlayerPointsAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -26,6 +33,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainGUI extends BasePageableGUI {
@@ -34,7 +42,7 @@ public class MainGUI extends BasePageableGUI {
     private static GUISettings guiSettings = plugin.getGuiSettings();
     private static CacheGuildManager cacheGuildManager = plugin.getCacheGuildManager();
     private Inventory inventory;
-    private List<Guild> guilds;
+    private List<Guild> guilds = new ArrayList<>();
 
     public MainGUI(GuildPlayer guildPlayer) {
         super(GUIType.MAIN, guildPlayer);
@@ -49,7 +57,22 @@ public class MainGUI extends BasePageableGUI {
         InventoryBuilder inventoryBuilder = new InventoryBuilder()
                 .row(6)
                 .colored()
-                .title("&a&l宗门(第" + (getCurrentPage() + 1) + "页)");
+                .title("&a&l宗门(第" + (getCurrentPage() + 1) + "页)")
+                .listener(new InventoryListener() {
+                    @Override
+                    public void onClicked(InventoryClickEvent event) {
+                        int index = event.getSlot() + getCurrentPage() * 43;
+
+                        if (index < guilds.size()) {
+                            Guild guild = guilds.get(index);
+                            GUI newGUI = new GuildInfoGUI(guildPlayer, guild, getCurrentPage());
+
+                            close();
+                            guildPlayer.setUsingGUI(newGUI);
+                            newGUI.open();
+                        }
+                    }
+                });
 
         // 如果大于1页则提供翻页按钮
         if (getTotalPage() > 1) {
@@ -143,7 +166,8 @@ public class MainGUI extends BasePageableGUI {
                     .addLore("&7- &f单击上方的图标以查看信息或加入宗门").build());
         }
 
-        this.guilds = cacheGuildManager.getSortedGuilds();
+        guilds.clear();
+        guilds.addAll(cacheGuildManager.getSortedGuilds());
         int guildSize = guilds.size();
         int itemCounter = page * 43;
         int loopCount = guildSize - itemCounter < 43 ? guildSize - itemCounter : 43;
@@ -152,8 +176,8 @@ public class MainGUI extends BasePageableGUI {
             Guild guild = guilds.get(itemCounter++);
 
             inventoryBuilder.item(i, new ItemBuilder(guild.getCurrentIcon().getItemStack())
-                    .lores(PlaceholderAPI.setPlaceholders(bukkitPlayer, guiSettings.getMainGUIRankingListLores()))
-                    .displayName(PlaceholderAPI.setPlaceholders(bukkitPlayer, guiSettings.getMainGUIRankingListDisplayName()))
+                    .lores(PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(guild.getOwner().getName()), guiSettings.getMainGUIRankingListLores()))
+                    .displayName(PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(guild.getOwner().getName()), guiSettings.getMainGUIRankingListDisplayName()))
                     .colored()
                     .enchant(Enchantment.DURABILITY, 1)
                     .addItemFlag(ItemFlag.HIDE_ENCHANTS)
@@ -165,9 +189,9 @@ public class MainGUI extends BasePageableGUI {
 
     @Override
     public int getTotalPage() {
-        int guildSize = guilds == null ? 0 : guilds.size();
+        int guildSize = guilds.size();
 
-        return guildSize % 43 == 0 ? guildSize / 43 : guildSize / 43 + 1;
+        return guildSize == 0 ? 1 : guildSize % 43 == 0 ? guildSize / 43 : guildSize / 43 + 1;
     }
 
     @Override

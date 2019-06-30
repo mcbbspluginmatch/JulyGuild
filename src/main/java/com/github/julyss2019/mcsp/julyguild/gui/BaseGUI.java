@@ -10,9 +10,11 @@ public class BaseGUI implements GUI {
     protected GuildPlayer guildPlayer;
     protected OfflineGuildPlayer offlineGuildPlayer;
     protected Player bukkitPlayer;
+    protected String playerName;
 
     public BaseGUI(GUIType guiType, GuildPlayer guildPlayer) {
         this.type = guiType;
+        this.playerName = guildPlayer.getName();
         this.guildPlayer = guildPlayer;
         this.offlineGuildPlayer = guildPlayer.getOfflineGuildPlayer();
         this.bukkitPlayer = guildPlayer.getBukkitPlayer();

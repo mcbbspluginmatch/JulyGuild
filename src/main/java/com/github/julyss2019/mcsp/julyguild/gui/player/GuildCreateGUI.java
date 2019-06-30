@@ -42,6 +42,8 @@ public class GuildCreateGUI extends BaseGUI {
 
     @Override
     public void build() {
+        super.build();
+
         InventoryBuilder inventoryBuilder = new InventoryBuilder().row(3).title("&e&l请选择支付方式").colored().listener(new InventoryListener() {
             @Override
             public void onClose(InventoryCloseEvent event) {

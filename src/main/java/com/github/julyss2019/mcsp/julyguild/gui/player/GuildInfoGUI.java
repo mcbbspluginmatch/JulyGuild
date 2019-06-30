@@ -3,12 +3,14 @@ package com.github.julyss2019.mcsp.julyguild.gui.player;
 import com.github.julyss2019.mcsp.julyguild.gui.BaseGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
+import com.github.julyss2019.mcsp.julyguild.gui.player.pageable.GuildMemberGUI;
+import com.github.julyss2019.mcsp.julyguild.gui.player.pageable.MainGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildAdmin;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
 import com.github.julyss2019.mcsp.julyguild.guild.player.Permission;
-import com.github.julyss2019.mcsp.julyguild.guild.request.JoinRequest;
-import com.github.julyss2019.mcsp.julyguild.guild.request.RequestType;
+import com.github.julyss2019.mcsp.julyguild.guild.request.JoinGuildRequest;
+import com.github.julyss2019.mcsp.julyguild.guild.request.GuildRequestType;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
@@ -107,7 +109,7 @@ public class GuildInfoGUI extends BaseGUI {
                     public void onClicked(InventoryClickEvent event) {
                         close();
 
-                        if (guild.hasRequest(offlineGuildPlayer, RequestType.JOIN)) {
+                        if (guild.hasRequest(offlineGuildPlayer, GuildRequestType.JOIN)) {
                             JulyMessage.sendColoredMessage(bukkitPlayer, "&c你已经有一个申请加入请求了, 请等待审批.");
                             return;
                         }
@@ -117,7 +119,7 @@ public class GuildInfoGUI extends BaseGUI {
                             return;
                         }
 
-                        guild.addRequest(JoinRequest.createNew(offlineGuildPlayer));
+                        guild.addRequest(JoinGuildRequest.createNew(offlineGuildPlayer));
                         JulyMessage.sendColoredMessage(bukkitPlayer, "&d已向 &e" + guild.getName() + " &d宗门发送加入申请, 请等待审核!");
 
                         for (GuildMember guildMember : guild.getMembers()) {

@@ -6,20 +6,20 @@ import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
 
 import java.util.UUID;
 
-public class JoinRequest extends BaseRequest implements Request {
+public class JoinGuildRequest extends BaseGuildRequest {
     private static JulyGuild plugin = JulyGuild.getInstance();
     private static GuildSettings guildSettings = plugin.getGuildSettings();
 
-    public JoinRequest() {
-        super(RequestType.JOIN);
+    public JoinGuildRequest() {
+        super(GuildRequestType.JOIN);
     }
 
-    public static JoinRequest createNew(OfflineGuildPlayer offlineGuildPlayer) {
-        JoinRequest joinRequest = new JoinRequest();
+    public static JoinGuildRequest createNew(OfflineGuildPlayer offlineGuildPlayer) {
+        JoinGuildRequest joinRequest = new JoinGuildRequest();
 
         joinRequest.setTime(System.currentTimeMillis());
-        joinRequest.setOfflineGuildPlayer(offlineGuildPlayer);
-        joinRequest.setUUID(UUID.randomUUID());
+        joinRequest.setRequester(offlineGuildPlayer);
+        joinRequest.setUuid(UUID.randomUUID());
         return joinRequest;
     }
 
