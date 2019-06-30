@@ -31,7 +31,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 
 public class JulyGuild extends JavaPlugin {
-    public static final String CONFIG_VERSION = "1.2.3";
+    public static final String CONFIG_VERSION = "1.2.4";
     private static final Gson gson = new Gson();
     private static JulyGuild instance;
     private GuildManager guildManager;
@@ -70,7 +70,7 @@ public class JulyGuild extends JavaPlugin {
         guildManager.loadGuilds();
         cacheGuildManager.updateSortedGuilds();
 
-        getLogger().info("载入了 " + guildManager.getGuilds().size() + "个 宗门.");
+        JulyMessage.sendColoredMessage(Bukkit.getConsoleSender(), "载入了 " + guildManager.getGuilds().size() + "个 宗门.");
         getCommand("guild").setExecutor(julyCommandExecutor);
         registerCommands();
         registerListeners();
@@ -80,7 +80,7 @@ public class JulyGuild extends JavaPlugin {
             getLogger().warning("PlaceholderAPI Hook 失败!");
         }
 
-        getLogger().info("插件初始化完毕!");
+        JulyMessage.sendColoredMessage(Bukkit.getConsoleSender(), "插件初始化完毕, 作者QQ: 884633197.");
     }
 
     public GUISettings getGuiSettings() {
