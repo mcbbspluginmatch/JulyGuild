@@ -9,13 +9,19 @@ import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildOwner;
 import com.github.julyss2019.mcsp.julyguild.guild.player.Permission;
 import com.github.julyss2019.mcsp.julyguild.guild.request.*;
+import com.github.julyss2019.mcsp.julyguild.log.guild.GuildBalanceChangedLog;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
-import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
+import com.github.julyss2019.mcsp.julylibrary.logger.FileLogger;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import com.github.julyss2019.mcsp.julylibrary.utils.YamlUtil;
+import me.clip.placeholderapi.PlaceholderAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import parsii.eval.Parser;
+import parsii.tokenizer.ParseException;
 
 import java.io.File;
 import java.util.*;
@@ -41,9 +47,9 @@ public class Guild {
     private List<String> announcements;
     private Map<String, GuildRequest> uuidRequestMap = new HashMap<>();
     private Map<String, List<GuildRequest>> playerRequestMap = new HashMap<>();
-    private double balance;
     private Map<String, GuildIcon> iconMap = new HashMap<>();
     private GuildIcon currentIcon;
+    private GuildBank guildBank;
 
     protected Guild(File file) {
         this.file = file;
@@ -65,14 +71,23 @@ public class Guild {
      * @return
      */
     public Guild load() {
+        if (isDeleted()) {
+            throw new GuildLoadException("宗门已被删除");
+        }
+
         memberMap.clear();
 
-        this.owner = new GuildOwner(this, guildPlayerManager.getOfflineGuildPlayer(yml.getString("owner.name")));
+        this.owner = new GuildOwner(this, guildPlayerManager.getGuildPlayer(yml.getString("owner.name")));
         this.name = yml.getString("name");
-        this.balance = yml.getDouble("balance");
         this.maxMemberCount = yml.getInt("max_member_count", guildSettings.getGuildDefMaxMemberCount());
         this.icon = Material.valueOf(yml.getString("icon", Material.SIGN.name()));
         this.announcements = yml.getStringList("announcements");
+        this.guildBank = new GuildBank(this);
+
+        if (announcements.size() == 0) {
+            announcements.addAll(guildSettings.getAnnouncementDef());
+        }
+
         this.creationTime = yml.getLong("creation_time");
 
         if (announcements.size() == 0) {
@@ -101,7 +116,7 @@ public class Guild {
                         break;
                 }
 
-                request.setRequester(guildPlayerManager.getOfflineGuildPlayer(playerName));
+                request.setRequester(guildPlayerManager.getGuildPlayer(playerName));
                 request.setTime(requestSection.getLong("time"));
                 request.setUuid(UUID.fromString(uuid));
 
@@ -133,6 +148,10 @@ public class Guild {
         return this;
     }
 
+    public GuildBank getGuildBank() {
+        return guildBank;
+    }
+
     public void setOwner(GuildMember newOwner) {
         GuildMember oldOwner = owner;
         String newOwnerName = newOwner.getName();
@@ -149,12 +168,12 @@ public class Guild {
         yml.set("owner.join_time", System.currentTimeMillis());
         save();
         memberMap.remove(oldOwner.getName()); // 删除旧宗主
-        this.owner = new GuildOwner(this, guildPlayerManager.getOfflineGuildPlayer(newOwnerName));
+        this.owner = new GuildOwner(this, guildPlayerManager.getGuildPlayer(newOwnerName));
         memberMap.put(newOwnerName, owner);
-        addMember(oldOwner.getOfflineGuildPlayer());
+        addMember(oldOwner.getGuildPlayer());
 
         if (newOwner.isOnline()) {
-            newOwner.getOfflineGuildPlayer().getGuildPlayer().updateGUI(GUIType.values());
+            newOwner.getGuildPlayer().getGuildPlayer().updateGUI(GUIType.values());
         }
     }
 
@@ -201,34 +220,17 @@ public class Guild {
         return new ArrayList<>(iconMap.values());
     }
 
-    public void depositBalance(double amount) {
-        setBalance(balance + amount);
-    }
-
-    public void withdrawBalance(double amount) {
-        setBalance(balance - amount);
-    }
-
-    public double getBalance() {
-        return balance;
-    }
-
-    public void setBalance(double balance) {
-        yml.set("balance", balance);
-        save();
-        this.balance = balance;
-    }
 
     public void loadMember(String memberName) {
         Permission permission = Permission.valueOf(yml.getString("members." + memberName + ".permission"));
-        OfflineGuildPlayer offlineGuildPlayer = guildPlayerManager.getOfflineGuildPlayer(memberName);
+        GuildPlayer guildPlayer = guildPlayerManager.getGuildPlayer(memberName);
 
         switch (permission) {
             case MEMBER:
-                memberMap.put(memberName, new GuildMember(this, offlineGuildPlayer));
+                memberMap.put(memberName, new GuildMember(this, guildPlayer));
                 break;
             case ADMIN:
-                memberMap.put(memberName, new GuildAdmin(this, offlineGuildPlayer));
+                memberMap.put(memberName, new GuildAdmin(this, guildPlayer));
                 break;
         }
     }
@@ -330,20 +332,20 @@ public class Guild {
 
     /**
      * 添加成员
-     * @param offlineGuildPlayer
+     * @param guildPlayer
      */
-    public void addMember(OfflineGuildPlayer offlineGuildPlayer) {
-        String playerName = offlineGuildPlayer.getName();
+    public void addMember(GuildPlayer guildPlayer) {
+        String playerName = guildPlayer.getName();
 
-        if (memberMap.containsKey(playerName) || offlineGuildPlayer.equals(owner.getOfflineGuildPlayer())) {
+        if (memberMap.containsKey(playerName) || guildPlayer.equals(owner.getGuildPlayer())) {
             throw new IllegalArgumentException("成员已存在");
         }
 
         yml.set("members." + playerName + ".permission", Permission.MEMBER.name());
         yml.set("members." + playerName + ".join_time", System.currentTimeMillis());
         YamlUtil.saveYaml(yml, file);
-        offlineGuildPlayer.setGuild(this);
-        memberMap.put(playerName, new GuildMember(this, offlineGuildPlayer));
+        guildPlayer.setGuild(this);
+        memberMap.put(playerName, new GuildMember(this, guildPlayer));
         updateMembersGUI(GUIType.MEMBER, GUIType.MAIN);
     }
 
@@ -364,7 +366,7 @@ public class Guild {
 
         yml.set("members." + memberName, null);
         save();
-        guildMember.getOfflineGuildPlayer().setGuild(null);
+        guildMember.getGuildPlayer().setGuild(null);
         memberMap.remove(memberName);
         updateMembersGUI(GUIType.MEMBER);
     }
@@ -378,10 +380,10 @@ public class Guild {
         YamlUtil.saveYaml(yml, file);
 
         for (GuildMember guildMember : getMembers()) {
-            guildMember.getOfflineGuildPlayer().setGuild(null);
+            guildMember.getGuildPlayer().setGuild(null);
 
-            if (guildMember.getOfflineGuildPlayer().isOnline()) {
-                guildMember.getOfflineGuildPlayer().getGuildPlayer().updateGUI(GUIType.values());
+            if (guildMember.getGuildPlayer().isOnline()) {
+                guildMember.getGuildPlayer().getGuildPlayer().updateGUI(GUIType.values());
             }
         }
 
@@ -454,13 +456,13 @@ public class Guild {
 
     /**
      * 是否有请求
-     * @param offlineGuildPlayer
+     * @param guildPlayer
      * @param guildRequestType
      * @return
      */
-    public boolean hasRequest(OfflineGuildPlayer offlineGuildPlayer, GuildRequestType guildRequestType) {
+    public boolean hasRequest(GuildPlayer guildPlayer, GuildRequestType guildRequestType) {
         for (GuildRequest guildRequest : getRequests()) {
-            if (guildRequest.getRequester().equals(offlineGuildPlayer) && guildRequestType == guildRequest.getType()) {
+            if (guildRequest.getRequester().equals(guildPlayer) && guildRequestType == guildRequest.getType()) {
                 return true;
             }
         }
@@ -486,10 +488,10 @@ public class Guild {
      */
     public void updateMembersGUI(GUIType... guiTypes) {
         for (GuildMember guildMember : getMembers()) {
-            OfflineGuildPlayer offlineGuildPlayer = guildMember.getOfflineGuildPlayer();
+            GuildPlayer guildPlayer = guildMember.getGuildPlayer();
 
-            if (offlineGuildPlayer.isOnline()) {
-                offlineGuildPlayer.getGuildPlayer().updateGUI(guiTypes);
+            if (guildPlayer.isOnline()) {
+                guildPlayer.getGuildPlayer().updateGUI(guiTypes);
             }
         }
     }
@@ -556,6 +558,12 @@ public class Guild {
     }
 
     public int getRank() {
+        try {
+            return (int) Parser.parse(PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(owner.getName()), guildSettings.getRankingListFormula())).evaluate();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         return 0;
     }
 

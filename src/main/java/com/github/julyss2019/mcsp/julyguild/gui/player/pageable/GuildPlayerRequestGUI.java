@@ -9,7 +9,6 @@ import com.github.julyss2019.mcsp.julyguild.guild.Guild;
 import com.github.julyss2019.mcsp.julyguild.guild.request.JoinGuildRequest;
 import com.github.julyss2019.mcsp.julyguild.guild.request.GuildRequest;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
-import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
 import com.github.julyss2019.mcsp.julyguild.util.Util;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryListener;
@@ -21,9 +20,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GuildPlayerRequestGUI extends BasePageableGUI {
     private static JulyGuild plugin = JulyGuild.getInstance();
@@ -34,7 +31,7 @@ public class GuildPlayerRequestGUI extends BasePageableGUI {
     public GuildPlayerRequestGUI(GuildPlayer guildPlayer) {
         super(GUIType.PLAYER_JOIN_REQUEST, guildPlayer);
 
-        this.guild = offlineGuildPlayer.getGuild();
+        this.guild = this.guildPlayer.getGuild();
         setCurrentPage(0);
     }
 
@@ -61,12 +58,12 @@ public class GuildPlayerRequestGUI extends BasePageableGUI {
 
                         if (index < joinGuildRequests.size()) {
                             JoinGuildRequest joinRequest = joinGuildRequests.get(index);
-                            OfflineGuildPlayer requestOfflineGuildPlayer = joinRequest.getRequester();
+                            GuildPlayer requestGuildPlayer = joinRequest.getRequester();
 
                             String guildName = guild.getName();
-                            String requesterName = requestOfflineGuildPlayer.getName();
+                            String requesterName = requestGuildPlayer.getName();
 
-                            if (requestOfflineGuildPlayer.isInGuild()) {
+                            if (requestGuildPlayer.isInGuild()) {
                                 guild.removeRequest(joinRequest);
                                 JulyMessage.sendColoredMessages(bukkitPlayer, "&c请求已失效: &e" + requesterName + "&c.");
                             }
@@ -76,17 +73,17 @@ public class GuildPlayerRequestGUI extends BasePageableGUI {
                                 guild.removeRequest(joinRequest);
                                 guild.addMember(joinRequest.getRequester());
 
-                                JulyMessage.sendColoredMessages(bukkitPlayer, "&b审批通过: &e" + requestOfflineGuildPlayer.getName() + "&a.");
+                                JulyMessage.sendColoredMessages(bukkitPlayer, "&b审批通过: &e" + requestGuildPlayer.getName() + "&a.");
 
-                                if (requestOfflineGuildPlayer.isOnline()) {
-                                    JulyMessage.sendColoredMessage(requestOfflineGuildPlayer.getBukkitPlayer(), "&d恭喜你通过审核, 正式成为 &e" + guildName + " &d宗门会员!");
+                                if (requestGuildPlayer.isOnline()) {
+                                    JulyMessage.sendColoredMessage(requestGuildPlayer.getBukkitPlayer(), "&d恭喜你通过审核, 正式成为 &e" + guildName + " &d宗门会员!");
                                 }
                             } else if (action == InventoryAction.PICKUP_HALF) { // 右键
                                 guild.removeRequest(joinRequest);
-                                JulyMessage.sendColoredMessages(bukkitPlayer, "&c审批拒绝: &e" + requestOfflineGuildPlayer.getName() + "&c.");
+                                JulyMessage.sendColoredMessages(bukkitPlayer, "&c审批拒绝: &e" + requestGuildPlayer.getName() + "&c.");
 
-                                if (requestOfflineGuildPlayer.isOnline()) {
-                                    JulyMessage.sendColoredMessages(requestOfflineGuildPlayer.getBukkitPlayer(), "&c你在 &e" + guildName  + " &c宗门的申请请求被拒绝.");
+                                if (requestGuildPlayer.isOnline()) {
+                                    JulyMessage.sendColoredMessages(requestGuildPlayer.getBukkitPlayer(), "&c你在 &e" + guildName  + " &c宗门的申请请求被拒绝.");
                                 }
                             }
                         }
@@ -131,8 +128,8 @@ public class GuildPlayerRequestGUI extends BasePageableGUI {
 
         for (int i = 0; i < loopCount; i++) {
             GuildRequest guildRequest = joinGuildRequests.get(itemCounter++);
-            OfflineGuildPlayer offlineGuildPlayer = guildRequest.getRequester();
-            String playerName = offlineGuildPlayer.getName();
+            GuildPlayer guildPlayer = guildRequest.getRequester();
+            String playerName = guildPlayer.getName();
 
             inventoryBuilder.item(i, new SkullItemBuilder()
                     .texture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjIxYWIzMWE0MjczOWEzNTI3ZDMwNWNjOTU2YWVlNGQ2YmEzNDU1NTQzODFhNmE0YzRmZjA2YTFjMTlmZGQ0In19fQ==")

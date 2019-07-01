@@ -16,10 +16,12 @@ import com.github.julyss2019.mcsp.julylibrary.utils.ItemUtil;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -53,116 +55,118 @@ public class GuildCreateGUI extends BaseGUI {
             }
         });
 
-        if (settings.isGuildCreateCostMoneyEnabled()) {
-            inventoryBuilder.item(1, 2, new ItemBuilder()
-                    .material(Material.GOLD_INGOT)
-                    .displayName("&f使用 &a金币x" + settings.getGuildCreateCostMoneyAmount() + " &f支付")
-                    .addLore("")
-                    .addLore("&a• &d点击支付&a •")
-                    .addLore("")
-                    .addLore("&7- &e公会名 &b▹ &f" + guildName)
-                    .colored()
-                    .build()
-                    , new ItemListener() {
-                        @Override
-                        public void onClicked(InventoryClickEvent event) {
-                            noAction = false;
-                            close();
+        inventoryBuilder.item(1, 2, new ItemBuilder()
+                .material(settings.isGuildCreateCostMoneyEnabled() ? Material.GOLD_INGOT : Material.BARRIER)
+                .displayName("&f使用 &a金币x" + settings.getGuildCreateCostMoneyAmount() + " &f支付")
+                .addLore("")
+                .addLore(settings.isGuildCreateCostMoneyEnabled() ? "&a• &d点击支付&a •" : "&a• &c未启用 &a•")
+                .addLore("")
+                .addLore("&7- &e公会名 &b▹ &f" + guildName)
+                .colored()
+                .enchant(Enchantment.DURABILITY, 1)
+                .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                .build()
+                , settings.isGuildCreateCostMoneyEnabled() ? new ItemListener() {
+                    @Override
+                    public void onClicked(InventoryClickEvent event) {
+                        noAction = false;
+                        close();
 
-                            if (offlineGuildPlayer.isInGuild()) {
-                                JulyMessage.sendColoredMessage(bukkitPlayer, "&c你已经在一个宗门里了.");
-                                return;
-                            }
-
-                            double playerMoney = vault.getBalance(bukkitPlayer);
-
-                            if (playerMoney < settings.getGuildCreateCostMoneyAmount()) {
-                                JulyMessage.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e" + (settings.getGuildCreateCostMoneyAmount() - playerMoney) + "个 &c金币!");
-                                return;
-                            }
-
-                            vault.withdrawPlayer(bukkitPlayer, settings.getGuildCreateCostMoneyAmount());
-                            createGuild(guildPlayer, guildName);
+                        if (guildPlayer.isInGuild()) {
+                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c你已经在一个宗门里了.");
+                            return;
                         }
-                    });
-        }
 
-        if (settings.isGuildCreateCostPointsEnabled()) {
-            inventoryBuilder.item(1, 4, new ItemBuilder()
-                    .material(Material.DIAMOND)
-                    .displayName("&f使用 &a点券x" + settings.getGuildCreateCostPointsAmount() + " &f支付")
-                    .addLore("")
-                    .addLore("&a• &d点击支付&a •")
-                    .addLore("")
-                    .addLore("&7- &e公会名 &b▹ &f" + guildName)
-                    .colored()
-                    .build()
-                    , new ItemListener() {
-                        @Override
-                        public void onClicked(InventoryClickEvent event) {
-                            noAction = false;
-                            close();
+                        double playerMoney = vault.getBalance(bukkitPlayer);
 
-                            if (offlineGuildPlayer.isInGuild()) {
-                                JulyMessage.sendColoredMessage(bukkitPlayer, "&c你已经在一个宗门里了.");
-                                return;
-                            }
-
-                            int playerPoints = playerPointsAPI.look(bukkitPlayer.getUniqueId());
-
-                            if (playerPoints < settings.getGuildCreateCostPointsAmount()) {
-                                JulyMessage.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e" + (settings.getGuildCreateCostPointsAmount() - playerPoints) + "个 &c点券!");
-                                return;
-                            }
-
-                            playerPointsAPI.take(bukkitPlayer.getUniqueId(), settings.getGuildCreateCostPointsAmount());
-                            createGuild(guildPlayer, guildName);
+                        if (playerMoney < settings.getGuildCreateCostMoneyAmount()) {
+                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e" + (settings.getGuildCreateCostMoneyAmount() - playerMoney) + "个 &c金币!");
+                            return;
                         }
-            });
-        }
 
-        if (settings.isGuildCreateCostItemEnabled()) {
-            inventoryBuilder.item(1, 6, new ItemBuilder()
-                    .material(Material.NAME_TAG)
-                    .displayName("&f使用 &a建帮令x" + settings.getGuildCreateCostItemAmount() + " &f支付")
-                    .addLore("")
-                    .addLore("&a• &d点击支付&a •")
-                    .addLore("")
-                    .addLore("&7- &e公会名 &b▹ &f" + guildName)
-                    .colored()
-                    .build()
-                    , new ItemListener() {
-                        @Override
-                        public void onClicked(InventoryClickEvent event) {
-                            noAction = false;
-                            close();
+                        vault.withdrawPlayer(bukkitPlayer, settings.getGuildCreateCostMoneyAmount());
+                        createGuild(guildPlayer, guildName);
+                    }
+                } : null);
 
-                            if (offlineGuildPlayer.isInGuild()) {
-                                JulyMessage.sendColoredMessage(bukkitPlayer, "&c你已经在一个宗门里了.");
-                                return;
-                            }
 
-                            for (ItemStack itemStack : bukkitPlayer.getInventory().getContents()) {
-                                if (ItemUtil.containsLore(itemStack, settings.getGuildCreateCostItemKeyLore())) {
-                                    int amount = itemStack.getAmount();
+        inventoryBuilder.item(1, 4, new ItemBuilder()
+                .material(settings.isGuildCreateCostPointsEnabled() ? Material.DIAMOND : Material.BARRIER)
+                .displayName("&f使用 &a点券x" + settings.getGuildCreateCostPointsAmount() + " &f支付")
+                .addLore("")
+                .addLore(settings.isGuildCreateCostPointsEnabled() ? "&a• &d点击支付&a •" : "&a• &c未启用 &a•")
+                .addLore("")
+                .addLore("&7- &e公会名 &b▹ &f" + guildName)
+                .enchant(Enchantment.DURABILITY, 1)
+                .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                .colored()
+                .build()
+                , settings.isGuildCreateCostPointsEnabled() ? new ItemListener() {
+                    @Override
+                    public void onClicked(InventoryClickEvent event) {
+                        noAction = false;
+                        close();
 
-                                    if (amount >= settings.getGuildCreateCostItemAmount()) {
-                                        if (amount - settings.getGuildCreateCostItemAmount() == 0) {
-                                            itemStack.setType(Material.AIR);
-                                        } else {
-                                            itemStack.setAmount(settings.getGuildCreateCostItemAmount() - amount);
-                                        }
+                        if (guildPlayer.isInGuild()) {
+                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c你已经在一个宗门里了.");
+                            return;
+                        }
 
-                                        createGuild(guildPlayer, guildName);
-                                        return;
+                        int playerPoints = playerPointsAPI.look(bukkitPlayer.getUniqueId());
+
+                        if (playerPoints < settings.getGuildCreateCostPointsAmount()) {
+                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e" + (settings.getGuildCreateCostPointsAmount() - playerPoints) + "个 &c点券!");
+                            return;
+                        }
+
+                        playerPointsAPI.take(bukkitPlayer.getUniqueId(), settings.getGuildCreateCostPointsAmount());
+                        createGuild(guildPlayer, guildName);
+                    }
+        } : null);
+
+
+        inventoryBuilder.item(1, 6, new ItemBuilder()
+                .material(settings.isGuildCreateCostItemEnabled() ? Material.NAME_TAG : Material.BARRIER)
+                .displayName("&f使用 &a建帮令x" + settings.getGuildCreateCostItemAmount() + " &f支付")
+                .addLore("")
+                .addLore(settings.isGuildCreateCostItemEnabled() ? "&a• &d点击支付&a •" : "&a• &c未启用 &a•")
+                .addLore("")
+                .addLore("&7- &e公会名 &b▹ &f" + guildName)
+                .colored()
+                .enchant(Enchantment.DURABILITY, 1)
+                .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                .build()
+                , settings.isGuildCreateCostItemEnabled() ? new ItemListener() {
+                    @Override
+                    public void onClicked(InventoryClickEvent event) {
+                        noAction = false;
+                        close();
+
+                        if (guildPlayer.isInGuild()) {
+                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c你已经在一个宗门里了.");
+                            return;
+                        }
+
+                        for (ItemStack itemStack : bukkitPlayer.getInventory().getContents()) {
+                            if (ItemUtil.containsLore(itemStack, settings.getGuildCreateCostItemKeyLore())) {
+                                int amount = itemStack.getAmount();
+
+                                if (amount >= settings.getGuildCreateCostItemAmount()) {
+                                    if (amount - settings.getGuildCreateCostItemAmount() == 0) {
+                                        itemStack.setType(Material.AIR);
+                                    } else {
+                                        itemStack.setAmount(settings.getGuildCreateCostItemAmount() - amount);
                                     }
+
+                                    createGuild(guildPlayer, guildName);
+                                    return;
                                 }
                             }
-
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e建帮令x" + settings.getGuildCreateCostItemAmount() + "&c(请重叠放置).");
                         }
-                    });
-        }
+
+                        JulyMessage.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e建帮令x" + settings.getGuildCreateCostItemAmount() + "&c(请重叠放置).");
+                    }
+                } : null);
 
         this.inventory = inventoryBuilder.build();
     }

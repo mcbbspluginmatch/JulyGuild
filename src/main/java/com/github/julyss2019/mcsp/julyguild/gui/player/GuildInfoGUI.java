@@ -73,7 +73,7 @@ public class GuildInfoGUI extends BaseGUI {
                     @Override
                     public void onClicked(InventoryClickEvent event) {
                             close();
-                            new GuildMemberGUI(guild, guildPlayer).open();
+                            new GuildMemberGUI(guildPlayer, guild).open();
                     }
                 })
                 .item(1, 5, new ItemBuilder()
@@ -97,7 +97,7 @@ public class GuildInfoGUI extends BaseGUI {
                 });
 
 
-        if (!offlineGuildPlayer.isInGuild()) {
+        if (!guildPlayer.isInGuild()) {
                 inventoryBuilder.item(1, 4, new ItemBuilder()
                         .material(Material.MAGMA_CREAM)
                         .displayName("&a申请加入宗门")
@@ -109,7 +109,7 @@ public class GuildInfoGUI extends BaseGUI {
                     public void onClicked(InventoryClickEvent event) {
                         close();
 
-                        if (guild.hasRequest(offlineGuildPlayer, GuildRequestType.JOIN)) {
+                        if (guild.hasRequest(guildPlayer, GuildRequestType.JOIN)) {
                             JulyMessage.sendColoredMessage(bukkitPlayer, "&c你已经有一个申请加入请求了, 请等待审批.");
                             return;
                         }
@@ -119,12 +119,12 @@ public class GuildInfoGUI extends BaseGUI {
                             return;
                         }
 
-                        guild.addRequest(JoinGuildRequest.createNew(offlineGuildPlayer));
+                        guild.addRequest(JoinGuildRequest.createNew(guildPlayer));
                         JulyMessage.sendColoredMessage(bukkitPlayer, "&d已向 &e" + guild.getName() + " &d宗门发送加入申请, 请等待审核!");
 
                         for (GuildMember guildMember : guild.getMembers()) {
                             if (guildMember instanceof GuildAdmin) {
-                                JulyMessage.sendColoredMessage(guildMember.getOfflineGuildPlayer().getBukkitPlayer(), "&e你的宗门收到一个加入请求, 请及时处理!");
+                                JulyMessage.sendColoredMessage(guildMember.getGuildPlayer().getBukkitPlayer(), "&e你的宗门收到一个加入请求, 请及时处理!");
                             }
                         }
                     }

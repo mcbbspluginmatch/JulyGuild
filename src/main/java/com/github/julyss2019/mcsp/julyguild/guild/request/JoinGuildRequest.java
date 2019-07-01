@@ -2,7 +2,7 @@ package com.github.julyss2019.mcsp.julyguild.guild.request;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
-import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 
 import java.util.UUID;
 
@@ -14,11 +14,11 @@ public class JoinGuildRequest extends BaseGuildRequest {
         super(GuildRequestType.JOIN);
     }
 
-    public static JoinGuildRequest createNew(OfflineGuildPlayer offlineGuildPlayer) {
+    public static JoinGuildRequest createNew(GuildPlayer guildPlayer) {
         JoinGuildRequest joinRequest = new JoinGuildRequest();
 
         joinRequest.setTime(System.currentTimeMillis());
-        joinRequest.setRequester(offlineGuildPlayer);
+        joinRequest.setRequester(guildPlayer);
         joinRequest.setUuid(UUID.randomUUID());
         return joinRequest;
     }

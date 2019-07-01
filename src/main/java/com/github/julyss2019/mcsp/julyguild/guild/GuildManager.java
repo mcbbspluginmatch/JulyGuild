@@ -3,10 +3,9 @@ package com.github.julyss2019.mcsp.julyguild.guild;
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
 import com.github.julyss2019.mcsp.julyguild.guild.exception.GuildCreateException;
-import com.github.julyss2019.mcsp.julyguild.guild.log.GuildCreateLog;
-import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.log.guild.GuildCreateGuildLog;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
-import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.logger.FileLogger;
 import com.github.julyss2019.mcsp.julylibrary.utils.YamlUtil;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -31,9 +30,9 @@ public class GuildManager {
      * @return
      */
     public void createGuild(@NotNull GuildPlayer guildOwner, @NotNull String guildName) {
-        OfflineGuildPlayer offlineGuildPlayer = guildOwner.getOfflineGuildPlayer();
+        GuildPlayer ownerGuildPlayer = guildOwner.getGuildPlayer();
 
-        if (guildOwner.getOfflineGuildPlayer().isInGuild()) {
+        if (guildOwner.getGuildPlayer().isInGuild()) {
             throw new IllegalArgumentException("主人已经有宗门了!");
         }
 
@@ -56,19 +55,17 @@ public class GuildManager {
         yml.set("name", guildName);
         yml.set("uuid", uuid);
         yml.set("owner.join_time", System.currentTimeMillis());
-        yml.set("owner.name", offlineGuildPlayer.getName());
+        yml.set("owner.name", ownerGuildPlayer.getName());
         yml.set("creation_time", creationTime);
 
         YamlUtil.saveYaml(yml, file);
         loadGuild(file);
-        offlineGuildPlayer.setGuild(getGuild(uuid));
+        ownerGuildPlayer.setGuild(getGuild(uuid));
 
         // 更新所有玩家的GUI
         for (GuildPlayer guildPlayer : guildPlayerManager.getOnlineGuildPlayers()) {
             guildPlayer.updateGUI(GUIType.MAIN);
         }
-
-        plugin.writeGuildLog(FileLogger.LoggerLevel.INFO, new GuildCreateLog(creationTime, uuid, guildOwner.getName(), guildName, true));
     }
 
     public int getGuildCount() {
@@ -110,10 +107,11 @@ public class GuildManager {
         guild.init();
 
         // 如果没有删除则存入Map
-        if (!guild.isDeleted()) {
-            guildMap.put(guild.getUUID().toString(), guild);
+        if (guild.isDeleted()) {
+            return;
         }
 
+        guildMap.put(guild.getUUID().toString(), guild);
         guild.load();
         JulyGuild.getInstance().getCacheGuildManager().updateSortedGuilds();
 

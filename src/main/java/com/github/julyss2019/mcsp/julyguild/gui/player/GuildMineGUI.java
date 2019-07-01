@@ -9,6 +9,7 @@ import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
 import com.github.julyss2019.mcsp.julyguild.gui.player.pageable.GuildMemberGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.player.pageable.MainGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
+import com.github.julyss2019.mcsp.julyguild.guild.GuildBank;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildAdmin;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
 import com.github.julyss2019.mcsp.julyguild.guild.player.Permission;
@@ -21,6 +22,7 @@ import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.milkbowl.vault.economy.Economy;
+import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -30,19 +32,24 @@ import org.bukkit.inventory.ItemFlag;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class GuildMineGUI extends BaseGUI {
     private static JulyGuild plugin = JulyGuild.getInstance();
     private static GuildSettings guildSettings = plugin.getGuildSettings();
     private static GUISettings guiSettings = plugin.getGuiSettings();
     private static Economy vault = plugin.getVaultAPI();
+    private static PlayerPointsAPI playerPointsAPI = plugin.getPlayerPointsAPI();
+
     private Inventory inventory;
     private Guild guild;
+    private GuildBank guildBank;
 
     public GuildMineGUI(GuildPlayer guildPlayer) {
         super(GUIType.MINE, guildPlayer);
 
-        this.guild = offlineGuildPlayer.getGuild();
+        this.guild = this.guildPlayer.getGuild();
+        this.guildBank = guild.getGuildBank();
         build();
     }
 
@@ -85,7 +92,7 @@ public class GuildMineGUI extends BaseGUI {
                         .enchant(Enchantment.DURABILITY, 1)
                         .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                         .build())
-                .item(1, 4, new ItemBuilder()
+                .item(2, 4, new ItemBuilder()
                         .material(Material.PAINTING)
                         .displayName("&f宗门公告")
                         .lores(guild.getAnnouncements())
@@ -93,7 +100,7 @@ public class GuildMineGUI extends BaseGUI {
                         .enchant(Enchantment.DURABILITY, 1)
                         .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                         .build())
-                .item(2, 4, new ItemBuilder()
+                .item(3, 4, new ItemBuilder()
                         .material(Material.TOTEM)
                         .displayName("&f宗门成员")
                         .addLore("&B• &7点击查看详细信息 &b•")
@@ -106,11 +113,11 @@ public class GuildMineGUI extends BaseGUI {
                             @Override
                             public void onClicked(InventoryClickEvent event) {
                                 close();
-                                new GuildMemberGUI(guild, guildPlayer).open();
+                                new GuildMemberGUI(guildPlayer, guild, GuildMineGUI.this).open();
                             }
                         }
                 )
-                .item(3, 4, new ItemBuilder()
+                .item(3, 3, new ItemBuilder()
                                 .material(Material.GOLD_NUGGET)
                                 .displayName("&e贡献金币")
                                 .enchant(Enchantment.DURABILITY, 1)
@@ -120,7 +127,7 @@ public class GuildMineGUI extends BaseGUI {
                     @Override
                     public void onClicked(InventoryClickEvent event) {
                         close();
-                        JulyMessage.sendColoredMessage(bukkitPlayer, "&d赞助金币可提升宗门排名.");
+                        JulyMessage.sendColoredMessage(bukkitPlayer, "&d金币将存入宗门银行.");
                         JulyMessage.sendColoredMessage(bukkitPlayer, "&e请在聊天栏输入并发送要赞助的金币数量: ");
                         JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
                             @Override
@@ -138,7 +145,7 @@ public class GuildMineGUI extends BaseGUI {
                                 }
 
                                 if (amount < guildSettings.getDonateMinMoney()) {
-                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c最小赞助额为 &e" + guildSettings.getDonateMinMoney() + "&c.");
+                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c最小金币赞助额为 &e" + guildSettings.getDonateMinMoney() + "&c.");
                                     return;
                                 }
 
@@ -148,9 +155,56 @@ public class GuildMineGUI extends BaseGUI {
                                 }
 
                                 vault.withdrawPlayer(bukkitPlayer, amount);
-                                member.donateBalance(amount);
-                                guild.depositBalance(amount);
-                                guild.broadcastMessage("&d" + member.getPermission().getChineseName() + " &e" + guildPlayer.getName() + " &d为宗门赞助了 &e¥" + amount + "&d!");
+                                member.addDonatedMoney(amount);
+                                guildBank.deposit(GuildBank.Type.MONEY, amount);
+                                guild.broadcastMessage("&d" + member.getPermission().getChineseName() + " &e" + guildPlayer.getName() + " &d为宗门赞助了 &e" + amount + "个 &d金币&d!");
+                            }
+                        });
+                    }
+                })
+                .item(3, 5, new ItemBuilder()
+                        .material(Material.DIAMOND)
+                        .displayName("&b贡献点券")
+                        .enchant(Enchantment.DURABILITY, 1)
+                        .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                        .colored()
+                        .build(), new ItemListener() {
+                    @Override
+                    public void onClicked(InventoryClickEvent event) {
+                        close();
+                        JulyMessage.sendColoredMessage(bukkitPlayer, "&d点券将存入宗门银行.");
+                        JulyMessage.sendColoredMessage(bukkitPlayer, "&e请在聊天栏输入并发送要赞助的点券数量: ");
+                        JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
+                            @Override
+                            public void onChat(AsyncPlayerChatEvent event) {
+                                JulyChatFilter.unregisterChatFilter(bukkitPlayer);
+                                event.setCancelled(true);
+
+                                int amount;
+
+                                try {
+                                    amount = Integer.parseInt(event.getMessage());
+                                } catch (Exception e) {
+                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c数量不正确!");
+                                    return;
+                                }
+
+                                if (amount < guildSettings.getDonateMinPoints()) {
+                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c最小点券赞助额为 &e" + guildSettings.getDonateMinMoney() + "&c.");
+                                    return;
+                                }
+
+                                UUID uuid = bukkitPlayer.getUniqueId();
+
+                                if (playerPointsAPI.look(uuid) < amount) {
+                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c点券不足.");
+                                    return;
+                                }
+
+                                playerPointsAPI.take(uuid, amount);
+                                member.addDonatedPoints(amount);
+                                guildBank.deposit(GuildBank.Type.MONEY, amount);
+                                guild.broadcastMessage("&d" + member.getPermission().getChineseName() + " &e" + guildPlayer.getName() + " &d为宗门赞助了 &e" + amount + "个 &d点券&d!");
                             }
                         });
                     }

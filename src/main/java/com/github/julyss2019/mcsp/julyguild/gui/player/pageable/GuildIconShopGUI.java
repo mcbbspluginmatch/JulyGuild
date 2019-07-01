@@ -6,17 +6,15 @@ import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.BasePageableGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
-import com.github.julyss2019.mcsp.julyguild.gui.player.GuildShopGUI;
+import com.github.julyss2019.mcsp.julyguild.gui.player.GuildIconBuyGUI;
+import com.github.julyss2019.mcsp.julyguild.gui.player.GuildManageGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
-import com.github.julyss2019.mcsp.julyguild.guild.GuildIcon;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryListener;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
-import net.milkbowl.vault.economy.Economy;
-import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -29,15 +27,14 @@ public class GuildIconShopGUI extends BasePageableGUI {
     private Inventory inventory;
     private static JulyGuild plugin = JulyGuild.getInstance();
     private static GuildSettings guildSettings = plugin.getGuildSettings();
-    private static Economy vault = plugin.getVaultAPI();
-    private static PlayerPointsAPI playerPointsAPI = plugin.getPlayerPointsAPI();
+
     private List<ConfigGuildIcon> icons = new ArrayList<>();
     private Guild guild;
 
     public GuildIconShopGUI(GuildPlayer guildPlayer) {
         super(GUIType.ICON_SHOP, guildPlayer);
 
-        this.guild = offlineGuildPlayer.getGuild();
+        this.guild = this.guildPlayer.getGuild();
         build();
     }
 
@@ -46,7 +43,7 @@ public class GuildIconShopGUI extends BasePageableGUI {
         super.setCurrentPage(page);
 
         icons.clear();
-        icons.addAll(guildSettings.getConfigGuildIcons());
+        icons.addAll(guildSettings.getIconShopItems());
 
         InventoryBuilder inventoryBuilder = new InventoryBuilder().title("&e&l图标商店").row(6).colored().listener(new InventoryListener() {
             @Override
@@ -61,45 +58,8 @@ public class GuildIconShopGUI extends BasePageableGUI {
                         return;
                     }
 
-                    int fee = configGuildIcon.getFee();
-                    ConfigGuildIcon.CostType costType = configGuildIcon.getCostType();
-
-                    if (costType == ConfigGuildIcon.CostType.MONEY) {
-                        if (!vault.has(bukkitPlayer, fee)) {
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c金币不足.");
-                            return;
-                        }
-
-                        vault.withdrawPlayer(bukkitPlayer, fee);
-                        JulyMessage.sendColoredMessage(bukkitPlayer, "&d购买成功!");
-
-                        GuildIcon guildIcon = GuildIcon.createNew(configGuildIcon.getMaterial(), configGuildIcon.getDurability());
-
-                        guild.giveGuildIcon(guildIcon);
-                        guild.setCurrentIcon(guildIcon);
-                        close();
-                        build();
-                        open();
-                        return;
-                    }
-
-                    if (costType == ConfigGuildIcon.CostType.POINTS) {
-                        if (playerPointsAPI.look(bukkitPlayer.getUniqueId()) < fee) {
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c金币不足.");
-                            return;
-                        }
-
-                        playerPointsAPI.take(bukkitPlayer.getUniqueId(), fee);
-                        JulyMessage.sendColoredMessage(bukkitPlayer, "&d购买成功!");
-
-                        GuildIcon guildIcon = GuildIcon.createNew(configGuildIcon.getMaterial(), configGuildIcon.getDurability());
-
-                        guild.giveGuildIcon(guildIcon);
-                        guild.setCurrentIcon(guildIcon);
-                        close();
-                        build();
-                        open();
-                    }
+                    close();
+                    new GuildIconBuyGUI(guildPlayer, configGuildIcon).open();
                 }
             }
         });
@@ -109,7 +69,7 @@ public class GuildIconShopGUI extends BasePageableGUI {
             @Override
             public void onClicked(InventoryClickEvent event) {
                 close();
-                new GuildShopGUI(guildPlayer).open();
+                new GuildManageGUI(guildPlayer).open();
             }
         });
 
@@ -141,11 +101,6 @@ public class GuildIconShopGUI extends BasePageableGUI {
         for (int i = 0; i < loopCount; i++) {
             ConfigGuildIcon icon = icons.get(itemCounter++);
             boolean isOwned = guild.isOwnedIcon(icon.getMaterial(), icon.getDurability());
-            List<String> newLores = new ArrayList<>();
-
-            for (String lore : icon.getLores()) {
-                newLores.add(lore.replace("{type}", icon.getCostType().getChineseName()).replace("{amount}", String.valueOf(icon.getFee())));
-            }
 
             ItemBuilder itemBuilder = new ItemBuilder()
                     .material(icon.getMaterial())
@@ -154,7 +109,7 @@ public class GuildIconShopGUI extends BasePageableGUI {
                     .addLore("")
                     .addLore(isOwned ? "&b• &a已拥有 &b•" : "&b• &c点击购买 &b•")
                     .addLore("")
-                    .addLores(newLores)
+                    .addLores(icon.getLores())
                     .colored();
 
             if (isOwned) {

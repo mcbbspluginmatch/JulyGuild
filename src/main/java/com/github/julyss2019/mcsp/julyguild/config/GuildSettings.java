@@ -11,30 +11,43 @@ import java.util.List;
 public class GuildSettings {
     @Config(path = "guild.create.name_regex")
     private String guildCreateNameRegex;
+
     @Config(path = "guild.create.name_not_valid_msg")
     private String guildCreateNameNotValidMsg;
+
     @Config(path = "guild.create.cost.money.amount")
     private int guildCreateCostMoneyAmount;
+
     @Config(path = "guild.create.cost.money.enabled")
     private boolean guildCreateCostMoneyEnabled;
+
     @Config(path = "guild.create.cost.points.amount")
     private int guildCreateCostPointsAmount;
+
     @Config(path = "guild.create.cost.points.enabled")
     private boolean guildCreateCostPointsEnabled;
+
     @Config(path = "guild.create.cost.item.key_lore")
     private String guildCreateCostItemKeyLore;
+
     @Config(path = "guild.create.cost.item.enabled")
     private boolean guildCreateCostItemEnabled;
+
     @Config(path = "guild.create.colored_no_per_msg")
     private String guildCreateColoredNoPerMsg;
+
     @Config(path = "guild.create.cost.item.amount")
     private int guildCreateCostItemAmount;
+
     @Config(path = "guild.announcement.split_char")
     private String guildAnnouncementSplitChar;
+
     @Config(path = "guild.announcement.max_count")
     private int guildAnnouncementMaxCount;
+
     @Config(path = "guild.def_max_member_count")
     private int guildDefMaxMemberCount;
+
     @Config(path = "guild.request.join.timeout")
     private int guildRequestJoinTimeout;
 
@@ -44,8 +57,11 @@ public class GuildSettings {
     @Config(path = "guild.def_max_admin_count")
     private int guildDefMaxAdminCount;
 
-    @Config(path = "guild.donate_min_money")
+    @Config(path = "guild.donate.min_money")
     private int donateMinMoney;
+
+    @Config(path = "guild.donate.min_points")
+    private int donateMinPoints;
 
     @Config(path = "guild.def_icon.material")
     private Material defIconMaterial;
@@ -77,6 +93,47 @@ public class GuildSettings {
     @Config(path = "guild.tp_all.timeout")
     private int tpAllShiftTimeout;
 
+    @Config(path = "guild.tp_all.cost.money")
+    private int tpAllCostMoney;
+
+    @Config(path = "guild.announcement.def")
+    private List<String> announcementDef;
+
+    @Config(path = "guild.ranking_list.formula")
+    private String rankingListFormula;
+
+    @Config(path = "guild.tp_all.allowed_send_worlds")
+    private List<String> tpAllAllowedSendWorlds;
+
+    @Config(path = "guild.tp_all.allowed_receive_worlds")
+    private List<String> tpAllAllowedReceiveWorlds;
+
+    public String getRankingListFormula() {
+        return rankingListFormula;
+    }
+
+    public int getDonateMinPoints() {
+        return donateMinPoints;
+    }
+
+    public int getTpAllCostMoney() {
+        return tpAllCostMoney;
+    }
+
+    public List<String> getTpAllAllowedSendWorlds() {
+        return tpAllAllowedSendWorlds;
+    }
+
+    public List<String> getTpAllAllowedReceiveWorlds() {
+        return tpAllAllowedReceiveWorlds;
+    }
+
+    public List<String> getAnnouncementDef() {
+        return announcementDef;
+    }
+
+    private List<ConfigGuildIcon> iconShopItems = new ArrayList<>();
+
     public int getTpAllShiftTimeout() {
         return tpAllShiftTimeout;
     }
@@ -93,10 +150,9 @@ public class GuildSettings {
         return tpAllShiftCount;
     }
 
-    private List<ConfigGuildIcon> configGuildIcons = new ArrayList<>();
 
-    public List<ConfigGuildIcon> getConfigGuildIcons() {
-        return configGuildIcons;
+    public List<ConfigGuildIcon> getIconShopItems() {
+        return iconShopItems;
     }
 
     public String getPromoteMoneyFormula() {

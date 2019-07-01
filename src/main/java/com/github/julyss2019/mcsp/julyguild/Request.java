@@ -1,11 +1,11 @@
 package com.github.julyss2019.mcsp.julyguild;
 
-import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 
 import java.util.UUID;
 
 public interface Request {
-    OfflineGuildPlayer getRequester();
+    GuildPlayer getRequester();
     long getCreationTime();
     boolean isTimeout();
     UUID getUUID();

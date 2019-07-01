@@ -12,7 +12,6 @@ import com.github.julyss2019.mcsp.julyguild.gui.player.GuildInfoGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.player.GuildMineGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.CacheGuildManager;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
-import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.chat.ChatListener;
 import com.github.julyss2019.mcsp.julylibrary.chat.JulyChatFilter;
@@ -23,7 +22,6 @@ import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.item.SkullItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import me.clip.placeholderapi.PlaceholderAPI;
-import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -99,7 +97,7 @@ public class MainGUI extends BasePageableGUI {
                     });
         }
 
-        if (offlineGuildPlayer.isInGuild()) {
+        if (guildPlayer.isInGuild()) {
             inventoryBuilder.item(5, 4, new SkullItemBuilder()
                     .texture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjIxYWIzMWE0MjczOWEzNTI3ZDMwNWNjOTU2YWVlNGQ2YmEzNDU1NTQzODFhNmE0YzRmZjA2YTFjMTlmZGQ0In19fQ==")
                     .displayName("&f我的宗门")

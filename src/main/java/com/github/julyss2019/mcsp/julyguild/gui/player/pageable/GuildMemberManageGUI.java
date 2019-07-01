@@ -34,7 +34,7 @@ public class GuildMemberManageGUI extends BasePageableGUI {
     public GuildMemberManageGUI(GuildPlayer guildPlayer) {
         super(GUIType.MEMBER_MANAGE, guildPlayer);
 
-        this.guild = offlineGuildPlayer.getGuild();
+        this.guild = this.guildPlayer.getGuild();
         build();
     }
 
@@ -155,7 +155,7 @@ public class GuildMemberManageGUI extends BasePageableGUI {
                     .addLore("&7- &d左键 &b▹ &d任命管理员")
                     .addLore("&7- &c右键 &b▹ &c移出宗门")
                     .addLore("")
-                    .addLore("&7- &e金币贡献 &b▹ &e¥" + member.getDonatedBalance())
+                    .addLore("&7- &e金币贡献 &b▹ &e¥" + member.getDonatedMoney())
                     .addLore("&7- &a入宗时间 &b▹ &a" + Util.YMD_SDF.format(member.getJoinTime()))
                     .colored();
 

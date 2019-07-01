@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import java.util.List;
 
 public class ConfigGuildIcon {
+    @Deprecated
     public enum CostType {
         POINTS("点券"), MONEY("金币");
 
@@ -24,8 +25,10 @@ public class ConfigGuildIcon {
     private short durability;
     private String displayName;
     private List<String> lores;
-    private CostType costType;
-    private int fee;
+    private boolean pointsPayEnabled;
+    private boolean moneyPayEnabled;
+    private int pointsCost;
+    private int moneyCost;
 
     public Material getMaterial() {
         return material;
@@ -59,19 +62,35 @@ public class ConfigGuildIcon {
         this.lores = lores;
     }
 
-    public CostType getCostType() {
-        return costType;
+    public boolean isPointsPayEnabled() {
+        return pointsPayEnabled;
     }
 
-    public void setCostType(CostType costType) {
-        this.costType = costType;
+    public void setPointsPayEnabled(boolean pointsPayEnabled) {
+        this.pointsPayEnabled = pointsPayEnabled;
     }
 
-    public int getFee() {
-        return fee;
+    public boolean isMoneyPayEnabled() {
+        return moneyPayEnabled;
     }
 
-    public void setFee(int fee) {
-        this.fee = fee;
+    public void setMoneyPayEnabled(boolean moneyPayEnabled) {
+        this.moneyPayEnabled = moneyPayEnabled;
+    }
+
+    public int getPointsCost() {
+        return pointsCost;
+    }
+
+    public void setPointsCost(int pointsCost) {
+        this.pointsCost = pointsCost;
+    }
+
+    public int getMoneyCost() {
+        return moneyCost;
+    }
+
+    public void setMoneyCost(int moneyCost) {
+        this.moneyCost = moneyCost;
     }
 }

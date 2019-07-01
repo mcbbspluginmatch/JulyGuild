@@ -11,7 +11,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 
 public class GUIListener implements Listener {
     private static JulyGuild plugin = JulyGuild.getInstance();
-    private static GuildManager guildManager = plugin.getGuildManager();
     private static GuildPlayerManager guildPlayerManager = plugin.getGuildPlayerManager();
 
     @EventHandler

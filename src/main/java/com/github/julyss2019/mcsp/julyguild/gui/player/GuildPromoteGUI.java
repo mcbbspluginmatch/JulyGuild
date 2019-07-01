@@ -34,7 +34,7 @@ public class GuildPromoteGUI extends BaseGUI {
     public GuildPromoteGUI(GuildPlayer guildPlayer) {
         super(GUIType.PROMOTE, guildPlayer);
 
-        this.guild = offlineGuildPlayer.getGuild();
+        this.guild = this.guildPlayer.getGuild();
         build();
     }
 

@@ -2,9 +2,8 @@ package com.github.julyss2019.mcsp.julyguild.listener;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
-import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
-import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julyguild.player.request.GuildPlayerRequestType;
 import com.github.julyss2019.mcsp.julyguild.player.request.TpRequest;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
@@ -50,7 +49,7 @@ public class TpAllListener implements Listener {
                 player.teleport(tpRequest.getLocation());
                 JulyMessage.sendTitle(player, new TitleBuilder().text("&a已传送").colored().build());
 
-                OfflineGuildPlayer requester = tpRequest.getRequester();
+                GuildPlayer requester = tpRequest.getRequester();
 
                 if (requester.isOnline()) {
                     JulyMessage.sendColoredMessage(requester.getBukkitPlayer(), "&e成员 &c" + player.getName() + " &e已集结.");

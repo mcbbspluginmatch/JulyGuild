@@ -11,7 +11,6 @@ import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryListener;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
-import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -28,7 +27,7 @@ public class GuildIconRepositoryGUI extends BasePageableGUI {
     public GuildIconRepositoryGUI(GuildPlayer guildPlayer) {
         super(GUIType.ICON_REPOSITORY, guildPlayer);
 
-        this.guild = offlineGuildPlayer.getGuild();
+        this.guild = this.guildPlayer.getGuild();
         setCurrentPage(0);
     }
 

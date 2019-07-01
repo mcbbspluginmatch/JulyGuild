@@ -2,14 +2,13 @@ package com.github.julyss2019.mcsp.julyguild;
 
 import com.github.julyss2019.mcsp.julyguild.command.Command;
 import com.github.julyss2019.mcsp.julyguild.command.MainGUICommand;
-import com.github.julyss2019.mcsp.julyguild.command.TestCommand;
 import com.github.julyss2019.mcsp.julyguild.config.ConfigGuildIcon;
 import com.github.julyss2019.mcsp.julyguild.config.GUISettings;
 import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
 import com.github.julyss2019.mcsp.julyguild.guild.CacheGuildManager;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;
-import com.github.julyss2019.mcsp.julyguild.listener.TpAllListener;
 import com.github.julyss2019.mcsp.julyguild.listener.GUIListener;
+import com.github.julyss2019.mcsp.julyguild.listener.TpAllListener;
 import com.github.julyss2019.mcsp.julyguild.log.GuildLog;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julylibrary.command.JulyCommandExecutor;
@@ -31,7 +30,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 
 public class JulyGuild extends JavaPlugin {
-    public static final String CONFIG_VERSION = "1.2.4";
+    public static final String CONFIG_VERSION = "1.3.2";
     private static final Gson gson = new Gson();
     private static JulyGuild instance;
     private GuildManager guildManager;
@@ -67,6 +66,7 @@ public class JulyGuild extends JavaPlugin {
         this.placeholderAPIExpansion = new PlaceholderAPIExpansion();
         this.tpAllListener = new TpAllListener();
 
+        JulyMessage.setPrefix(this, "§a[宗门] §f");
         guildManager.loadGuilds();
         cacheGuildManager.updateSortedGuilds();
 
@@ -74,13 +74,16 @@ public class JulyGuild extends JavaPlugin {
         getCommand("guild").setExecutor(julyCommandExecutor);
         registerCommands();
         registerListeners();
-        JulyMessage.setPrefix(this, "§a[宗门] §f");
 
         if (!placeholderAPIExpansion.register()) {
             getLogger().warning("PlaceholderAPI Hook 失败!");
         }
 
         JulyMessage.sendColoredMessage(Bukkit.getConsoleSender(), "插件初始化完毕, 作者QQ: 884633197.");
+    }
+
+    public void fix() {
+
     }
 
     public GUISettings getGuiSettings() {
@@ -93,7 +96,9 @@ public class JulyGuild extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        PlaceholderAPI.unregisterExpansion(placeholderAPIExpansion);
+        if (PlaceholderAPI.isRegistered("guild")) {
+            PlaceholderAPI.unregisterExpansion(placeholderAPIExpansion);
+        }
     }
 
     private void registerListeners() {
@@ -135,7 +140,6 @@ public class JulyGuild extends JavaPlugin {
 
     private void registerCommands() {
         registerCommand(new MainGUICommand());
-        registerCommand(new TestCommand());
     }
 
     private void registerCommand(Command command) {
@@ -175,8 +179,8 @@ public class JulyGuild extends JavaPlugin {
     }
 
     private void loadSpecialConfig() {
-        if (getConfig().contains("guild.icon.items")) {
-            ConfigurationSection iconItemSection = getConfig().getConfigurationSection("guild.icon.items");
+        if (getConfig().contains("guild.icon_shop.items")) {
+            ConfigurationSection iconItemSection = getConfig().getConfigurationSection("guild.icon_shop.items");
 
             for (String key : iconItemSection.getKeys(false)) {
                 ConfigurationSection itemSection = iconItemSection.getConfigurationSection(key);
@@ -186,10 +190,12 @@ public class JulyGuild extends JavaPlugin {
                 configGuildIcon.setDurability((short) itemSection.getInt("durability"));
                 configGuildIcon.setDisplayName(itemSection.getString("display_name"));
                 configGuildIcon.setLores(itemSection.getStringList("lores"));
-                configGuildIcon.setCostType(ConfigGuildIcon.CostType.valueOf(itemSection.getString("cost.type")));
-                configGuildIcon.setFee(itemSection.getInt("cost.amount"));
+                configGuildIcon.setMoneyPayEnabled(itemSection.getBoolean("cost.money.enabled"));
+                configGuildIcon.setPointsPayEnabled(itemSection.getBoolean("cost.points.enabled"));
+                configGuildIcon.setMoneyCost(itemSection.getInt("cost.money.amount"));
+                configGuildIcon.setPointsCost(itemSection.getInt("cost.points.amount"));
 
-                guildSettings.getConfigGuildIcons().add(configGuildIcon);
+                guildSettings.getIconShopItems().add(configGuildIcon);
             }
         }
     }

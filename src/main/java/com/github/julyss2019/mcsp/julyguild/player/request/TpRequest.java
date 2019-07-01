@@ -1,7 +1,6 @@
 package com.github.julyss2019.mcsp.julyguild.player.request;
 
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
-import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
 import org.bukkit.Location;
 
 import java.util.UUID;
@@ -19,7 +18,7 @@ public class TpRequest extends BaseGuildPlayerRequest {
         return location;
     }
 
-    public static TpRequest createNew(OfflineGuildPlayer requester, Location location) {
+    public static TpRequest createNew(GuildPlayer requester, Location location) {
         TpRequest instance = new TpRequest(location);
 
         instance.setRequester(requester);

@@ -2,6 +2,7 @@ package com.github.julyss2019.mcsp.julyguild.gui.player.pageable;
 
 import com.github.julyss2019.mcsp.julyguild.gui.BasePageableGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
+import com.github.julyss2019.mcsp.julyguild.gui.GUI;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
 import com.github.julyss2019.mcsp.julyguild.gui.player.GuildInfoGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
@@ -20,12 +21,19 @@ import java.util.List;
 public class GuildMemberGUI extends BasePageableGUI {
     private Guild guild;
     private Inventory inventory;
+    private GUI lastGUI;
 
-    public GuildMemberGUI(Guild guild, GuildPlayer guildPlayer) {
+    public GuildMemberGUI(GuildPlayer guildPlayer, Guild guild) {
         super(GUIType.MEMBER, guildPlayer);
 
         this.guild = guild;
         setCurrentPage(0);
+    }
+
+    public GuildMemberGUI(GuildPlayer guildPlayer, Guild guild, GUI lastGUI) {
+        this(guildPlayer, guild);
+
+        this.lastGUI = lastGUI;
     }
 
     @Override
@@ -40,7 +48,12 @@ public class GuildMemberGUI extends BasePageableGUI {
                 close();
 
                 if (guild.isValid()) {
-                    new GuildInfoGUI(guildPlayer, guild).open();
+                    if (lastGUI != null) {
+                        lastGUI.build();
+                        lastGUI.open();
+                    } else {
+                        new GuildInfoGUI(guildPlayer, guild).open();
+                    }
                 }
             }
         });
@@ -83,7 +96,7 @@ public class GuildMemberGUI extends BasePageableGUI {
                     .displayName("&f" + member.getName())
                     .addLore("&b• " + permission.getColor() + permission.getChineseName() + " &b•")
                     .addLore("")
-                    .addLore("&7- &e金币贡献 &b▹ &e¥" + member.getDonatedBalance())
+                    .addLore("&7- &e金币贡献 &b▹ &e¥" + member.getDonatedMoney())
                     .addLore("&7- &a入宗时间 &b▹ &a" + Util.YMD_SDF.format(member.getJoinTime()))
                     .colored()
                     .build());

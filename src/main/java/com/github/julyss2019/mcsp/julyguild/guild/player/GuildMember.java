@@ -1,31 +1,32 @@
 package com.github.julyss2019.mcsp.julyguild.guild.player;
 
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
-import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 public class GuildMember {
     private Guild guild;
-    private OfflineGuildPlayer offlineGuildPlayer;
+    private GuildPlayer guildPlayer;
     private long joinTime;
-    private int donatedBalance; // 赞助的金币
+    private double donatedMoney; // 赞助的金币
+    private double donatedPoints;
     private String name;
     private ConfigurationSection memberSection;
 
-    public GuildMember(Guild guild, OfflineGuildPlayer player) {
+    public GuildMember(Guild guild, GuildPlayer player) {
         this.guild = guild;
-        this.offlineGuildPlayer = player;
+        this.guildPlayer = player;
         this.name = player.getName();
         this.memberSection = guild.getYml().getConfigurationSection("members." + player.getName());
 
         load();
     }
 
-    public GuildMember(Guild guild, OfflineGuildPlayer player, ConfigurationSection memberSection) {
+    public GuildMember(Guild guild, GuildPlayer player, ConfigurationSection memberSection) {
         this.guild = guild;
-        this.offlineGuildPlayer = player;
+        this.guildPlayer = player;
         this.name = player.getName();
         this.memberSection = memberSection;
 
@@ -35,8 +36,53 @@ public class GuildMember {
     public void load() {
         if (memberSection != null) {
             this.joinTime = memberSection.getLong("join_time");
-            this.donatedBalance = memberSection.getInt("donated_balance");
+            this.donatedMoney = memberSection.getDouble("donated_money");
+            this.donatedPoints = memberSection.getDouble("donated_points");
         }
+    }
+
+    /**
+     * 添加已赞助的金币
+     * @param amount
+     */
+    public void addDonatedMoney(double amount) {
+        if (amount < 0) {
+            throw new IllegalArgumentException("数量必须大于0");
+        }
+
+        setDonatedMoney(getDonatedMoney() + amount);
+    }
+
+    /**
+     * 添加已赞助的点券
+     * @param amount
+     */
+    public void addDonatedPoints(double amount) {
+        if (amount < 0) {
+            throw new IllegalArgumentException("数量必须大于0");
+        }
+
+        setDonatedPoints(getDonatedPoints() + amount);
+    }
+
+    public double getDonatedMoney() {
+        return donatedMoney;
+    }
+
+    public double getDonatedPoints() {
+        return donatedPoints;
+    }
+
+    public void setDonatedMoney(double donatedMoney) {
+        memberSection.set("donated_money", donatedMoney);
+        save();
+        this.donatedMoney = donatedMoney;
+    }
+
+    public void setDonatedPoints(double donatedPoints) {
+        memberSection.set("donated_points", donatedPoints);
+        save();
+        this.donatedPoints = donatedPoints;
     }
 
     public Player getBukkitPlayer() {
@@ -51,33 +97,23 @@ public class GuildMember {
         return guild;
     }
 
-    public OfflineGuildPlayer getOfflineGuildPlayer() {
-        return offlineGuildPlayer;
+    public GuildPlayer getGuildPlayer() {
+        return guildPlayer;
     }
 
     public String getName() {
         return name;
     }
 
-    public void donateBalance(int amount) {
-        setDonatedBalance(getDonatedBalance() + amount);
-    }
-
-    public void setDonatedBalance(int amount) {
-        memberSection.set("donated_balance", amount);
-        guild.save();
-        this.donatedBalance = amount;
-    }
-
-    public int getDonatedBalance() {
-        return donatedBalance;
-    }
-
     public boolean isOnline() {
-        return getOfflineGuildPlayer().isOnline();
+        return getGuildPlayer().isOnline();
     }
 
     public Permission getPermission() {
         return Permission.MEMBER;
+    }
+
+    public void save() {
+        guild.save();
     }
 }

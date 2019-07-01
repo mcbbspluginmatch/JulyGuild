@@ -1,24 +1,28 @@
 package com.github.julyss2019.mcsp.julyguild;
 
-import com.github.julyss2019.mcsp.julyguild.player.OfflineGuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
+import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 
 import java.util.UUID;
 
 public class BaseRequest implements Request {
-    private OfflineGuildPlayer requester;
+    private static JulyGuild plugin = JulyGuild.getInstance();
+    private static GuildSettings guildSettings = plugin.getGuildSettings();
+
+    private GuildPlayer requester;
     private long time;
     private UUID uuid;
 
     public BaseRequest() {
     }
 
-    public BaseRequest(OfflineGuildPlayer requester, long time, UUID uuid) {
+    public BaseRequest(GuildPlayer requester, long time, UUID uuid) {
         this.requester = requester;
         this.time = time;
         this.uuid = uuid;
     }
 
-    public void setRequester(OfflineGuildPlayer requester) {
+    public void setRequester(GuildPlayer requester) {
         this.requester = requester;
     }
 
@@ -39,7 +43,7 @@ public class BaseRequest implements Request {
     }
 
     @Override
-    public OfflineGuildPlayer getRequester() {
+    public GuildPlayer getRequester() {
         return requester;
     }
 
@@ -50,7 +54,7 @@ public class BaseRequest implements Request {
 
     @Override
     public boolean isTimeout() {
-        return false;
+        return System.currentTimeMillis() - getCreationTime() > guildSettings.getTpAllShiftTimeout();
     }
 
     @Override
