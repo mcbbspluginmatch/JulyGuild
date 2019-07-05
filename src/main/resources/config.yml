@@ -1,4 +1,4 @@
-config_version: 1.3.2
+config_version: 1.3.6
 guild:
   # 排行榜
   ranking_list:
@@ -37,60 +37,6 @@ guild:
   def_icon:
     material: APPLE
     durability: 0
-  shop:
-    # 行数
-    row: 6
-    shops:
-      'shop0':
-        index: 0
-        type: ICON_SHOP
-      'shop1':
-        index: 1
-        type: CUSTOM
-        display_name: '&a全员钻石'
-        lores:
-          - '&e费用: '
-        target_type: ONLINE_MEMBER
-        cost:
-          money:
-            amount: 100
-            enabled: true
-            formula: '5*%GUILD_ONLINE_MEMBER_COUNT%'
-          points:
-            amount: 5
-            enabled: true
-          item:
-            enabled: true
-            formula: '5*%GUILD_ONLINE_MEMBER_COUNT%'
-
-            amount: 1
-            material: DIAMOND
-            durability: 0
-            display_name: '测试'
-            lores:
-              - '测试'
-        reward:
-          type: COMMAND
-          commands:
-            - 'give {member_name} DIAMOND 1'
-#      'shop2':
-#        type: DIY
-#        index: 0
-#        display_name: '&a全员钻石'
-#        lores:
-#          - '&e费用: '
-#        target_type: ONLINE_MEMBER
-#        cost:
-#          money:
-#            amount: 100
-#            enabled: true
-#            formula: '5*'
-#          points:
-#            amount: 5
-#            enabled: true
-#        reward:
-#          type: FUCTION
-#          function: 'func1'
   # 宗门图标商店
   icon_shop:
     items:
@@ -175,7 +121,8 @@ gui:
         - ' '
         - '&7- &d宗主 &b▹ &d%GUILD_OWNER%'
         - '&7- &a人数 &b▹ &a%GUILD_MEMBER_COUNT%/%GUILD_MAX_MEMBER_COUNT%'
-        - '&7- &eGDP &b▹ &e%GUILD_BALANCE%'
+        - '&7- &e金币储备 &b▹ &e%GUILD_MONEY%'
+        - '&7- &e点券储备 &b▹ &e%GUILD_POINTS%'
         - '&7- &9创建时间 &b▹ &9%GUILD_CREATION_TIME%'
   main_gui:
     # 排行榜
@@ -186,7 +133,8 @@ gui:
         - ' '
         - '&7- &d宗主 &b▹ &d%GUILD_OWNER%'
         - '&7- &a人数 &b▹ &a%GUILD_MEMBER_COUNT%/%GUILD_MAX_MEMBER_COUNT%'
-        - '&7- &eGDP &b▹ &e¥%GUILD_BALANCE%'
+        - '&7- &e金币储备 &b▹ &e%GUILD_MONEY%'
+        - '&7- &e点券储备 &b▹ &e%GUILD_POINTS%'
         - '&7- &9创建时间 &b▹ &9%GUILD_CREATION_TIME%'
   mine_gui:
     # 个人信息
@@ -198,4 +146,5 @@ gui:
         - '&7- &a所在宗门 &b▹ &a%GUILD_NAME%'
         - '&7- &d职务 &b▹ &d%GUILD_MEMBER_PER%'
         - '&7- &e金币贡献 &b▹ &e%GUILD_MEMBER_DONATE_MONEY%'
+        - '&7- &e金币贡献 &b▹ &e%GUILD_MEMBER_DONATE_POINTS%'
         - '&7- &9入宗时间 &b▹ &9%GUILD_MEMBER_JOIN_TIME%'

@@ -8,11 +8,12 @@ import com.github.julyss2019.mcsp.julyguild.guild.player.GuildAdmin;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildOwner;
 import com.github.julyss2019.mcsp.julyguild.guild.player.Permission;
-import com.github.julyss2019.mcsp.julyguild.guild.request.*;
-import com.github.julyss2019.mcsp.julyguild.log.guild.GuildBalanceChangedLog;
-import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
+import com.github.julyss2019.mcsp.julyguild.guild.request.BaseGuildRequest;
+import com.github.julyss2019.mcsp.julyguild.guild.request.GuildRequest;
+import com.github.julyss2019.mcsp.julyguild.guild.request.GuildRequestType;
+import com.github.julyss2019.mcsp.julyguild.guild.request.JoinGuildRequest;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
-import com.github.julyss2019.mcsp.julylibrary.logger.FileLogger;
+import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import com.github.julyss2019.mcsp.julylibrary.utils.YamlUtil;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -25,6 +26,7 @@ import parsii.tokenizer.ParseException;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Guild {
     private static JulyGuild plugin = JulyGuild.getInstance();
@@ -573,5 +575,9 @@ public class Guild {
                 JulyMessage.sendColoredMessage(member.getBukkitPlayer(), message);
             }
         }
+    }
+
+    public List<GuildMember> getOnlineMembers() {
+        return getMembers().stream().filter(GuildMember::isOnline).collect(Collectors.toList());
     }
 }

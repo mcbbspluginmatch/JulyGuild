@@ -7,8 +7,8 @@ public class GuildBalanceChangedLog extends BaseGuildLog {
     private Double oldBalance;
     private Double newBalance;
 
-    public GuildBalanceChangedLog(Double oldBalance, Double newBalance) {
-        super(GuildLogType.BALANCE_CHANGED);
+    public GuildBalanceChangedLog(String guildUUID, Double oldBalance, Double newBalance) {
+        super(GuildLogType.BALANCE_CHANGED, guildUUID);
 
         this.oldBalance = oldBalance;
         this.newBalance = newBalance;

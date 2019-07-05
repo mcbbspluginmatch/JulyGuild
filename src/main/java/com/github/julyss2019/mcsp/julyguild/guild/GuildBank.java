@@ -1,10 +1,13 @@
 package com.github.julyss2019.mcsp.julyguild.guild;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
+import com.github.julyss2019.mcsp.julyguild.log.guild.GuildBalanceChangedLog;
+import com.github.julyss2019.mcsp.julylibrary.logger.FileLogger;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
 public class GuildBank {
+    private static JulyGuild plugin = JulyGuild.getInstance();
     public enum Type {POINTS, MONEY}
 
     private Guild guild;
@@ -65,9 +68,12 @@ public class GuildBank {
     }
 
     public void setMoney(double money) {
+        double oldMoney = this.money;
+
         section.set("money", money);
         guild.save();
         this.money = money;
+        plugin.writeGuildLog(FileLogger.LoggerLevel.INFO, new GuildBalanceChangedLog(guild.getUUID().toString(), oldMoney, money));
     }
 
     public void setPoints(double points) {

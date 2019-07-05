@@ -3,6 +3,7 @@ package com.github.julyss2019.mcsp.julyguild;
 import com.github.julyss2019.mcsp.julyguild.guild.CacheGuildManager;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildBank;
+import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julyguild.util.Util;
@@ -56,7 +57,9 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
             case "member_per":
                 return guild.getMember(playerName).getPermission().getChineseName();
             case "member_donate_money":
-                return String.valueOf(guild.getMember(playerName).getDonatedMoney());
+                return String.valueOf((int) guild.getMember(playerName).getDonatedMoney());
+            case "member_donate_points":
+                return String.valueOf((int) guild.getMember(playerName).getDonatedPoints());
             case "member_join_time":
                 return Util.YMD_SDF.format(guild.getMember(playerName).getJoinTime());
             case "ranking":
@@ -73,6 +76,8 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
                 return String.valueOf((int) guildBank.getMoney());
             case "points":
                 return String.valueOf((int) guildBank.getPoints());
+            case "online_member_count":
+                return String.valueOf(guild.getOnlineMembers().size());
         }
 
         return null;

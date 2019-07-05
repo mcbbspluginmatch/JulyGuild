@@ -190,7 +190,7 @@ public class GuildMineGUI extends BaseGUI {
                                 }
 
                                 if (amount < guildSettings.getDonateMinPoints()) {
-                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c最小点券赞助额为 &e" + guildSettings.getDonateMinMoney() + "&c.");
+                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c最小点券赞助额为 &e" + guildSettings.getDonateMinPoints() + "&c.");
                                     return;
                                 }
 
@@ -203,7 +203,7 @@ public class GuildMineGUI extends BaseGUI {
 
                                 playerPointsAPI.take(uuid, amount);
                                 member.addDonatedPoints(amount);
-                                guildBank.deposit(GuildBank.Type.MONEY, amount);
+                                guildBank.deposit(GuildBank.Type.POINTS, amount);
                                 guild.broadcastMessage("&d" + member.getPermission().getChineseName() + " &e" + guildPlayer.getName() + " &d为宗门赞助了 &e" + amount + "个 &d点券&d!");
                             }
                         });

@@ -6,6 +6,7 @@ import com.github.julyss2019.mcsp.julyguild.gui.BaseGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
+import com.github.julyss2019.mcsp.julyguild.guild.GuildBank;
 import com.github.julyss2019.mcsp.julyguild.guild.exception.GuildPromoteException;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
@@ -26,6 +27,7 @@ import parsii.tokenizer.ParseException;
 public class GuildPromoteGUI extends BaseGUI {
     private Inventory inventory;
     private Guild guild;
+    private GuildBank guildBank;
     private static JulyGuild plugin = JulyGuild.getInstance();
     private static GuildSettings guildSettings = plugin.getGuildSettings();
     private static Economy vault = plugin.getVaultAPI();
@@ -35,6 +37,7 @@ public class GuildPromoteGUI extends BaseGUI {
         super(GUIType.PROMOTE, guildPlayer);
 
         this.guild = this.guildPlayer.getGuild();
+        this.guildBank = guild.getGuildBank();
         build();
     }
 
@@ -83,12 +86,12 @@ public class GuildPromoteGUI extends BaseGUI {
                             .build(), new ItemListener() {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
-                            if (!vault.has(bukkitPlayer, needMoney)) {
+                            if (!guildBank.has(GuildBank.Type.MONEY, needMoney)) {
                                 JulyMessage.sendColoredMessage(bukkitPlayer, "&c金币不足.");
                                 return;
                             }
 
-                            vault.withdrawPlayer(bukkitPlayer, needMoney);
+                            guildBank.withdraw(GuildBank.Type.MONEY, needMoney);
                             guild.setMaxMemberCount(guild.getMaxMemberCount() + 1);
                             JulyMessage.sendColoredMessage(bukkitPlayer, "&d升级成功, 宗门目前可最多容纳: &e" + guild.getMaxMemberCount() + "人&d.");
                             close();
@@ -126,12 +129,12 @@ public class GuildPromoteGUI extends BaseGUI {
                             .build(), new ItemListener() {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
-                            if (playerPointsAPI.look(bukkitPlayer.getUniqueId()) < needPoints) {
+                            if (guildBank.has(GuildBank.Type.POINTS, needPoints)) {
                                 JulyMessage.sendColoredMessage(bukkitPlayer, "&c点券不足.");
                                 return;
                             }
 
-                            playerPointsAPI.take(bukkitPlayer.getUniqueId(), needPoints);
+                            guildBank.withdraw(GuildBank.Type.POINTS, needPoints);
                             guild.setMaxMemberCount(guild.getMaxMemberCount() + 1);
                             JulyMessage.sendColoredMessage(bukkitPlayer, "&d升级成功, 宗门目前可最多容纳: &e" + guild.getMaxMemberCount() + "人&d.");
                             close();

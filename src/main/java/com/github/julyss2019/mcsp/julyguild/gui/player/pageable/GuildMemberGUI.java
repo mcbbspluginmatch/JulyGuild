@@ -96,8 +96,9 @@ public class GuildMemberGUI extends BasePageableGUI {
                     .displayName("&f" + member.getName())
                     .addLore("&b• " + permission.getColor() + permission.getChineseName() + " &b•")
                     .addLore("")
-                    .addLore("&7- &e金币贡献 &b▹ &e¥" + member.getDonatedMoney())
-                    .addLore("&7- &a入宗时间 &b▹ &a" + Util.YMD_SDF.format(member.getJoinTime()))
+                    .addLore("&7- &e金币贡献 &b▹ &e" + member.getDonatedMoney())
+                    .addLore("&7- &d点券贡献 &b▹ &d" + member.getDonatedPoints())
+                    .addLore("&7- &9入宗时间 &b▹ &9" + Util.YMD_SDF.format(member.getJoinTime()))
                     .colored()
                     .build());
         }

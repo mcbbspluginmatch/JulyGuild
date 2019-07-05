@@ -3,7 +3,9 @@ package com.github.julyss2019.mcsp.julyguild.gui.player;
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.config.ConfigGuildIcon;
 import com.github.julyss2019.mcsp.julyguild.gui.BaseGUI;
+import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
+import com.github.julyss2019.mcsp.julyguild.gui.player.pageable.GuildIconShopGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildBank;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildIcon;
@@ -38,9 +40,17 @@ public class GuildIconBuyGUI extends BaseGUI {
         super.build();
 
         this.inventory = new InventoryBuilder()
-                .title("&e请选择支付方式")
+                .title("&e&l请选择支付方式")
                 .row(3)
                 .colored()
+                .item(26, CommonItem.BACK, new ItemListener() {
+                    @Override
+                    public void onClicked(InventoryClickEvent event) {
+                        close();
+                        new GuildIconShopGUI(guildPlayer).open();
+                    }
+                })
+
                 .item(1, 2, new ItemBuilder()
                         .material(configGuildIcon.isMoneyPayEnabled() ? Material.GOLD_INGOT : Material.BARRIER)
                         .displayName("&f使用 &a金币x" + configGuildIcon.getMoneyCost() + " &f支付")
@@ -69,7 +79,7 @@ public class GuildIconBuyGUI extends BaseGUI {
                     }
                 })
                 .item(1, 6, new ItemBuilder()
-                        .material(configGuildIcon.isMoneyPayEnabled() ? Material.DIAMOND : Material.BARRIER)
+                        .material(configGuildIcon.isPointsPayEnabled() ? Material.DIAMOND : Material.BARRIER)
                         .displayName("&f使用 &a点券x" + configGuildIcon.getPointsCost() + " &f支付")
                         .addLore("")
                         .addLore(configGuildIcon.isPointsPayEnabled() ? "&a• &d点击支付&a •" : "&a• 未启用 &a•")
