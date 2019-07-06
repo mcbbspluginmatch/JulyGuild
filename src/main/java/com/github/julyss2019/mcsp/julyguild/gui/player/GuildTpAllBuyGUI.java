@@ -62,7 +62,7 @@ public class GuildTpAllBuyGUI extends BaseGUI {
                             return;
                         }
 
-                        if (!guildBank.has(GuildBank.Type.MONEY, guildSettings.getTpAllCostMoney())) {
+                        if (!guildBank.has(GuildBank.BalanceType.MONEY, guildSettings.getTpAllCostMoney())) {
                             JulyMessage.sendColoredMessage(bukkitPlayer, "&c宗门银行金币不足.");
                             return;
                         }
@@ -97,7 +97,7 @@ public class GuildTpAllBuyGUI extends BaseGUI {
                             return;
                         }
 
-                        guildBank.withdraw(GuildBank.Type.MONEY, guildSettings.getTpAllCostMoney());
+                        guildBank.withdraw(GuildBank.BalanceType.MONEY, guildSettings.getTpAllCostMoney());
 
                         JulyMessage.sendColoredMessage(bukkitPlayer, "&e成功向 &c" + validCounter + "个 &e成员发送了全员集结令, 请等待确认!");
 

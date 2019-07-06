@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class GuildBank {
     private static JulyGuild plugin = JulyGuild.getInstance();
-    public enum Type {POINTS, MONEY}
+    public enum BalanceType {POINTS, MONEY}
 
     private Guild guild;
     private double money;
@@ -31,62 +31,58 @@ public class GuildBank {
         this.points = section.getInt("points");
     }
 
-    public boolean has(@NotNull GuildBank.Type type, double amount) {
-        return type == Type.MONEY ? money >= amount : points >= amount;
+    public boolean has(@NotNull GuildBank.BalanceType balanceType, double amount) {
+        return balanceType == BalanceType.MONEY ? money >= amount : points >= amount;
     }
 
-    public void deposit(@NotNull GuildBank.Type type, double amount) {
+    public void deposit(@NotNull GuildBank.BalanceType balanceType, double amount) {
         if (amount < 0) {
             throw new IllegalArgumentException("数量必须大于0");
         }
 
-        if (type == Type.POINTS) {
-            setPoints(getPoints() + amount);
-        } else {
-            setMoney(getMoney() + amount);
-        }
+        setBalance(balanceType, amount);
     }
 
-    public void withdraw(@NotNull GuildBank.Type type, double amount) {
+    public void withdraw(@NotNull GuildBank.BalanceType balanceType, double amount) {
         if (amount < 0) {
             throw new IllegalArgumentException("数量必须大于0");
         }
 
-        if (type == Type.POINTS) {
-            if (getPoints() < amount) {
-                throw new IllegalArgumentException("点券不足");
-            }
+        if (!has(balanceType, amount)) {
+            throw new IllegalArgumentException("余额不足");
+        }
 
-            setPoints(getPoints() - amount);
-        } else {
-            if (getMoney() < amount) {
-                throw new IllegalArgumentException("金币不足");
-            }
 
-            setMoney(getMoney() - amount);
+        setBalance(balanceType, getBalance(balanceType) - amount);
+    }
+
+    public void setBalance(@NotNull GuildBank.BalanceType balanceType, double amount) {
+        if (balanceType == BalanceType.MONEY) {
+            double oldMoney = this.money;
+
+            section.set("money", amount);
+            guild.save();
+            this.money = amount;
+            plugin.writeGuildLog(FileLogger.LoggerLevel.INFO, new GuildBalanceChangedLog(guild.getUUID().toString(), BalanceType.MONEY, oldMoney, this.money));
+        } else if (balanceType == BalanceType.POINTS) {
+            double oldPoints = this.points;
+
+            section.set("points", amount);
+            guild.save();
+            this.points = amount;
+            plugin.writeGuildLog(FileLogger.LoggerLevel.INFO, new GuildBalanceChangedLog(guild.getUUID().toString(), BalanceType.POINTS, oldPoints, this.points));
         }
     }
 
-    public void setMoney(double money) {
-        double oldMoney = this.money;
+    public double getBalance(@NotNull GuildBank.BalanceType balanceType) {
+        if (balanceType == BalanceType.MONEY) {
+            return money;
+        }
 
-        section.set("money", money);
-        guild.save();
-        this.money = money;
-        plugin.writeGuildLog(FileLogger.LoggerLevel.INFO, new GuildBalanceChangedLog(guild.getUUID().toString(), oldMoney, money));
-    }
+        if (balanceType == BalanceType.POINTS) {
+            return points;
+        }
 
-    public void setPoints(double points) {
-        section.set("points", money);
-        guild.save();
-        this.points = points;
-    }
-
-    public double getMoney() {
-        return money;
-    }
-
-    public double getPoints() {
-        return points;
+        throw new IllegalArgumentException("非法的类型");
     }
 }

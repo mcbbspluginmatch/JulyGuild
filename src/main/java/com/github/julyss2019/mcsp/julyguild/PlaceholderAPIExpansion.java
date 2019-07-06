@@ -73,9 +73,9 @@ public class PlaceholderAPIExpansion extends PlaceholderExpansion {
             case "creation_time":
                 return Util.YMD_SDF.format(guild.getCreationTime());
             case "money":
-                return String.valueOf((int) guildBank.getMoney());
+                return String.valueOf((int) guildBank.getBalance(GuildBank.BalanceType.MONEY));
             case "points":
-                return String.valueOf((int) guildBank.getPoints());
+                return String.valueOf((int) guildBank.getBalance(GuildBank.BalanceType.POINTS));
             case "online_member_count":
                 return String.valueOf(guild.getOnlineMembers().size());
         }

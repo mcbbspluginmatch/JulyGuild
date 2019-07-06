@@ -63,12 +63,12 @@ public class GuildIconBuyGUI extends BaseGUI {
                     public void onClicked(InventoryClickEvent event) {
                         int fee = configGuildIcon.getMoneyCost();
 
-                        if (!guildBank.has(GuildBank.Type.MONEY, fee)) {
+                        if (!guildBank.has(GuildBank.BalanceType.MONEY, fee)) {
                             JulyMessage.sendColoredMessage(bukkitPlayer, "&c宗门银行金币不足.");
                             return;
                         }
 
-                        guildBank.withdraw(GuildBank.Type.MONEY, fee);
+                        guildBank.withdraw(GuildBank.BalanceType.MONEY, fee);
                         JulyMessage.sendColoredMessage(bukkitPlayer, "&d购买成功!");
 
                         GuildIcon guildIcon = GuildIcon.createNew(configGuildIcon.getMaterial(), configGuildIcon.getDurability());
@@ -90,12 +90,12 @@ public class GuildIconBuyGUI extends BaseGUI {
                     public void onClicked(InventoryClickEvent event) {
                         int fee = configGuildIcon.getPointsCost();
 
-                        if (!guildBank.has(GuildBank.Type.POINTS, fee)) {
+                        if (!guildBank.has(GuildBank.BalanceType.POINTS, fee)) {
                             JulyMessage.sendColoredMessage(bukkitPlayer, "&c宗门银行点券不足.");
                             return;
                         }
 
-                        guildBank.withdraw(GuildBank.Type.POINTS, fee);
+                        guildBank.withdraw(GuildBank.BalanceType.POINTS, fee);
                         JulyMessage.sendColoredMessage(bukkitPlayer, "&d购买成功!");
 
                         GuildIcon guildIcon = GuildIcon.createNew(configGuildIcon.getMaterial(), configGuildIcon.getDurability());

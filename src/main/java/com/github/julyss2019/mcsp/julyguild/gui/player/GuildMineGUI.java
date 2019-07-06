@@ -156,7 +156,7 @@ public class GuildMineGUI extends BaseGUI {
 
                                 vault.withdrawPlayer(bukkitPlayer, amount);
                                 member.addDonatedMoney(amount);
-                                guildBank.deposit(GuildBank.Type.MONEY, amount);
+                                guildBank.deposit(GuildBank.BalanceType.MONEY, amount);
                                 guild.broadcastMessage("&d" + member.getPermission().getChineseName() + " &e" + guildPlayer.getName() + " &d为宗门赞助了 &e" + amount + "个 &d金币&d!");
                             }
                         });
@@ -203,7 +203,7 @@ public class GuildMineGUI extends BaseGUI {
 
                                 playerPointsAPI.take(uuid, amount);
                                 member.addDonatedPoints(amount);
-                                guildBank.deposit(GuildBank.Type.POINTS, amount);
+                                guildBank.deposit(GuildBank.BalanceType.POINTS, amount);
                                 guild.broadcastMessage("&d" + member.getPermission().getChineseName() + " &e" + guildPlayer.getName() + " &d为宗门赞助了 &e" + amount + "个 &d点券&d!");
                             }
                         });

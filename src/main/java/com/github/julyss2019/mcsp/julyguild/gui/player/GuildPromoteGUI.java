@@ -86,12 +86,12 @@ public class GuildPromoteGUI extends BaseGUI {
                             .build(), new ItemListener() {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
-                            if (!guildBank.has(GuildBank.Type.MONEY, needMoney)) {
+                            if (!guildBank.has(GuildBank.BalanceType.MONEY, needMoney)) {
                                 JulyMessage.sendColoredMessage(bukkitPlayer, "&c金币不足.");
                                 return;
                             }
 
-                            guildBank.withdraw(GuildBank.Type.MONEY, needMoney);
+                            guildBank.withdraw(GuildBank.BalanceType.MONEY, needMoney);
                             guild.setMaxMemberCount(guild.getMaxMemberCount() + 1);
                             JulyMessage.sendColoredMessage(bukkitPlayer, "&d升级成功, 宗门目前可最多容纳: &e" + guild.getMaxMemberCount() + "人&d.");
                             close();
@@ -129,12 +129,12 @@ public class GuildPromoteGUI extends BaseGUI {
                             .build(), new ItemListener() {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
-                            if (guildBank.has(GuildBank.Type.POINTS, needPoints)) {
+                            if (!guildBank.has(GuildBank.BalanceType.POINTS, needPoints)) {
                                 JulyMessage.sendColoredMessage(bukkitPlayer, "&c点券不足.");
                                 return;
                             }
 
-                            guildBank.withdraw(GuildBank.Type.POINTS, needPoints);
+                            guildBank.withdraw(GuildBank.BalanceType.POINTS, needPoints);
                             guild.setMaxMemberCount(guild.getMaxMemberCount() + 1);
                             JulyMessage.sendColoredMessage(bukkitPlayer, "&d升级成功, 宗门目前可最多容纳: &e" + guild.getMaxMemberCount() + "人&d.");
                             close();
