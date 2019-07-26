@@ -16,7 +16,6 @@ import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryListener;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.item.SkullItemBuilder;
-import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -42,7 +41,7 @@ public class GuildMemberManageGUI extends BasePageableGUI {
     public void setCurrentPage(int page) {
         super.setCurrentPage(page);
 
-        InventoryBuilder inventoryBuilder = new InventoryBuilder().title("&e&l宗门成员管理(第" + (getCurrentPage() + 1) + "页)").colored().row(6)
+        InventoryBuilder inventoryBuilder = new InventoryBuilder().title("&e&l宗门成员管理").colored().row(6)
                 .listener(new InventoryListener() {
                     @Override
                     public void onClicked(InventoryClickEvent event) {
@@ -54,8 +53,8 @@ public class GuildMemberManageGUI extends BasePageableGUI {
 
                             if (action == InventoryAction.PICKUP_ALL) {
                                 close();
-                                JulyMessage.sendColoredMessages(bukkitPlayer, "&e管理员拥有的权限: 审批玩家.");
-                                JulyMessage.sendColoredMessages(bukkitPlayer, "&c如果要将会员 &e" + guildMember.getName() + " &c设置为宗门管理员, 请在 &e10秒内 &c在聊天栏输入并发送: &econfirm");
+                                Util.sendColoredMessage(bukkitPlayer, "&e管理员拥有的权限: 审批玩家.");
+                                Util.sendColoredMessage(bukkitPlayer, "&c如果要将会员 &e" + guildMember.getName() + " &c设置为宗门管理员, 请在 &e10秒内 &c在聊天栏输入并发送: &econfirm");
                                 JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
                                     @Override
                                     public void onChat(AsyncPlayerChatEvent event) {
@@ -64,18 +63,18 @@ public class GuildMemberManageGUI extends BasePageableGUI {
 
                                         if (event.getMessage().equalsIgnoreCase("confirm")) {
                                             guild.setMemberPermission(guildMember, Permission.ADMIN);
-                                            JulyMessage.sendColoredMessages(bukkitPlayer, "&c已设置成员 &e" +guildMember.getName() + " &c为宗门管理员.");
+                                            Util.sendColoredMessage(bukkitPlayer, "&c已设置成员 &e" +guildMember.getName() + " &c为宗门管理员.");
                                         }
                                     }
 
                                     @Override
                                     public void onTimeout() {
-                                        JulyMessage.sendColoredMessages(bukkitPlayer, "&c确认已超时.");
+                                        Util.sendColoredMessage(bukkitPlayer, "&c确认已超时.");
                                     }
                                 }, 10);
                             } else if (action == InventoryAction.PICKUP_HALF) {
                                 close();
-                                JulyMessage.sendColoredMessages(bukkitPlayer, "&c如果要从宗门移出会员 &e" + guildMember.getName() + " &c, 请在 &e10秒内 &c在聊天栏输入并发送: &econfirm");
+                                Util.sendColoredMessage(bukkitPlayer, "&c如果要从宗门移出会员 &e" + guildMember.getName() + " &c, 请在 &e10秒内 &c在聊天栏输入并发送: &econfirm");
                                 JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
                                     @Override
                                     public void onChat(AsyncPlayerChatEvent event) {
@@ -84,13 +83,13 @@ public class GuildMemberManageGUI extends BasePageableGUI {
 
                                         if (event.getMessage().equalsIgnoreCase("confirm")) {
                                             guild.removeMember(guildMember);
-                                            JulyMessage.sendColoredMessages(bukkitPlayer, "&c已移出会员 &e" +guildMember.getName() + "&c.");
+                                            Util.sendColoredMessage(bukkitPlayer, "&c已移出会员 &e" +guildMember.getName() + "&c.");
                                         }
                                     }
 
                                     @Override
                                     public void onTimeout() {
-                                        JulyMessage.sendColoredMessages(bukkitPlayer, "&c确认已超时.");
+                                        Util.sendColoredMessage(bukkitPlayer, "&c确认已超时.");
                                     }
                                 }, 10);
                             }
@@ -147,26 +146,24 @@ public class GuildMemberManageGUI extends BasePageableGUI {
 
         for (int i = 0; i < loopCount; i++) {
             GuildMember member = guildMembers.get(itemCounter++);
+            String memberName = member.getName();
+
             ItemBuilder itemBuilder = new SkullItemBuilder()
-                    .texture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjIxYWIzMWE0MjczOWEzNTI3ZDMwNWNjOTU2YWVlNGQ2YmEzNDU1NTQzODFhNmE0YzRmZjA2YTFjMTlmZGQ0In19fQ==")
-                    .displayName("&f" + member.getName())
-                    .addLore("&a▸ &c" + member.getPermission().getChineseName() + " &a◂")
+                    .owner(memberName)
+                    .displayName("&f" + memberName)
+                    .addLore(member.getPermission().getColor() + member.getPermission().getChineseName())
                     .addLore("")
-                    .addLore("&7- &d左键 &b▹ &d任命管理员")
-                    .addLore("&7- &c右键 &b▹ &c移出宗门")
+                    .addLore("&d左键 &b▹ &d任命管理员")
+                    .addLore("&c右键 &b▹ &c移出宗门")
                     .addLore("")
-                    .addLore("&7- &e金币贡献 &b▹ &e¥" + member.getDonatedMoney())
-                    .addLore("&7- &a入宗时间 &b▹ &a" + Util.YMD_SDF.format(member.getJoinTime()))
+                    .addLore("&e金币贡献 &b▹ &e¥" + member.getDonatedMoney())
+                    .addLore("&a入宗时间 &b▹ &a" + Util.YMD_SDF.format(member.getJoinTime()))
                     .colored();
 
             inventoryBuilder.item(i, itemBuilder.build());
         }
 
         this.inventory = inventoryBuilder.build();
-    }
-
-    public List<GuildMember> getGuildMembers() {
-        return guildMembers;
     }
 
     @Override

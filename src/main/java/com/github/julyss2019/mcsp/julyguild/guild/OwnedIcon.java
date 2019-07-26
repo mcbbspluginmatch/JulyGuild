@@ -7,13 +7,13 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public class GuildIcon {
+public class OwnedIcon {
     private Material material;
     private short durability;
     private UUID uuid;
     private ItemStack itemStack;
 
-    public GuildIcon(Material material, short durability, UUID uuid) {
+    public OwnedIcon(Material material, short durability, UUID uuid) {
         this.material = material;
         this.durability = durability;
         this.uuid = uuid;
@@ -37,7 +37,7 @@ public class GuildIcon {
         return durability;
     }
 
-    public static GuildIcon createNew(Material material, short durability) {
-        return new GuildIcon(material, durability, UUID.randomUUID());
+    public static OwnedIcon createNew(Material material, short durability) {
+        return new OwnedIcon(material, durability, UUID.randomUUID());
     }
 }

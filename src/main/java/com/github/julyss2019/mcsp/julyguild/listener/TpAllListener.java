@@ -2,10 +2,11 @@ package com.github.julyss2019.mcsp.julyguild.listener;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
-import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julyguild.player.request.GuildPlayerRequestType;
 import com.github.julyss2019.mcsp.julyguild.player.request.TpRequest;
+import com.github.julyss2019.mcsp.julyguild.util.Util;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import com.github.julyss2019.mcsp.julylibrary.message.TitleBuilder;
 import org.bukkit.entity.Player;
@@ -20,8 +21,8 @@ public class TpAllListener implements Listener {
     private static JulyGuild plugin = JulyGuild.getInstance();
     private static GuildSettings guildSettings = plugin.getGuildSettings();
     private static GuildPlayerManager guildPlayerManager = plugin.getGuildPlayerManager();
-    private Map<String, Long> lastSneakMap = new HashMap<>();
-    private Map<String, Integer> sneakCounterMap = new HashMap<>();
+    private static Map<String, Long> lastSneakMap = new HashMap<>();
+    private static Map<String, Integer> sneakCounterMap = new HashMap<>();
 
     @EventHandler
     public void onPlayerToggleSneakEvent(PlayerToggleSneakEvent event) {
@@ -52,7 +53,7 @@ public class TpAllListener implements Listener {
                 GuildPlayer requester = tpRequest.getRequester();
 
                 if (requester.isOnline()) {
-                    JulyMessage.sendColoredMessage(requester.getBukkitPlayer(), "&e成员 &c" + player.getName() + " &e已集结.");
+                    Util.sendColoredMessage(requester.getBukkitPlayer(), "&e成员 &c" + player.getName() + " &e已集结.");
                 }
 
                 resetPlayer(playerName);
@@ -60,7 +61,7 @@ public class TpAllListener implements Listener {
         }
     }
 
-    public void resetPlayer(String playerName) {
+    public static void resetPlayer(String playerName) {
         lastSneakMap.remove(playerName);
         sneakCounterMap.remove(playerName);
     }

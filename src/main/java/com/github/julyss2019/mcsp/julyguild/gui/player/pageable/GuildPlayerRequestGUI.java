@@ -14,7 +14,6 @@ import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryListener;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.SkullItemBuilder;
-import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -65,7 +64,7 @@ public class GuildPlayerRequestGUI extends BasePageableGUI {
 
                             if (requestGuildPlayer.isInGuild()) {
                                 guild.removeRequest(joinRequest);
-                                JulyMessage.sendColoredMessages(bukkitPlayer, "&c请求已失效: &e" + requesterName + "&c.");
+                                Util.sendColoredMessage(bukkitPlayer, "&c请求已失效: &e" + requesterName + "&c.");
                             }
 
                             // 左键
@@ -73,17 +72,17 @@ public class GuildPlayerRequestGUI extends BasePageableGUI {
                                 guild.removeRequest(joinRequest);
                                 guild.addMember(joinRequest.getRequester());
 
-                                JulyMessage.sendColoredMessages(bukkitPlayer, "&b审批通过: &e" + requestGuildPlayer.getName() + "&a.");
+                                Util.sendColoredMessage(bukkitPlayer, "&b审批通过: &e" + requestGuildPlayer.getName() + "&a.");
 
                                 if (requestGuildPlayer.isOnline()) {
-                                    JulyMessage.sendColoredMessage(requestGuildPlayer.getBukkitPlayer(), "&d恭喜你通过审核, 正式成为 &e" + guildName + " &d宗门会员!");
+                                    Util.sendColoredMessage(requestGuildPlayer.getBukkitPlayer(), "&d恭喜你通过审核, 正式成为 &e" + guildName + " &d宗门会员!");
                                 }
                             } else if (action == InventoryAction.PICKUP_HALF) { // 右键
                                 guild.removeRequest(joinRequest);
-                                JulyMessage.sendColoredMessages(bukkitPlayer, "&c审批拒绝: &e" + requestGuildPlayer.getName() + "&c.");
+                                Util.sendColoredMessage(bukkitPlayer, "&c审批拒绝: &e" + requestGuildPlayer.getName() + "&c.");
 
                                 if (requestGuildPlayer.isOnline()) {
-                                    JulyMessage.sendColoredMessages(requestGuildPlayer.getBukkitPlayer(), "&c你在 &e" + guildName  + " &c宗门的申请请求被拒绝.");
+                                    Util.sendColoredMessage(requestGuildPlayer.getBukkitPlayer(), "&c你在 &e" + guildName  + " &c宗门的申请请求被拒绝.");
                                 }
                             }
                         }
@@ -132,12 +131,12 @@ public class GuildPlayerRequestGUI extends BasePageableGUI {
             String playerName = guildPlayer.getName();
 
             inventoryBuilder.item(i, new SkullItemBuilder()
-                    .texture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjIxYWIzMWE0MjczOWEzNTI3ZDMwNWNjOTU2YWVlNGQ2YmEzNDU1NTQzODFhNmE0YzRmZjA2YTFjMTlmZGQ0In19fQ==")
+                    .owner(playerName)
                     .displayName("&f" + playerName)
-                    .addLore("&7- &a左键 &b▹ &a同意")
-                    .addLore("&7- &c右键 &b▹ &c拒绝")
+                    .addLore("&a左键 &b▹ &a同意")
+                    .addLore("&c右键 &b▹ &c拒绝")
                     .addLore("")
-                    .addLore("&7- &9申请时间 &b▹ &9" + Util.YMDHM_SDF.format(guildRequest.getCreationTime()))
+                    .addLore("&9申请时间 &b▹ &9" + Util.YMDHM_SDF.format(guildRequest.getCreationTime()))
                     .colored()
                     .build());
         }

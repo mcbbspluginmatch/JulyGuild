@@ -5,7 +5,7 @@ import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
 import com.github.julyss2019.mcsp.julyguild.gui.player.GuildManageGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
-import com.github.julyss2019.mcsp.julyguild.guild.GuildIcon;
+import com.github.julyss2019.mcsp.julyguild.guild.OwnedIcon;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryListener;
@@ -22,7 +22,7 @@ import java.util.List;
 public class GuildIconRepositoryGUI extends BasePageableGUI {
     private Inventory inventory;
     private Guild guild;
-    private List<GuildIcon> icons = new ArrayList<>();
+    private List<OwnedIcon> icons = new ArrayList<>();
 
     public GuildIconRepositoryGUI(GuildPlayer guildPlayer) {
         super(GUIType.ICON_REPOSITORY, guildPlayer);
@@ -48,7 +48,7 @@ public class GuildIconRepositoryGUI extends BasePageableGUI {
                 int index = getCurrentPage() * 51 + event.getSlot();
 
                 if (index < icons.size()) {
-                    GuildIcon icon = icons.get(index);
+                    OwnedIcon icon = icons.get(index);
 
                     if (!guild.getCurrentIcon().equals(icon)) {
                         guild.setCurrentIcon(icon);
@@ -95,7 +95,7 @@ public class GuildIconRepositoryGUI extends BasePageableGUI {
         int loopCount = iconSize - itemCounter < 51 ? iconSize - itemCounter : 51;
 
         for (int i = 0; i < loopCount; i++) {
-            GuildIcon icon = icons.get(itemCounter++);
+            OwnedIcon icon = icons.get(itemCounter++);
             ItemBuilder itemBuilder = new ItemBuilder().material(icon.getMaterial()).durability(icon.getDurability()).colored();
 
             if (guild.getCurrentIcon().equals(icon)) {

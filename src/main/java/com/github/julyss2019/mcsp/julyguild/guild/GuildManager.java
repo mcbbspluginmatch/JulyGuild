@@ -3,7 +3,7 @@ package com.github.julyss2019.mcsp.julyguild.guild;
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
 import com.github.julyss2019.mcsp.julyguild.guild.exception.GuildCreateException;
-import com.github.julyss2019.mcsp.julyguild.log.guild.GuildCreateGuildLog;
+import com.github.julyss2019.mcsp.julyguild.log.guild.GuildCreateLog;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julylibrary.logger.FileLogger;
@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 
 public class GuildManager {
     private static JulyGuild plugin = JulyGuild.getInstance();
-    private static GuildPlayerManager guildPlayerManager = plugin.getGuildPlayerManager();
-    private static FileLogger fileLogger = plugin.getFileLogger();
+    private GuildPlayerManager guildPlayerManager = plugin.getGuildPlayerManager();
+    private FileLogger fileLogger = plugin.getFileLogger();
     private Map<String, Guild> guildMap = new HashMap<>();
 
     public GuildManager() {}
@@ -66,6 +66,8 @@ public class GuildManager {
         for (GuildPlayer guildPlayer : guildPlayerManager.getOnlineGuildPlayers()) {
             guildPlayer.updateGUI(GUIType.MAIN);
         }
+
+        fileLogger.writeJson(new GuildCreateLog(uuid, guildName, guildOwner.getName()));
     }
 
     public int getGuildCount() {

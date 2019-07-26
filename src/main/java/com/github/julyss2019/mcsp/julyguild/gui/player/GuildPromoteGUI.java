@@ -9,11 +9,11 @@ import com.github.julyss2019.mcsp.julyguild.guild.Guild;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildBank;
 import com.github.julyss2019.mcsp.julyguild.guild.exception.GuildPromoteException;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.util.Util;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryListener;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
-import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
@@ -87,13 +87,13 @@ public class GuildPromoteGUI extends BaseGUI {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
                             if (!guildBank.has(GuildBank.BalanceType.MONEY, needMoney)) {
-                                JulyMessage.sendColoredMessage(bukkitPlayer, "&c金币不足.");
+                                Util.sendColoredMessage(bukkitPlayer, "&c金币不足.");
                                 return;
                             }
 
                             guildBank.withdraw(GuildBank.BalanceType.MONEY, needMoney);
                             guild.setMaxMemberCount(guild.getMaxMemberCount() + 1);
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&d升级成功, 宗门目前可最多容纳: &e" + guild.getMaxMemberCount() + "人&d.");
+                            Util.sendColoredMessage(bukkitPlayer, "&d升级成功, 宗门目前可最多容纳: &e" + guild.getMaxMemberCount() + "人&d.");
                             close();
 
                             new BukkitRunnable() {
@@ -130,13 +130,13 @@ public class GuildPromoteGUI extends BaseGUI {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
                             if (!guildBank.has(GuildBank.BalanceType.POINTS, needPoints)) {
-                                JulyMessage.sendColoredMessage(bukkitPlayer, "&c点券不足.");
+                                Util.sendColoredMessage(bukkitPlayer, "&c点券不足.");
                                 return;
                             }
 
                             guildBank.withdraw(GuildBank.BalanceType.POINTS, needPoints);
                             guild.setMaxMemberCount(guild.getMaxMemberCount() + 1);
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&d升级成功, 宗门目前可最多容纳: &e" + guild.getMaxMemberCount() + "人&d.");
+                            Util.sendColoredMessage(bukkitPlayer, "&d升级成功, 宗门目前可最多容纳: &e" + guild.getMaxMemberCount() + "人&d.");
                             close();
 
                             new BukkitRunnable() {

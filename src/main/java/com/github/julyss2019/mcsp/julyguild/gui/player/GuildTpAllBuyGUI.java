@@ -8,8 +8,10 @@ import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildBank;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
+import com.github.julyss2019.mcsp.julyguild.listener.TpAllListener;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julyguild.player.request.TpRequest;
+import com.github.julyss2019.mcsp.julyguild.util.Util;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
@@ -58,12 +60,12 @@ public class GuildTpAllBuyGUI extends BaseGUI {
                         close();
 
                         if (!guildSettings.getTpAllAllowedSendWorlds().contains("*") && guildSettings.getTpAllAllowedSendWorlds().contains(bukkitPlayer.getWorld().getName())) {
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c当前世界不能发起全员集结令.");
+                            Util.sendColoredMessage(bukkitPlayer, "&c当前世界不能发起全员集结令.");
                             return;
                         }
 
                         if (!guildBank.has(GuildBank.BalanceType.MONEY, guildSettings.getTpAllCostMoney())) {
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c宗门银行金币不足.");
+                            Util.sendColoredMessage(bukkitPlayer, "&c宗门银行金币不足.");
                             return;
                         }
 
@@ -83,9 +85,9 @@ public class GuildTpAllBuyGUI extends BaseGUI {
                                 }
 
                                 member.getGuildPlayer().getGuildPlayer().addRequest(TpRequest.createNew(guildPlayer, bukkitPlayer.getLocation()));
-                                plugin.getTpAllListener().resetPlayer(member.getName()); // 重置
+                                TpAllListener.resetPlayer(member.getName()); // 重置
                                 JulyMessage.sendTitle(member.getBukkitPlayer(), new TitleBuilder().text("&b全员集结令").colored().build());
-                                JulyMessage.sendColoredMessage(member.getBukkitPlayer(), "&e宗主 &c" + bukkitPlayer.getName() + " &e请求你传送到TA那, 如果要传送请在 &c" + guildSettings.getTpAllShiftTimeout() + "秒内 &e快速按 &c" + guildSettings.getTpAllShiftCount() + "次 &eShift键!");
+                                Util.sendColoredMessage(member.getBukkitPlayer(), "&e宗主 &c" + bukkitPlayer.getName() + " &e请求你传送到TA那, 如果要传送请在 &c" + guildSettings.getTpAllShiftTimeout() + "秒内 &e快速按 &c" + guildSettings.getTpAllShiftCount() + "次 &eShift键!");
                                 validCounter++;
                             } else {
                                 offlineCounter++;
@@ -93,20 +95,20 @@ public class GuildTpAllBuyGUI extends BaseGUI {
                         }
 
                         if (validCounter == 0) {
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c队员均离线或暂时无法传送!");
+                            Util.sendColoredMessage(bukkitPlayer, "&c队员均离线或暂时无法传送!");
                             return;
                         }
 
                         guildBank.withdraw(GuildBank.BalanceType.MONEY, guildSettings.getTpAllCostMoney());
 
-                        JulyMessage.sendColoredMessage(bukkitPlayer, "&e成功向 &c" + validCounter + "个 &e成员发送了全员集结令, 请等待确认!");
+                        Util.sendColoredMessage(bukkitPlayer, "&e成功向 &c" + validCounter + "个 &e成员发送了全员集结令, 请等待确认!");
 
                         if (offlineCounter != 0) {
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c离线的玩家有 &e" + offlineCounter + "个&c.");
+                            Util.sendColoredMessage(bukkitPlayer, "&c离线的玩家有 &e" + offlineCounter + "个&c.");
                         }
 
                         if (diffWorldCounter != 0) {
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c暂时无法集结的玩家有 &e" + diffWorldCounter + "个&c.");
+                            Util.sendColoredMessage(bukkitPlayer, "&c暂时无法集结的玩家有 &e" + diffWorldCounter + "个&c.");
                         }
                     }
                 }).build();

@@ -22,7 +22,7 @@ public class CacheGuildManager {
             public void run() {
                 sortedGuilds = guildManager.getSortedGuilds();
             }
-        }.runTaskTimer(plugin, 0L, 20L);
+        }.runTaskTimer(plugin, 0L, 20L * 60L);
     }
 
     public void updateSortedGuilds() {

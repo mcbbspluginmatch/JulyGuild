@@ -9,6 +9,7 @@ public class BaseGuildRequest extends BaseRequest implements GuildRequest {
         this.guildRequestType = guildRequestType;
     }
 
+
     @Override
     public GuildRequestType getType() {
         return guildRequestType;

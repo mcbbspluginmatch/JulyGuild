@@ -23,16 +23,24 @@ public class GuildBank {
         }
 
         this.section = guild.getYml().getConfigurationSection("bank");
-        load();
     }
 
-    public void load() {
+    public GuildBank load() {
         this.money = section.getInt("money");
         this.points = section.getInt("points");
+        return this;
     }
 
     public boolean has(@NotNull GuildBank.BalanceType balanceType, double amount) {
-        return balanceType == BalanceType.MONEY ? money >= amount : points >= amount;
+        if (balanceType == BalanceType.MONEY) {
+            return money >= amount;
+        }
+
+        if (balanceType == BalanceType.POINTS) {
+            return points >= amount;
+        }
+
+        throw new IllegalArgumentException("非法的类型");
     }
 
     public void deposit(@NotNull GuildBank.BalanceType balanceType, double amount) {
@@ -40,7 +48,7 @@ public class GuildBank {
             throw new IllegalArgumentException("数量必须大于0");
         }
 
-        setBalance(balanceType, amount);
+        setBalance(balanceType, getBalance(balanceType) + amount);
     }
 
     public void withdraw(@NotNull GuildBank.BalanceType balanceType, double amount) {

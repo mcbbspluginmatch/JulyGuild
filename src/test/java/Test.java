@@ -1,7 +1,11 @@
+import java.util.UUID;
+
 public class Test {
+    private static String test = "test";
+    private static String testS = test;
+
     public static void main(String[] args) {
-        for (int i = 0; i < 100; i++) {
-            System.out.println(Math.random());
-        }
+        test = "1";
+        System.out.println(UUID.fromString("Gilgamesh").toString());
     }
 }

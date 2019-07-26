@@ -2,20 +2,22 @@ package com.github.julyss2019.mcsp.julyguild;
 
 import com.github.julyss2019.mcsp.julyguild.command.Command;
 import com.github.julyss2019.mcsp.julyguild.command.MainGUICommand;
+import com.github.julyss2019.mcsp.julyguild.command.ReloadCommand;
 import com.github.julyss2019.mcsp.julyguild.config.ConfigGuildIcon;
-import com.github.julyss2019.mcsp.julyguild.config.GUISettings;
 import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
+import com.github.julyss2019.mcsp.julyguild.config.IconShopSettings;
 import com.github.julyss2019.mcsp.julyguild.guild.CacheGuildManager;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;
 import com.github.julyss2019.mcsp.julyguild.listener.GUIListener;
 import com.github.julyss2019.mcsp.julyguild.listener.TpAllListener;
 import com.github.julyss2019.mcsp.julyguild.log.GuildLog;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
+import com.github.julyss2019.mcsp.julyguild.tasks.RequestCleanTask;
+import com.github.julyss2019.mcsp.julyguild.util.Util;
 import com.github.julyss2019.mcsp.julylibrary.command.JulyCommandExecutor;
 import com.github.julyss2019.mcsp.julylibrary.config.JulyConfig;
 import com.github.julyss2019.mcsp.julylibrary.logger.FileLogger;
 import com.github.julyss2019.mcsp.julylibrary.logger.JulyFileLogger;
-import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import com.google.gson.Gson;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.milkbowl.vault.economy.Economy;
@@ -24,27 +26,30 @@ import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
 
 public class JulyGuild extends JavaPlugin {
-    public static final String CONFIG_VERSION = "1.3.6";
+    public static final String CONFIG_VERSION = "1.3.9";
     private static final Gson gson = new Gson();
     private static JulyGuild instance;
     private GuildManager guildManager;
     private GuildPlayerManager guildPlayerManager;
     private CacheGuildManager cacheGuildManager;
     private GuildSettings guildSettings;
-    private GUISettings guiSettings;
+    private IconShopSettings iconShopSettings;
     private String[] initFolderPaths = new String[] {"players", "guilds", "logs"};
+    private String[] initFilePaths = new String[] {"config.yml", "icon_shop.yml", "guild_shop.yml"};
     private JulyCommandExecutor julyCommandExecutor;
     private PlayerPointsAPI playerPointsAPI;
     private Economy vaultAPI;
     private FileLogger fileLogger;
     private PlaceholderAPIExpansion placeholderAPIExpansion;
-    private TpAllListener tpAllListener;
 
     @Override
     public void onEnable() {
@@ -64,29 +69,21 @@ public class JulyGuild extends JavaPlugin {
         this.guildManager = new GuildManager();
         this.cacheGuildManager = new CacheGuildManager();
         this.placeholderAPIExpansion = new PlaceholderAPIExpansion();
-        this.tpAllListener = new TpAllListener();
 
         if (!placeholderAPIExpansion.register()) {
             getLogger().warning("PlaceholderAPI Hook 失败!");
         }
 
-        JulyMessage.setPrefix(this, "§a[宗门] §f");
+        julyCommandExecutor.setPrefix("§a[宗门] §f");
         guildManager.loadGuilds();
         cacheGuildManager.startTask();
 
-        JulyMessage.sendColoredMessage(Bukkit.getConsoleSender(), "载入了 " + guildManager.getGuilds().size() + "个 宗门.");
-        getCommand("guild").setExecutor(julyCommandExecutor);
+        Util.sendColoredMessage(Bukkit.getConsoleSender(), "载入了 " + guildManager.getGuilds().size() + "个 宗门.");
+        getCommand("jguild").setExecutor(julyCommandExecutor);
         registerCommands();
         registerListeners();
-        JulyMessage.sendColoredMessage(Bukkit.getConsoleSender(), "插件初始化完毕, 作者QQ: 884633197.");
-    }
-
-    public GUISettings getGuiSettings() {
-        return guiSettings;
-    }
-
-    public CacheGuildManager getCacheGuildManager() {
-        return cacheGuildManager;
+        runTasks();
+        Util.sendColoredMessage(Bukkit.getConsoleSender(), "插件初始化完毕, 作者QQ: 884633197, 接MC插件定制.");
     }
 
     @Override
@@ -94,15 +91,25 @@ public class JulyGuild extends JavaPlugin {
         if (PlaceholderAPI.isRegistered("guild")) {
             PlaceholderAPI.unregisterExpansion(placeholderAPIExpansion);
         }
+
+        Util.sendColoredMessage(Bukkit.getConsoleSender(), "插件被卸载, 作者QQ: 884633197, 接MC插件定制.");
+    }
+
+    private void runTasks() {
+        new RequestCleanTask().runTaskTimerAsynchronously(this, 0L, 20L);
+    }
+
+    public CacheGuildManager getCacheGuildManager() {
+        return cacheGuildManager;
+    }
+
+    public IconShopSettings getIconShopSettings() {
+        return iconShopSettings;
     }
 
     private void registerListeners() {
         Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
-        Bukkit.getPluginManager().registerEvents(tpAllListener, this);
-    }
-
-    public TpAllListener getTpAllListener() {
-        return tpAllListener;
+        Bukkit.getPluginManager().registerEvents(new TpAllListener(), this);
     }
 
     public void writeGuildLog(FileLogger.LoggerLevel loggerLevel, GuildLog log) {
@@ -135,6 +142,7 @@ public class JulyGuild extends JavaPlugin {
 
     private void registerCommands() {
         registerCommand(new MainGUICommand());
+        registerCommand(new ReloadCommand());
     }
 
     private void registerCommand(Command command) {
@@ -147,12 +155,29 @@ public class JulyGuild extends JavaPlugin {
 
             if (!folder.exists()) {
                 if (!folder.mkdirs()) {
-                    getLogger().severe("创建文件夹 " + folderPath + " 失败.");
                     setEnabled(false);
-                    return;
+                    throw new RuntimeException("&c创建文件夹失败: " + folderPath);
                 }
             }
         }
+
+        for (String filePath : initFilePaths) {
+            File file = new File(getDataFolder(), filePath);
+
+            if (!file.exists()) {
+                saveResource(filePath, false);
+            }
+        }
+    }
+
+    public void reloadPluginConfig() {
+        guildSettings.reset();
+        iconShopSettings.reset();
+
+        JulyConfig.reloadConfig(this, YamlConfiguration.loadConfiguration(new File(getDataFolder(), "config.yml")), guildSettings);
+        JulyConfig.reloadConfig(this, YamlConfiguration.loadConfiguration(new File(getDataFolder(), "icon_shop.yml")), iconShopSettings);
+
+        loadSpecialConfig();
     }
 
     private void loadConfig() {
@@ -161,21 +186,29 @@ public class JulyGuild extends JavaPlugin {
 
         // 如果配置版本不一样，重命名文件，创建新的配置
         if (!CONFIG_VERSION.equals(oldConfigVersion)) {
-            new File(getDataFolder(), "config.yml").renameTo(new File(getDataFolder(), "config.yml." + oldConfigVersion));
+            File configFile = new File(getDataFolder(), "config.yml");
+
+            if (configFile.exists() && !configFile.renameTo(new File(getDataFolder(), "config.yml." + oldConfigVersion))) {
+                throw new RuntimeException("&c配置文件更新失败.");
+            }
+
             getLogger().warning("配置文件版本不一致, 将重新生成(" + oldConfigVersion + "->" + CONFIG_VERSION + ")");
             saveDefaultConfig();
             loadConfig();
             return;
         }
 
-        guildSettings = (GuildSettings) JulyConfig.loadConfig(this, getConfig(), GuildSettings.class);
-        guiSettings = (GUISettings) JulyConfig.loadConfig(this, getConfig().getConfigurationSection("gui"), GUISettings.class);
+        this.guildSettings = (GuildSettings) JulyConfig.loadConfig(this, YamlConfiguration.loadConfiguration(new File(getDataFolder(), "config.yml")), GuildSettings.class);
+        this.iconShopSettings = (IconShopSettings) JulyConfig.loadConfig(this, YamlConfiguration.loadConfiguration(new File(getDataFolder(), "icon_shop.yml")), IconShopSettings.class);
+
         loadSpecialConfig();
     }
 
     private void loadSpecialConfig() {
-        if (getConfig().contains("guild.icon_shop.items")) {
-            ConfigurationSection iconItemSection = getConfig().getConfigurationSection("guild.icon_shop.items");
+        FileConfiguration iconShopConfig = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "icon_shop.yml"));
+
+        if (iconShopConfig.contains("items")) {
+            ConfigurationSection iconItemSection = iconShopConfig.getConfigurationSection("items");
 
             for (String key : iconItemSection.getKeys(false)) {
                 ConfigurationSection itemSection = iconItemSection.getConfigurationSection(key);
@@ -190,7 +223,7 @@ public class JulyGuild extends JavaPlugin {
                 configGuildIcon.setMoneyCost(itemSection.getInt("cost.money.amount"));
                 configGuildIcon.setPointsCost(itemSection.getInt("cost.points.amount"));
 
-                guildSettings.getIconShopItems().add(configGuildIcon);
+                iconShopSettings.addConfigGuildIcon(configGuildIcon);
             }
         }
     }

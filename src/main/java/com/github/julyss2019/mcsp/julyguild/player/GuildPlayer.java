@@ -47,7 +47,7 @@ public class GuildPlayer {
      * @param usingGUI
      */
     public void setUsingGUI(GUI usingGUI) {
-        if (!isOnline()) {
+        if (!isOnline() && usingGUI != null) {
             throw new IllegalStateException("离线状态下不能设置GUI");
         }
 

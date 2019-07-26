@@ -6,6 +6,7 @@ import com.github.julyss2019.mcsp.julyguild.gui.BaseGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.util.Util;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryListener;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
@@ -50,16 +51,15 @@ public class GuildCreateGUI extends BaseGUI {
             @Override
             public void onClose(InventoryCloseEvent event) {
                 if (noAction) {
-                    JulyMessage.sendColoredMessages(bukkitPlayer, "&c创建宗门失败!");
+                    Util.sendColoredMessage(bukkitPlayer, "&c创建宗门失败!");
                 }
             }
         });
 
         inventoryBuilder.item(1, 2, new ItemBuilder()
                 .material(settings.isGuildCreateCostMoneyEnabled() ? Material.GOLD_INGOT : Material.BARRIER)
-                .displayName("&f使用 &a金币x" + settings.getGuildCreateCostMoneyAmount() + " &f支付")
-                .addLore("")
-                .addLore(settings.isGuildCreateCostMoneyEnabled() ? "&a• &d点击支付&a •" : "&a• &c未启用 &a•")
+                .displayName("&f使用 &e金币x" + settings.getGuildCreateCostMoneyAmount() + " &f支付")
+                .addLore(settings.isGuildCreateCostMoneyEnabled() ? "&b>> &a点击支付" : "&b>> &c未启用")
                 .addLore("")
                 .addLore("&7- &e公会名 &b▹ &f" + guildName)
                 .colored()
@@ -73,14 +73,14 @@ public class GuildCreateGUI extends BaseGUI {
                         close();
 
                         if (guildPlayer.isInGuild()) {
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c你已经在一个宗门里了.");
+                            Util.sendColoredMessage(bukkitPlayer, "&c你已经在一个宗门里了.");
                             return;
                         }
 
                         double playerMoney = vault.getBalance(bukkitPlayer);
 
                         if (playerMoney < settings.getGuildCreateCostMoneyAmount()) {
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e" + (settings.getGuildCreateCostMoneyAmount() - playerMoney) + "个 &c金币!");
+                            Util.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e" + (settings.getGuildCreateCostMoneyAmount() - playerMoney) + "个 &c金币!");
                             return;
                         }
 
@@ -92,9 +92,8 @@ public class GuildCreateGUI extends BaseGUI {
 
         inventoryBuilder.item(1, 4, new ItemBuilder()
                 .material(settings.isGuildCreateCostPointsEnabled() ? Material.DIAMOND : Material.BARRIER)
-                .displayName("&f使用 &a点券x" + settings.getGuildCreateCostPointsAmount() + " &f支付")
-                .addLore("")
-                .addLore(settings.isGuildCreateCostPointsEnabled() ? "&a• &d点击支付&a •" : "&a• &c未启用 &a•")
+                .displayName("&f使用 &e点券x" + settings.getGuildCreateCostPointsAmount() + " &f支付")
+                .addLore(settings.isGuildCreateCostPointsEnabled() ? "&b>> &a点击支付" : "&b>> &c未启用")
                 .addLore("")
                 .addLore("&7- &e公会名 &b▹ &f" + guildName)
                 .enchant(Enchantment.DURABILITY, 1)
@@ -108,14 +107,14 @@ public class GuildCreateGUI extends BaseGUI {
                         close();
 
                         if (guildPlayer.isInGuild()) {
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c你已经在一个宗门里了.");
+                            Util.sendColoredMessage(bukkitPlayer, "&c你已经在一个宗门里了.");
                             return;
                         }
 
                         int playerPoints = playerPointsAPI.look(bukkitPlayer.getUniqueId());
 
                         if (playerPoints < settings.getGuildCreateCostPointsAmount()) {
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e" + (settings.getGuildCreateCostPointsAmount() - playerPoints) + "个 &c点券!");
+                            Util.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e" + (settings.getGuildCreateCostPointsAmount() - playerPoints) + "个 &c点券!");
                             return;
                         }
 
@@ -127,9 +126,8 @@ public class GuildCreateGUI extends BaseGUI {
 
         inventoryBuilder.item(1, 6, new ItemBuilder()
                 .material(settings.isGuildCreateCostItemEnabled() ? Material.NAME_TAG : Material.BARRIER)
-                .displayName("&f使用 &a建帮令x" + settings.getGuildCreateCostItemAmount() + " &f支付")
-                .addLore("")
-                .addLore(settings.isGuildCreateCostItemEnabled() ? "&a• &d点击支付&a •" : "&a• &c未启用 &a•")
+                .displayName("&f使用 &e建帮令x" + settings.getGuildCreateCostItemAmount() + " &f支付")
+                .addLore(settings.isGuildCreateCostItemEnabled() ? "&b>> &a点击支付" : "&b>> &c未启用")
                 .addLore("")
                 .addLore("&7- &e公会名 &b▹ &f" + guildName)
                 .colored()
@@ -143,7 +141,7 @@ public class GuildCreateGUI extends BaseGUI {
                         close();
 
                         if (guildPlayer.isInGuild()) {
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c你已经在一个宗门里了.");
+                            Util.sendColoredMessage(bukkitPlayer, "&c你已经在一个宗门里了.");
                             return;
                         }
 
@@ -164,7 +162,7 @@ public class GuildCreateGUI extends BaseGUI {
                             }
                         }
 
-                        JulyMessage.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e建帮令x" + settings.getGuildCreateCostItemAmount() + "&c(请重叠放置).");
+                        Util.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e建帮令x" + settings.getGuildCreateCostItemAmount() + "&c(请重叠放置).");
                     }
                 } : null);
 
@@ -175,13 +173,13 @@ public class GuildCreateGUI extends BaseGUI {
         Player bukkitPlayer = guildPlayer.getBukkitPlayer();
 
         guildManager.createGuild(guildPlayer, guildName);
-        JulyMessage.sendColoredMessage(bukkitPlayer, "&d恭喜 &e" + bukkitPlayer.getName() + " &d创建宗门 &e" + guildName + " &d成功!");
+        JulyMessage.broadcastColoredMessage("&d恭喜 &e" + bukkitPlayer.getName() + " &d创建宗门 &e" + guildName + " &d成功!");
         JulyMessage.sendTitle(bukkitPlayer, new TitleBuilder().text("&d创建宗门成功").colored().build());
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                bukkitPlayer.performCommand("guild main");
+                bukkitPlayer.performCommand("jguild main");
             }
         }.runTaskLater(plugin, 60L);
     }

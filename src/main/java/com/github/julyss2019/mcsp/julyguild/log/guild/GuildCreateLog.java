@@ -3,11 +3,11 @@ package com.github.julyss2019.mcsp.julyguild.log.guild;
 import com.github.julyss2019.mcsp.julyguild.log.BaseGuildLog;
 import com.github.julyss2019.mcsp.julyguild.log.GuildLogType;
 
-public class GuildCreateGuildLog extends BaseGuildLog {
+public class GuildCreateLog extends BaseGuildLog {
     private String owner;
     private String guildName;
 
-    public GuildCreateGuildLog(String guildUUID, String guildName, String owner) {
+    public GuildCreateLog(String guildUUID, String guildName, String owner) {
         super(GuildLogType.CREATE, guildUUID);
 
         this.owner = owner;

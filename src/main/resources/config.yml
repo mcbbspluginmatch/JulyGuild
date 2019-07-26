@@ -1,8 +1,12 @@
-config_version: 1.3.6
+config_version: 1.3.9
 guild:
   # 排行榜
   ranking_list:
-    # 计算公式
+    # 计算公式，可用变量：
+    # %GUILD_MONEY% 宗门金币
+    # %GUILD_POINTS% 宗门点券
+    # %GUILD_MEMBER_COUNT% 宗门成员数
+    # %GUILD_MAX_MEMBER_COUNT% 宗门最大成员数
     formula: '%GUILD_MONEY%*0.3+%GUILD_POINTS%*0.5+%GUILD_MEMBER_COUNT%*0.2'
   # 全员传送
   tp_all:
@@ -33,41 +37,6 @@ guild:
     point_formula: '5*(1+0.05)^%GUILD_MAX_MEMBER_COUNT%'
     # 金币最大能升级到的人数
     point_max_member_count: 50
-  # 默认图标
-  def_icon:
-    material: APPLE
-    durability: 0
-  # 宗门图标商店
-  icon_shop:
-    items:
-      '1':
-        material: STONE
-        durability: 0
-        display_name: '&f石头'
-        lores:
-          - '&7- &e花费 &b▹ 点券/金币'
-          - '&7- &d价格 &b▹ &d1000/500'
-        cost:
-          points:
-            amount: 1000
-            enabled: true
-          money:
-            amount: 500
-            enabled: false
-      '2':
-        material: DIAMOND
-        durability: 0
-        display_name: '&d钻石'
-        lores:
-          - '&7- &e花费 &b▹ 点券/金币'
-          - '&7- &d价格 &b▹ &d1000/1000'
-        cost:
-          points:
-            amount: 1000
-            enabled: true
-          money:
-            amount: 1000
-            enabled: true
   # 赞助
   donate:
     # 最小点券
@@ -119,11 +88,11 @@ gui:
       lores:
         - '&b『Top.%GUILD_RANKING%&b』'
         - ' '
-        - '&7- &d宗主 &b▹ &d%GUILD_OWNER%'
-        - '&7- &a人数 &b▹ &a%GUILD_MEMBER_COUNT%/%GUILD_MAX_MEMBER_COUNT%'
-        - '&7- &e金币储备 &b▹ &e%GUILD_MONEY%'
-        - '&7- &e点券储备 &b▹ &e%GUILD_POINTS%'
-        - '&7- &9创建时间 &b▹ &9%GUILD_CREATION_TIME%'
+        - '&d宗主&f: &d%GUILD_OWNER%'
+        - '&a人数&f: &a%GUILD_MEMBER_COUNT%/%GUILD_MAX_MEMBER_COUNT%'
+        - '&e金币储备&f: &e%GUILD_MONEY%'
+        - '&e点券储备&f: &e%GUILD_POINTS%'
+        - '&9创建时间&f: &9%GUILD_CREATION_TIME%'
   main_gui:
     # 排行榜
     ranking_list:
@@ -131,11 +100,11 @@ gui:
       lores:
         - '&b『&bTop.%GUILD_RANKING%&b』'
         - ' '
-        - '&7- &d宗主 &b▹ &d%GUILD_OWNER%'
-        - '&7- &a人数 &b▹ &a%GUILD_MEMBER_COUNT%/%GUILD_MAX_MEMBER_COUNT%'
-        - '&7- &e金币储备 &b▹ &e%GUILD_MONEY%'
-        - '&7- &e点券储备 &b▹ &e%GUILD_POINTS%'
-        - '&7- &9创建时间 &b▹ &9%GUILD_CREATION_TIME%'
+        - '&d宗主&f: &d%GUILD_OWNER%'
+        - '&a人数&f: &a%GUILD_MEMBER_COUNT%/%GUILD_MAX_MEMBER_COUNT%'
+        - '&e金币储备&f: &e%GUILD_MONEY%'
+        - '&e点券储备&f: &e%GUILD_POINTS%'
+        - '&9创建时间&f: &9%GUILD_CREATION_TIME%'
   mine_gui:
     # 个人信息
     player_info:
@@ -143,8 +112,8 @@ gui:
       lores:
         - '&b• &7%player_name%&b •'
         - ' '
-        - '&7- &a所在宗门 &b▹ &a%GUILD_NAME%'
-        - '&7- &d职务 &b▹ &d%GUILD_MEMBER_PER%'
-        - '&7- &e金币贡献 &b▹ &e%GUILD_MEMBER_DONATE_MONEY%'
-        - '&7- &e金币贡献 &b▹ &e%GUILD_MEMBER_DONATE_POINTS%'
-        - '&7- &9入宗时间 &b▹ &9%GUILD_MEMBER_JOIN_TIME%'
+        - '&a所在宗门&f: &a%GUILD_NAME%'
+        - '&d职务&f: &d%GUILD_MEMBER_PER%'
+        - '&e金币贡献&f: &e%GUILD_MEMBER_DONATE_MONEY%'
+        - '&e点券贡献&f: &e%GUILD_MEMBER_DONATE_POINTS%'
+        - '&9入宗时间&f: &9%GUILD_MEMBER_JOIN_TIME%'

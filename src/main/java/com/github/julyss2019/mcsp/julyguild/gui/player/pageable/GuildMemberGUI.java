@@ -90,15 +90,16 @@ public class GuildMemberGUI extends BasePageableGUI {
         for (int i = 0; i < loopCount; i++) {
             GuildMember member = members.get(itemCounter++);
             Permission permission = member.getPermission();
+            String memberName = member.getName();
 
             inventoryBuilder.item(i, new SkullItemBuilder()
-                    .texture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjIxYWIzMWE0MjczOWEzNTI3ZDMwNWNjOTU2YWVlNGQ2YmEzNDU1NTQzODFhNmE0YzRmZjA2YTFjMTlmZGQ0In19fQ==")
-                    .displayName("&f" + member.getName())
-                    .addLore("&b• " + permission.getColor() + permission.getChineseName() + " &b•")
+                    .owner(memberName)
+                    .displayName("&f" + memberName)
+                    .addLore(permission.getColor() + permission.getChineseName())
                     .addLore("")
-                    .addLore("&7- &e金币贡献 &b▹ &e" + member.getDonatedMoney())
-                    .addLore("&7- &d点券贡献 &b▹ &d" + member.getDonatedPoints())
-                    .addLore("&7- &9入宗时间 &b▹ &9" + Util.YMD_SDF.format(member.getJoinTime()))
+                    .addLore("&e金币贡献 &b▹ &e" + member.getDonatedMoney())
+                    .addLore("&d点券贡献 &b▹ &d" + member.getDonatedPoints())
+                    .addLore("&9入宗时间 &b▹ &9" + Util.YMD_SDF.format(member.getJoinTime()))
                     .colored()
                     .build());
         }

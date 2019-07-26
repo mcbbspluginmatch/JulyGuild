@@ -1,11 +1,7 @@
 package com.github.julyss2019.mcsp.julyguild.config;
 
 import com.github.julyss2019.mcsp.julylibrary.config.Config;
-import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class GuildSettings {
@@ -51,9 +47,6 @@ public class GuildSettings {
     @Config(path = "guild.request.join.timeout")
     private int guildRequestJoinTimeout;
 
-    //@Config(path = "guild.request.invite.timeout")
-    private int guildRequestInviteTimeout;
-
     @Config(path = "guild.def_max_admin_count")
     private int guildDefMaxAdminCount;
 
@@ -62,12 +55,6 @@ public class GuildSettings {
 
     @Config(path = "guild.donate.min_points")
     private int donateMinPoints;
-
-    @Config(path = "guild.def_icon.material")
-    private Material defIconMaterial;
-
-    @Config(path = "guild.def_icon.durability")
-    private short defIconDurability;
 
     @Config(path = "guild.promote.money_formula")
     private String promoteMoneyFormula;
@@ -108,6 +95,13 @@ public class GuildSettings {
     @Config(path = "guild.tp_all.allowed_receive_worlds")
     private List<String> tpAllAllowedReceiveWorlds;
 
+    public GuildSettings() {}
+
+
+    public void reset() {
+
+    }
+
     public String getRankingListFormula() {
         return rankingListFormula;
     }
@@ -132,8 +126,6 @@ public class GuildSettings {
         return announcementDef;
     }
 
-    private List<ConfigGuildIcon> iconShopItems = new ArrayList<>();
-
     public int getTpAllShiftTimeout() {
         return tpAllShiftTimeout;
     }
@@ -150,11 +142,6 @@ public class GuildSettings {
         return tpAllShiftCount;
     }
 
-
-    public List<ConfigGuildIcon> getIconShopItems() {
-        return iconShopItems;
-    }
-
     public String getPromoteMoneyFormula() {
         return promoteMoneyFormula;
     }
@@ -169,18 +156,6 @@ public class GuildSettings {
 
     public int getPromotePointMaxMemberCount() {
         return promotePointMaxMemberCount;
-    }
-
-    public Material getDefIconMaterial() {
-        return defIconMaterial;
-    }
-
-    public short getDefIconDurability() {
-        return defIconDurability;
-    }
-
-    public ItemStack getDefIconItem() {
-        return new ItemBuilder().material(defIconMaterial).durability(defIconDurability).build();
     }
 
     public int getDonateMinMoney() {
@@ -243,11 +218,45 @@ public class GuildSettings {
         return guildRequestJoinTimeout;
     }
 
-    public int getGuildRequestInviteTimeout() {
-        return guildRequestInviteTimeout;
-    }
-
     public int getGuildDefMaxAdminCount() {
         return guildDefMaxAdminCount;
+    }
+
+    @Config(path = "gui.global.guild_info.display_name")
+    private String globalGuildInfoDisplayName;
+    @Config(path = "gui.global.guild_info.lores")
+    private List<String> globalGuildInfoLores;
+    @Config(path = "gui.main_gui.ranking_list.display_name")
+    private String mainGUIRankingListDisplayName;
+    @Config(path = "gui.main_gui.ranking_list.lores")
+    private List<String> mainGUIRankingListLores;
+    @Config(path = "gui.mine_gui.player_info.display_name")
+    private String mineGUIPlayerInfoDisplayName;
+    @Config(path = "gui.mine_gui.player_info.lores")
+    private List<String> mineGUIPlayerInfoLores;
+
+
+    public String getGlobalGuildInfoDisplayName() {
+        return globalGuildInfoDisplayName;
+    }
+
+    public List<String> getGlobalGuildInfoLores() {
+        return globalGuildInfoLores;
+    }
+
+    public String getMainGUIRankingListDisplayName() {
+        return mainGUIRankingListDisplayName;
+    }
+
+    public List<String> getMainGUIRankingListLores() {
+        return mainGUIRankingListLores;
+    }
+
+    public String getMineGUIPlayerInfoDisplayName() {
+        return mineGUIPlayerInfoDisplayName;
+    }
+
+    public List<String> getMineGUIPlayerInfoLores() {
+        return mineGUIPlayerInfoLores;
     }
 }

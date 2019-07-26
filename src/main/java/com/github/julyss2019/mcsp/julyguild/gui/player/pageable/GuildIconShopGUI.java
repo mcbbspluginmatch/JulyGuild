@@ -3,6 +3,7 @@ package com.github.julyss2019.mcsp.julyguild.gui.player.pageable;
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.config.ConfigGuildIcon;
 import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
+import com.github.julyss2019.mcsp.julyguild.config.IconShopSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.BasePageableGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
@@ -10,11 +11,13 @@ import com.github.julyss2019.mcsp.julyguild.gui.player.GuildIconBuyGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.player.GuildManageGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.util.Util;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryListener;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
-import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
+import com.github.julyss2019.mcsp.julylibrary.map.MapBuilder;
+import com.github.julyss2019.mcsp.julylibrary.utils.StrUtil;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -26,7 +29,7 @@ import java.util.List;
 public class GuildIconShopGUI extends BasePageableGUI {
     private Inventory inventory;
     private static JulyGuild plugin = JulyGuild.getInstance();
-    private static GuildSettings guildSettings = plugin.getGuildSettings();
+    private static IconShopSettings iconShopSettings = plugin.getIconShopSettings();
 
     private List<ConfigGuildIcon> icons = new ArrayList<>();
     private Guild guild;
@@ -43,7 +46,7 @@ public class GuildIconShopGUI extends BasePageableGUI {
         super.setCurrentPage(page);
 
         icons.clear();
-        icons.addAll(guildSettings.getIconShopItems());
+        icons.addAll(iconShopSettings.getConfigGuildIcons());
 
         InventoryBuilder inventoryBuilder = new InventoryBuilder().title("&e&l图标商店").row(6).colored().listener(new InventoryListener() {
             @Override
@@ -54,7 +57,7 @@ public class GuildIconShopGUI extends BasePageableGUI {
                     ConfigGuildIcon configGuildIcon = icons.get(index);
 
                     if (guild.isOwnedIcon(configGuildIcon.getMaterial(), configGuildIcon.getDurability())) {
-                        JulyMessage.sendColoredMessage(bukkitPlayer, "&c宗门已经拥有这个图标了.");
+                        Util.sendColoredMessage(bukkitPlayer, "&c宗门已经拥有这个图标了.");
                         return;
                     }
 
@@ -106,10 +109,10 @@ public class GuildIconShopGUI extends BasePageableGUI {
                     .material(icon.getMaterial())
                     .durability(icon.getDurability())
                     .displayName(icon.getDisplayName())
+                    .addLore(isOwned ? "&b>> &a已拥有 &b•" : "&b>> &a点击购买")
                     .addLore("")
-                    .addLore(isOwned ? "&b• &a已拥有 &b•" : "&b• &c点击购买 &b•")
-                    .addLore("")
-                    .addLores(icon.getLores())
+                    .addLores(StrUtil.replacePlaceholders(icon.getLores(),
+                            new MapBuilder<String, String>().put("{MONEY}", String.valueOf(icon.getMoneyCost())).put("{POINTS}", String.valueOf(icon.getPointsCost())).build()))
                     .colored();
 
             if (isOwned) {

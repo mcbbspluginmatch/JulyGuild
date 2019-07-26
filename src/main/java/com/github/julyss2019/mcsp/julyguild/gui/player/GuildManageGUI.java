@@ -10,18 +10,15 @@ import com.github.julyss2019.mcsp.julyguild.gui.player.pageable.GuildIconShopGUI
 import com.github.julyss2019.mcsp.julyguild.gui.player.pageable.GuildMemberManageGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.player.pageable.GuildPlayerRequestGUI;
 import com.github.julyss2019.mcsp.julyguild.guild.Guild;
-import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
 import com.github.julyss2019.mcsp.julyguild.guild.player.Permission;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
-import com.github.julyss2019.mcsp.julyguild.player.request.TpRequest;
 import com.github.julyss2019.mcsp.julyguild.util.Util;
 import com.github.julyss2019.mcsp.julylibrary.chat.ChatListener;
 import com.github.julyss2019.mcsp.julylibrary.chat.JulyChatFilter;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
-import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
-import com.github.julyss2019.mcsp.julylibrary.message.TitleBuilder;
+import com.github.julyss2019.mcsp.julylibrary.item.SkullItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -66,10 +63,8 @@ public class GuildManageGUI extends BaseGUI {
             inventoryBuilder
                     .item(1, 2, new ItemBuilder()
                                     .material(Material.GOLD_BARDING)
-                                    .displayName("&a审批玩家")
-                                    .addLore("")
-                                    .addLore("&7- &f处理玩家加入宗门的请求")
-                                    .addLore("")
+                                    .displayName("&f审批玩家")
+                                    .addLore("&b>> &a处理玩家加入宗门的请求")
                                     .enchant(Enchantment.DURABILITY, 1)
                                     .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                                     .colored()
@@ -84,10 +79,9 @@ public class GuildManageGUI extends BaseGUI {
 
                     .item(1, 3, new ItemBuilder()
                             .material(Material.PAINTING)
-                            .displayName("&a设置公告")
-                            .addLore("")
-                            .addLore("&7- &f点击设置公告")
-                            .addLore("&7- &F玩家可以在宗门介绍页和我的宗门中看见公告")
+                            .displayName("&f设置公告")
+                            .addLore("&b>> &a点击设置公告")
+                            .addLore("&b>> &a玩家可以在宗门介绍页和我的宗门中看见公告")
                             .addLore("")
                             .addLores(guild.getAnnouncements())
                             .colored()
@@ -97,7 +91,7 @@ public class GuildManageGUI extends BaseGUI {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
                             close();
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&e请在聊天栏输入并发送要设置的公告, 使用符号 &c" + guildSettings.getGuildAnnouncementSplitChar() + " &e来换行, 最多支持 &c" + guildSettings.getGuildAnnouncementMaxCount() + "行&e: ");
+                            Util.sendColoredMessage(bukkitPlayer, "&e请在聊天栏输入并发送要设置的公告, 使用符号 &c" + guildSettings.getGuildAnnouncementSplitChar() + " &e来换行, 最多支持 &c" + guildSettings.getGuildAnnouncementMaxCount() + "行&e: ");
 
                             JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
                                 @Override
@@ -107,24 +101,22 @@ public class GuildManageGUI extends BaseGUI {
                                     String[] messages = event.getMessage().split(guildSettings.getGuildAnnouncementSplitChar());
 
                                     if (messages.length > guildSettings.getGuildAnnouncementMaxCount()) {
-                                        JulyMessage.sendColoredMessage(bukkitPlayer, "&c公告最多能设置 &e" + guildSettings.getGuildAnnouncementMaxCount() + "条&c, 使用分隔符 &e" + guildSettings.getGuildAnnouncementSplitChar() + " &c换行.");
+                                        Util.sendColoredMessage(bukkitPlayer, "&c公告最多能设置 &e" + guildSettings.getGuildAnnouncementMaxCount() + "条&c, 使用分隔符 &e" + guildSettings.getGuildAnnouncementSplitChar() + " &c换行.");
                                         return;
                                     }
 
                                     guild.setAnnouncements(Arrays.asList(messages));
-                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&d设置公告成功!");
+                                    Util.sendColoredMessage(bukkitPlayer, "&d设置公告成功!");
                                     JulyChatFilter.unregisterChatFilter(bukkitPlayer);
                                 }
                             });
                         }
                     })
 
-                    .item(1, 4, new ItemBuilder()
-                                    .material(Material.TOTEM)
-                                    .displayName("&a成员管理").colored()
-                                    .addLore("")
-                                    .addLore("&7- &f任职或移出成员")
-                                    .addLore("")
+                    .item(1, 4, new SkullItemBuilder()
+                                    .owner("Notch")
+                                    .displayName("&f成员管理").colored()
+                                    .addLore("&b>> &a任职或移出成员")
                                     .enchant(Enchantment.DURABILITY, 1)
                                     .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                                     .build()
@@ -137,11 +129,9 @@ public class GuildManageGUI extends BaseGUI {
                             })
 
                     .item(1, 5, new ItemBuilder()
-                            .material(Material.BLAZE_POWDER)
-                            .displayName("&a宗门升级")
-                            .addLore("")
-                            .addLore("&7- &f升级宗门最大人数")
-                            .addLore("")
+                            .material(Material.EXP_BOTTLE)
+                            .displayName("&f宗门升级")
+                            .addLore("&b>> &a升级宗门最大人数")
                             .enchant(Enchantment.DURABILITY, 1)
                             .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                             .colored()
@@ -154,11 +144,9 @@ public class GuildManageGUI extends BaseGUI {
                     })
 
                     .item(1, 6, new ItemBuilder()
-                            .material(Material.BEACON)
-                            .displayName("&a图标购买")
-                            .addLore("")
-                            .addLore("&7- &f点击购买宗门图标")
-                            .addLore("")
+                            .material(Material.DOUBLE_PLANT)
+                            .displayName("&f图标购买")
+                            .addLore("&b>> &a点击购买宗门图标")
                             .colored()
                             .enchant(Enchantment.DURABILITY, 1)
                             .addItemFlag(ItemFlag.HIDE_ENCHANTS)
@@ -171,10 +159,12 @@ public class GuildManageGUI extends BaseGUI {
                     })
 
                     .item(2, 2, new ItemBuilder()
-                            .material(Material.END_CRYSTAL)
-                            .displayName("&a图标仓库")
+                            .material(Material.PAPER)
+                            .enchant(Enchantment.DURABILITY, 1)
+                            .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                            .displayName("&f图标仓库")
                             .colored()
-                            .addLore("&7- &f设置你购买的的宗门图标")
+                            .addLore("&b>> &a设置你购买的的宗门图标")
                             .build(), new ItemListener() {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
@@ -185,7 +175,7 @@ public class GuildManageGUI extends BaseGUI {
 
                     .item(2, 3, new ItemBuilder()
                             .material(Material.NAME_TAG)
-                            .displayName("&a转让宗门")
+                            .displayName("&f转让宗门")
                             .colored()
                             .enchant(Enchantment.DURABILITY, 1)
                             .addItemFlag(ItemFlag.HIDE_ENCHANTS)
@@ -193,7 +183,7 @@ public class GuildManageGUI extends BaseGUI {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
                             close();
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c如果要转让宗门, 请在 &e60秒内 &c输入欲转让给的成员ID: ");
+                            Util.sendColoredMessage(bukkitPlayer, "&c如果要转让宗门, 请在 &e60秒内 &c输入欲转让给的成员ID: ");
                             JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
                                 @Override
                                 public void onChat(AsyncPlayerChatEvent event) {
@@ -202,12 +192,12 @@ public class GuildManageGUI extends BaseGUI {
                                     String name = event.getMessage();
 
                                     if (name.equalsIgnoreCase(playerName)) {
-                                        JulyMessage.sendColoredMessage(bukkitPlayer, "&c你不能转让给你自己.");
+                                        Util.sendColoredMessage(bukkitPlayer, "&c你不能转让给你自己.");
                                         return;
                                     }
 
                                     if (!guild.isMember(name)) {
-                                        JulyMessage.sendColoredMessage(bukkitPlayer, "&c玩家 &e" + name + " &c不是你宗门的成员.");
+                                        Util.sendColoredMessage(bukkitPlayer, "&c玩家 &e" + name + " &c不是你宗门的成员.");
                                         return;
                                     }
 
@@ -218,7 +208,7 @@ public class GuildManageGUI extends BaseGUI {
                                         }
                                     }.runTaskLater(plugin, 1L);
 
-                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&d成功将宗门转让给 &e" + name + "&d.");
+                                    Util.sendColoredMessage(bukkitPlayer, "&d成功将宗门转让给 &e" + name + "&d.");
                                 }
                             }, 60);
                         }
@@ -226,10 +216,7 @@ public class GuildManageGUI extends BaseGUI {
 
                     .item(2, 4, new ItemBuilder()
                             .material(Material.CHEST)
-                            .displayName("&a宗门商店")
-                            .addLore("")
-                            .addLore("&c未开放")
-                            .addLore("")
+                            .displayName("&f宗门商店")
                             .enchant(Enchantment.DURABILITY, 1)
                             .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                             .addItemFlag(ItemFlag.HIDE_POTION_EFFECTS)
@@ -238,10 +225,8 @@ public class GuildManageGUI extends BaseGUI {
 
                     .item(2, 5, new ItemBuilder()
                             .material(Material.EYE_OF_ENDER)
-                            .displayName("&a全员集结令")
-                            .addLore("")
-                            .addLore("&7- &f请求全体成员传送到你所在的位置")
-                            .addLore("")
+                            .displayName("&f全员集结令")
+                            .addLore("&b>> &a请求全体成员传送到你所在的位置")
                             .enchant(Enchantment.DURABILITY, 1)
                             .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                             .colored()
@@ -253,7 +238,7 @@ public class GuildManageGUI extends BaseGUI {
                             long interval = (System.currentTimeMillis() - tpAllIntervalMap.getOrDefault(bukkitPlayer.getName(), 0L)) / 1000L;
 
                             if (interval < guildSettings.getTpAllInterval()) {
-                                JulyMessage.sendColoredMessage(bukkitPlayer, "&c冷却中: &e" + Util.getTimeLeftStr(guildSettings.getTpAllInterval() - interval) + "&c.");
+                                Util.sendColoredMessage(bukkitPlayer, "&c冷却中: &e" + Util.getTimeLeftStr(guildSettings.getTpAllInterval() - interval) + "&c.");
                                 return;
                             }
 
@@ -273,11 +258,11 @@ public class GuildManageGUI extends BaseGUI {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
                             close();
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c（该操作不可恢复，请谨慎操作）如果要解散宗门, 请在 &e10秒内 &c聊天栏输入并发送: &econfirm");
+                            Util.sendColoredMessage(bukkitPlayer, "&c（该操作不可恢复，请谨慎操作）如果要解散宗门, 请在 &e10秒内 &c聊天栏输入并发送: &econfirm");
                             JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
                                 @Override
                                 public void onTimeout() {
-                                    JulyMessage.sendColoredMessages(bukkitPlayer, "&c确认请求已超时.");
+                                    Util.sendColoredMessage(bukkitPlayer, "&c确认请求已超时.");
                                 }
 
                                 @Override
@@ -286,9 +271,9 @@ public class GuildManageGUI extends BaseGUI {
 
                                     if (event.getMessage().equals("confirm")) {
                                         guild.delete();
-                                        JulyMessage.sendColoredMessage(bukkitPlayer, "&d解散宗门成功.");
+                                        Util.sendColoredMessage(bukkitPlayer, "&d解散宗门成功.");
                                     } else {
-                                        JulyMessage.sendColoredMessage(bukkitPlayer, "&e解散宗门失败.");
+                                        Util.sendColoredMessage(bukkitPlayer, "&e解散宗门失败.");
                                     }
 
                                     JulyChatFilter.unregisterChatFilter(bukkitPlayer);
@@ -300,10 +285,8 @@ public class GuildManageGUI extends BaseGUI {
             inventoryBuilder
                     .item(1, 4, new ItemBuilder()
                                     .material(Material.GOLD_BARDING)
-                                    .displayName("&a审批玩家")
-                                    .addLore("")
-                                    .addLore("&7- &f处理玩家加入宗门的请求")
-                                    .addLore("")
+                                    .displayName("&f审批玩家")
+                                    .addLore("&b>> &a处理玩家加入宗门的请求")
                                     .enchant(Enchantment.DURABILITY, 1)
                                     .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                                     .colored()

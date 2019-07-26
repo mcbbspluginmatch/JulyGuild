@@ -1,8 +1,8 @@
 package com.github.julyss2019.mcsp.julyguild.gui.player;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
-import com.github.julyss2019.mcsp.julyguild.config.GUISettings;
 import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
+import com.github.julyss2019.mcsp.julyguild.config.IconShopSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.BaseGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
@@ -14,12 +14,13 @@ import com.github.julyss2019.mcsp.julyguild.guild.player.GuildAdmin;
 import com.github.julyss2019.mcsp.julyguild.guild.player.GuildMember;
 import com.github.julyss2019.mcsp.julyguild.guild.player.Permission;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
+import com.github.julyss2019.mcsp.julyguild.util.Util;
 import com.github.julyss2019.mcsp.julylibrary.chat.ChatListener;
 import com.github.julyss2019.mcsp.julylibrary.chat.JulyChatFilter;
 import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryBuilder;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
-import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
+import com.github.julyss2019.mcsp.julylibrary.item.SkullItemBuilder;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
@@ -37,7 +38,6 @@ import java.util.UUID;
 public class GuildMineGUI extends BaseGUI {
     private static JulyGuild plugin = JulyGuild.getInstance();
     private static GuildSettings guildSettings = plugin.getGuildSettings();
-    private static GUISettings guiSettings = plugin.getGuiSettings();
     private static Economy vault = plugin.getVaultAPI();
     private static PlayerPointsAPI playerPointsAPI = plugin.getPlayerPointsAPI();
 
@@ -67,7 +67,7 @@ public class GuildMineGUI extends BaseGUI {
             Permission permission = guildMember.getPermission();
 
             if (memberLores.size() < 10) {
-                memberLores.add("&7- " + permission.getColor() + "[" + permission.getChineseName() + "] " + guildMember.getName());
+                memberLores.add(permission.getColor() + "[" + permission.getChineseName() + "] " + guildMember.getName());
             } else {
                 break;
             }
@@ -77,8 +77,8 @@ public class GuildMineGUI extends BaseGUI {
                 // 宗门信息
                 .item(2, 5, new ItemBuilder().
                         material(Material.SIGN)
-                        .displayName(PlaceholderAPI.setPlaceholders(bukkitPlayer, guiSettings.getGlobalGuildInfoDisplayName()))
-                        .lores(PlaceholderAPI.setPlaceholders(bukkitPlayer, guiSettings.getGlobalGuildInfoLores()))
+                        .displayName(PlaceholderAPI.setPlaceholders(bukkitPlayer, guildSettings.getGlobalGuildInfoDisplayName()))
+                        .lores(PlaceholderAPI.setPlaceholders(bukkitPlayer, guildSettings.getGlobalGuildInfoLores()))
                         .colored()
                         .enchant(Enchantment.DURABILITY, 1)
                         .addItemFlag(ItemFlag.HIDE_ENCHANTS)
@@ -86,8 +86,8 @@ public class GuildMineGUI extends BaseGUI {
                 // 个人信息
                 .item(2, 3, new ItemBuilder().
                         material(Material.SIGN)
-                        .displayName(PlaceholderAPI.setPlaceholders(bukkitPlayer, guiSettings.getMineGUIPlayerInfoDisplayName()))
-                        .lores(PlaceholderAPI.setPlaceholders(bukkitPlayer, guiSettings.getMineGUIPlayerInfoLores()))
+                        .displayName(PlaceholderAPI.setPlaceholders(bukkitPlayer, guildSettings.getMineGUIPlayerInfoDisplayName()))
+                        .lores(PlaceholderAPI.setPlaceholders(bukkitPlayer, guildSettings.getMineGUIPlayerInfoLores()))
                         .colored()
                         .enchant(Enchantment.DURABILITY, 1)
                         .addItemFlag(ItemFlag.HIDE_ENCHANTS)
@@ -100,10 +100,10 @@ public class GuildMineGUI extends BaseGUI {
                         .enchant(Enchantment.DURABILITY, 1)
                         .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                         .build())
-                .item(3, 4, new ItemBuilder()
-                        .material(Material.TOTEM)
+                .item(3, 4, new SkullItemBuilder()
+                        .owner("Notch")
                         .displayName("&f宗门成员")
-                        .addLore("&B• &7点击查看详细信息 &b•")
+                        .addLore("&b>> &a点击查看详细信息")
                         .addLore("")
                         .addLores(memberLores)
                         .addLore(guild.getMemberCount() > 10 ? "&7和 &e" + (guild.getMemberCount() - 10) + "个 &7成员..." : null)
@@ -127,8 +127,8 @@ public class GuildMineGUI extends BaseGUI {
                     @Override
                     public void onClicked(InventoryClickEvent event) {
                         close();
-                        JulyMessage.sendColoredMessage(bukkitPlayer, "&d金币将存入宗门银行.");
-                        JulyMessage.sendColoredMessage(bukkitPlayer, "&e请在聊天栏输入并发送要赞助的金币数量: ");
+                        Util.sendColoredMessage(bukkitPlayer, "&d金币将存入宗门银行.");
+                        Util.sendColoredMessage(bukkitPlayer, "&e请在聊天栏输入并发送要赞助的金币数量: ");
                         JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
                             @Override
                             public void onChat(AsyncPlayerChatEvent event) {
@@ -140,17 +140,17 @@ public class GuildMineGUI extends BaseGUI {
                                 try {
                                     amount = Integer.parseInt(event.getMessage());
                                 } catch (Exception e) {
-                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c数量不正确!");
+                                    Util.sendColoredMessage(bukkitPlayer, "&c数量不正确!");
                                     return;
                                 }
 
                                 if (amount < guildSettings.getDonateMinMoney()) {
-                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c最小金币赞助额为 &e" + guildSettings.getDonateMinMoney() + "&c.");
+                                    Util.sendColoredMessage(bukkitPlayer, "&c最小金币赞助额为 &e" + guildSettings.getDonateMinMoney() + "&c.");
                                     return;
                                 }
 
                                 if (vault.getBalance(bukkitPlayer) < amount) {
-                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c金币不足.");
+                                    Util.sendColoredMessage(bukkitPlayer, "&c金币不足.");
                                     return;
                                 }
 
@@ -172,8 +172,8 @@ public class GuildMineGUI extends BaseGUI {
                     @Override
                     public void onClicked(InventoryClickEvent event) {
                         close();
-                        JulyMessage.sendColoredMessage(bukkitPlayer, "&d点券将存入宗门银行.");
-                        JulyMessage.sendColoredMessage(bukkitPlayer, "&e请在聊天栏输入并发送要赞助的点券数量: ");
+                        Util.sendColoredMessage(bukkitPlayer, "&d点券将存入宗门银行.");
+                        Util.sendColoredMessage(bukkitPlayer, "&e请在聊天栏输入并发送要赞助的点券数量: ");
                         JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
                             @Override
                             public void onChat(AsyncPlayerChatEvent event) {
@@ -185,19 +185,19 @@ public class GuildMineGUI extends BaseGUI {
                                 try {
                                     amount = Integer.parseInt(event.getMessage());
                                 } catch (Exception e) {
-                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c数量不正确!");
+                                    Util.sendColoredMessage(bukkitPlayer, "&c数量不正确!");
                                     return;
                                 }
 
                                 if (amount < guildSettings.getDonateMinPoints()) {
-                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c最小点券赞助额为 &e" + guildSettings.getDonateMinPoints() + "&c.");
+                                    Util.sendColoredMessage(bukkitPlayer, "&c最小点券赞助额为 &e" + guildSettings.getDonateMinPoints() + "&c.");
                                     return;
                                 }
 
                                 UUID uuid = bukkitPlayer.getUniqueId();
 
                                 if (playerPointsAPI.look(uuid) < amount) {
-                                    JulyMessage.sendColoredMessage(bukkitPlayer, "&c点券不足.");
+                                    Util.sendColoredMessage(bukkitPlayer, "&c点券不足.");
                                     return;
                                 }
 
@@ -247,7 +247,7 @@ public class GuildMineGUI extends BaseGUI {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
                             close();
-                            JulyMessage.sendColoredMessage(bukkitPlayer, "&c如果要退出宗门, 请在聊天栏输入并发送: &econfirm");
+                            Util.sendColoredMessage(bukkitPlayer, "&c如果要退出宗门, 请在聊天栏输入并发送: &econfirm");
                             JulyChatFilter.registerChatFilter(bukkitPlayer, new ChatListener() {
                                 @Override
                                 public void onChat(AsyncPlayerChatEvent event) {
@@ -255,9 +255,9 @@ public class GuildMineGUI extends BaseGUI {
 
                                     if (event.getMessage().equals("confirm")) {
                                         guild.removeMember(guild.getMember(playerName));
-                                        JulyMessage.sendColoredMessage(bukkitPlayer, "&d退出宗门成功.");
+                                        Util.sendColoredMessage(bukkitPlayer, "&d退出宗门成功.");
                                     } else {
-                                        JulyMessage.sendColoredMessage(bukkitPlayer, "&e退出宗门失败.");
+                                        Util.sendColoredMessage(bukkitPlayer, "&e退出宗门失败.");
                                     }
 
                                     JulyChatFilter.unregisterChatFilter(bukkitPlayer);
