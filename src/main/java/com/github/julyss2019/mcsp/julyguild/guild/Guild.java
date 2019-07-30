@@ -20,7 +20,6 @@ import com.github.julyss2019.mcsp.julylibrary.utils.YamlUtil;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.jetbrains.annotations.NotNull;
 import parsii.eval.Parser;
 import parsii.tokenizer.ParseException;
 
@@ -34,7 +33,8 @@ public class Guild {
     private static IconShopSettings iconShopSettings = plugin.getIconShopSettings();
     private static GuildPlayerManager guildPlayerManager = plugin.getGuildPlayerManager();
     private static GuildManager guildManager = plugin.getGuildManager();
-    private static OwnedIcon defOwnedIcon = OwnedIcon.createNew(iconShopSettings.getDefIconMaterial(), iconShopSettings.getDefIconDurability());
+    public static final OwnedIcon DEFAULT_ICON = OwnedIcon.createNew(iconShopSettings.getDefIconMaterial(), iconShopSettings.getDefIconDurability());
+
     private File file;
     private YamlConfiguration yml;
 
@@ -142,12 +142,8 @@ public class Guild {
             }
         }
 
-        this.currentIcon = iconMap.get(yml.getString("current_icon"));
-
-        if (currentIcon == null) {
-            this.currentIcon = defOwnedIcon;
-        }
-
+        iconMap.put(DEFAULT_ICON.getUuid().toString(), DEFAULT_ICON);
+        this.currentIcon = iconMap.get(yml.getString("current_icon", DEFAULT_ICON.getUuid().toString()));
         return this;
     }
 
@@ -199,6 +195,14 @@ public class Guild {
     }
 
     public void setCurrentIcon(UUID uuid) {
+        // 默认图标不存配置
+        if (uuid.equals(DEFAULT_ICON.getUuid())) {
+            yml.set("current_icon", null);
+            save();
+            this.currentIcon = iconMap.get(uuid.toString());
+            return;
+        }
+
         String uuidStr = uuid.toString();
 
         if (!iconMap.containsKey(uuidStr)) {
@@ -215,10 +219,16 @@ public class Guild {
     }
 
     public UUID giveIcon(Material material, short durability) {
-        UUID uuid = UUID.randomUUID();
-        String uuidStr = UUID.randomUUID().toString();
+        for (OwnedIcon icon : getIcons()) {
+            if (icon.getMaterial() == material && icon.getDurability() == durability) {
+                throw new IllegalArgumentException("图标已拥有");
+            }
+        }
 
-        yml.set("icons." + uuidStr + ".material", material);
+        UUID uuid = UUID.randomUUID();
+        String uuidStr = uuid.toString();
+
+        yml.set("icons." + uuidStr + ".material", material.name());
         yml.set("icons." + uuidStr + ".durability", durability);
         save();
         iconMap.put(uuidStr, new OwnedIcon(material, durability, uuid));

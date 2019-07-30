@@ -90,6 +90,7 @@ public class GuildIconRepositoryGUI extends BasePageableGUI {
         }
 
         this.icons = guild.getIcons();
+
         int iconSize = icons.size();
         int itemCounter = page * 51;
         int loopCount = iconSize - itemCounter < 51 ? iconSize - itemCounter : 51;
@@ -99,11 +100,11 @@ public class GuildIconRepositoryGUI extends BasePageableGUI {
             ItemBuilder itemBuilder = new ItemBuilder().material(icon.getMaterial()).durability(icon.getDurability()).colored();
 
             if (guild.getCurrentIcon().equals(icon)) {
-                itemBuilder.addLore("").addLore("&b• &e当前使用 &b•").addLore("");
+                itemBuilder.addLore("&b>> &e当前使用");
                 itemBuilder.enchant(Enchantment.DURABILITY, 1);
                 itemBuilder.addItemFlag(ItemFlag.HIDE_ENCHANTS);
             } else {
-                itemBuilder.addLore("").addLore("&b• &a点击设置 &b•").addLore("");
+                itemBuilder.addLore("&b>> &a点击设置");
             }
 
             inventoryBuilder.item(i, itemBuilder.build());

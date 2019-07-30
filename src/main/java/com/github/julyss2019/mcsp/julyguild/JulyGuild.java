@@ -32,7 +32,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.io.IOException;
 
 public class JulyGuild extends JavaPlugin {
     public static final String CONFIG_VERSION = "1.3.9";
@@ -83,7 +82,7 @@ public class JulyGuild extends JavaPlugin {
         registerCommands();
         registerListeners();
         runTasks();
-        Util.sendColoredMessage(Bukkit.getConsoleSender(), "插件初始化完毕, 作者QQ: 884633197, 接MC插件定制.");
+        Util.sendColoredMessage(Bukkit.getConsoleSender(), "插件初始化完毕, 作者QQ: 884633197.");
     }
 
     @Override
@@ -92,7 +91,7 @@ public class JulyGuild extends JavaPlugin {
             PlaceholderAPI.unregisterExpansion(placeholderAPIExpansion);
         }
 
-        Util.sendColoredMessage(Bukkit.getConsoleSender(), "插件被卸载, 作者QQ: 884633197, 接MC插件定制.");
+        Util.sendColoredMessage(Bukkit.getConsoleSender(), "插件被卸载.");
     }
 
     private void runTasks() {
