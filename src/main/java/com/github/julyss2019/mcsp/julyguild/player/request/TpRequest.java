@@ -1,7 +1,7 @@
 package com.github.julyss2019.mcsp.julyguild.player.request;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
-import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
+import com.github.julyss2019.mcsp.julyguild.config.MainSettings;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import org.bukkit.Location;
 
@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class TpRequest extends BaseGuildPlayerRequest {
     private Location location;
-    private static GuildSettings guildSettings = JulyGuild.getInstance().getGuildSettings();
+    private static MainSettings mainSettings = JulyGuild.getInstance().getMainSettings();
 
     public TpRequest(Location location) {
         super(GuildPlayerRequestType.TP);
@@ -32,6 +32,6 @@ public class TpRequest extends BaseGuildPlayerRequest {
 
     @Override
     public boolean isTimeout() {
-        return (System.currentTimeMillis() - getCreationTime()) / 1000 > guildSettings.getTpAllShiftTimeout();
+        return (System.currentTimeMillis() - getCreationTime()) / 1000 > mainSettings.getTpAllShiftTimeout();
     }
 }

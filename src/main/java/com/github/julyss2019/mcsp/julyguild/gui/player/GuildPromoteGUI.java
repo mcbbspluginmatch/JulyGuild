@@ -1,7 +1,7 @@
 package com.github.julyss2019.mcsp.julyguild.gui.player;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
-import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
+import com.github.julyss2019.mcsp.julyguild.config.MainSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.BaseGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
@@ -15,8 +15,6 @@ import com.github.julyss2019.mcsp.julylibrary.inventory.InventoryListener;
 import com.github.julyss2019.mcsp.julylibrary.inventory.ItemListener;
 import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import me.clip.placeholderapi.PlaceholderAPI;
-import net.milkbowl.vault.economy.Economy;
-import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -24,20 +22,22 @@ import org.bukkit.scheduler.BukkitRunnable;
 import parsii.eval.Parser;
 import parsii.tokenizer.ParseException;
 
+import java.util.Arrays;
+
 public class GuildPromoteGUI extends BaseGUI {
     private Inventory inventory;
     private Guild guild;
     private GuildBank guildBank;
-    private static JulyGuild plugin = JulyGuild.getInstance();
-    private static GuildSettings guildSettings = plugin.getGuildSettings();
-    private static Economy vault = plugin.getVaultAPI();
-    private static PlayerPointsAPI playerPointsAPI = plugin.getPlayerPointsAPI();
+    private boolean moneyEnabled;
+    private boolean pointsEnabled;
 
     public GuildPromoteGUI(GuildPlayer guildPlayer) {
         super(GUIType.PROMOTE, guildPlayer);
 
         this.guild = this.guildPlayer.getGuild();
         this.guildBank = guild.getGuildBank();
+        this.moneyEnabled = mainSettings.isPromoteMoneyEnabled();
+        this.pointsEnabled = mainSettings.isPromotePointsEnabled();
         build();
     }
 
@@ -64,28 +64,29 @@ public class GuildPromoteGUI extends BaseGUI {
 
         int currentMaxMemberCount = guild.getMaxMemberCount();
 
-        if (currentMaxMemberCount + 1 > guildSettings.getPromoteMoneyMaxMemberCount()) {
-            inventoryBuilder.item(1, 3, new ItemBuilder().material(Material.BARRIER).displayName("&f使用金币升级").addLore("&7- &c已封顶").colored().build());
+        if (currentMaxMemberCount + 1 > mainSettings.getPromoteMoneyMaxMemberCount()) {
+            inventoryBuilder.item(1, 3, new ItemBuilder().material(Material.BARRIER).displayName("&f使用金币升级").addLore("&c已封顶").colored().build());
         } else {
             int needMoney;
 
             try {
-                needMoney = (int) Parser.parse(PlaceholderAPI.setPlaceholders(bukkitPlayer, guildSettings.getPromoteMoneyFormula())).evaluate();
+                needMoney = (int) Parser.parse(PlaceholderAPI.setPlaceholders(bukkitPlayer, mainSettings.getPromoteMoneyFormula())).evaluate();
             } catch (ParseException e) {
                 e.printStackTrace();
-                throw new GuildPromoteException("算式错误");
+                throw new GuildPromoteException("升级公式不合法");
             }
 
             inventoryBuilder
                     .item(1, 3, new ItemBuilder()
-                            .material(Material.GOLD_INGOT)
-                            .displayName("&f使用金币升级")
-                            .addLore("&7- &e花费 &b▹ &e" + needMoney)
-                            .addLore("&7- &d人数 &b▹ &d" + currentMaxMemberCount + "->" + (currentMaxMemberCount + 1))
+                            .material(moneyEnabled ? Material.GOLD_INGOT : Material.BARRIER)
+                            .displayName("&a使用金币升级")
+                            .addLores(moneyEnabled ? new String[] {"&a>> &e点击升级", "", "&b花费&f: &b" + needMoney, "&d人数&f: &d" + currentMaxMemberCount + "->" + (currentMaxMemberCount + 1)} : new String[] {"&a>> &c未启用"})
                             .colored()
-                            .build(), new ItemListener() {
+                            .build(), !moneyEnabled ? null : new ItemListener() {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
+                            close();
+
                             if (!guildBank.has(GuildBank.BalanceType.MONEY, needMoney)) {
                                 Util.sendColoredMessage(bukkitPlayer, "&c金币不足.");
                                 return;
@@ -94,7 +95,6 @@ public class GuildPromoteGUI extends BaseGUI {
                             guildBank.withdraw(GuildBank.BalanceType.MONEY, needMoney);
                             guild.setMaxMemberCount(guild.getMaxMemberCount() + 1);
                             Util.sendColoredMessage(bukkitPlayer, "&d升级成功, 宗门目前可最多容纳: &e" + guild.getMaxMemberCount() + "人&d.");
-                            close();
 
                             new BukkitRunnable() {
                                 @Override
@@ -107,26 +107,25 @@ public class GuildPromoteGUI extends BaseGUI {
                     });
         }
 
-        if (currentMaxMemberCount + 1 > guildSettings.getPromotePointMaxMemberCount()) {
-            inventoryBuilder.item(1, 5, new ItemBuilder().material(Material.BARRIER).displayName("&f使用点券升级").addLore("&7- &c已封顶").colored().build());
+        if (currentMaxMemberCount + 1 > mainSettings.getPromotePointMaxMemberCount()) {
+            inventoryBuilder.item(1, 5, new ItemBuilder().material(Material.BARRIER).displayName("&f使用点券升级").addLore("&c已封顶").colored().build());
         } else {
             int needPoints;
 
             try {
-                needPoints = (int) Parser.parse(PlaceholderAPI.setPlaceholders(bukkitPlayer, guildSettings.getPromotePointFormula())).evaluate();
+                needPoints = (int) Parser.parse(PlaceholderAPI.setPlaceholders(bukkitPlayer, mainSettings.getPromotePointFormula())).evaluate();
             } catch (ParseException e) {
                 e.printStackTrace();
-                throw new GuildPromoteException("算式错误");
+                throw new GuildPromoteException("升级公式不合法");
             }
 
             inventoryBuilder
                     .item(1, 5, new ItemBuilder()
-                            .material(Material.DIAMOND)
-                            .displayName("&f使用点券升级")
-                            .addLore("&7- &e花费 &b▹ &e" + needPoints)
-                            .addLore("&7- &d人数 &b▹ &d" + currentMaxMemberCount + "->" + (currentMaxMemberCount + 1))
+                            .material(pointsEnabled ? Material.DIAMOND : Material.BARRIER)
+                            .displayName("&a使用点券升级")
+                            .addLores(pointsEnabled ? new String[] {"&a>> &e点击升级", "", "&b花费&f: &b" + needPoints, "&d人数&f: &d" + currentMaxMemberCount + "->" + (currentMaxMemberCount + 1)} : new String[] {"&a>> &c未启用"})
                             .colored()
-                            .build(), new ItemListener() {
+                            .build(), !pointsEnabled ? null : new ItemListener() {
                         @Override
                         public void onClicked(InventoryClickEvent event) {
                             if (!guildBank.has(GuildBank.BalanceType.POINTS, needPoints)) {

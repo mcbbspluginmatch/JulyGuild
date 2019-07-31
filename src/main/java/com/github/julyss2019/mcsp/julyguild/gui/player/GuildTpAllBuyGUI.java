@@ -1,7 +1,7 @@
 package com.github.julyss2019.mcsp.julyguild.gui.player;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
-import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
+import com.github.julyss2019.mcsp.julyguild.config.MainSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.BaseGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
@@ -24,7 +24,7 @@ import org.bukkit.inventory.Inventory;
 public class GuildTpAllBuyGUI extends BaseGUI {
     private static JulyGuild plugin = JulyGuild.getInstance();
 
-    private GuildSettings guildSettings = plugin.getGuildSettings();
+    private MainSettings mainSettings = plugin.getMainSettings();
     private Inventory inventory;
     private Guild guild;
     private GuildBank guildBank;
@@ -49,7 +49,7 @@ public class GuildTpAllBuyGUI extends BaseGUI {
                 })
                 .item(1, 4, new ItemBuilder()
                         .material(Material.GOLD_INGOT)
-                        .displayName("&f使用 &a金币x" + guildSettings.getTpAllCostMoney() + " &f支付")
+                        .displayName("&f使用 &a金币x" + mainSettings.getTpAllCostMoney() + " &f支付")
                         .addLore("")
                         .addLore("&b• &d点击支付&b •")
                         .addLore("")
@@ -59,12 +59,12 @@ public class GuildTpAllBuyGUI extends BaseGUI {
                     public void onClicked(InventoryClickEvent event) {
                         close();
 
-                        if (!guildSettings.getTpAllAllowedSendWorlds().contains("*") && guildSettings.getTpAllAllowedSendWorlds().contains(bukkitPlayer.getWorld().getName())) {
+                        if (!mainSettings.getTpAllAllowedSendWorlds().contains("*") && mainSettings.getTpAllAllowedSendWorlds().contains(bukkitPlayer.getWorld().getName())) {
                             Util.sendColoredMessage(bukkitPlayer, "&c当前世界不能发起全员集结令.");
                             return;
                         }
 
-                        if (!guildBank.has(GuildBank.BalanceType.MONEY, guildSettings.getTpAllCostMoney())) {
+                        if (!guildBank.has(GuildBank.BalanceType.MONEY, mainSettings.getTpAllCostMoney())) {
                             Util.sendColoredMessage(bukkitPlayer, "&c宗门银行金币不足.");
                             return;
                         }
@@ -79,7 +79,7 @@ public class GuildTpAllBuyGUI extends BaseGUI {
                             }
 
                             if (member.isOnline()) {
-                                if (!guildSettings.getTpAllAllowedReceiveWorlds().contains("*") && !guildSettings.getTpAllAllowedReceiveWorlds().contains(member.getBukkitPlayer().getWorld().getName())) {
+                                if (!mainSettings.getTpAllAllowedReceiveWorlds().contains("*") && !mainSettings.getTpAllAllowedReceiveWorlds().contains(member.getBukkitPlayer().getWorld().getName())) {
                                     diffWorldCounter++;
                                     continue;
                                 }
@@ -87,7 +87,7 @@ public class GuildTpAllBuyGUI extends BaseGUI {
                                 member.getGuildPlayer().getGuildPlayer().addRequest(TpRequest.createNew(guildPlayer, bukkitPlayer.getLocation()));
                                 TpAllListener.resetPlayer(member.getName()); // 重置
                                 JulyMessage.sendTitle(member.getBukkitPlayer(), new TitleBuilder().text("&b全员集结令").colored().build());
-                                Util.sendColoredMessage(member.getBukkitPlayer(), "&e宗主 &c" + bukkitPlayer.getName() + " &e请求你传送到TA那, 如果要传送请在 &c" + guildSettings.getTpAllShiftTimeout() + "秒内 &e快速按 &c" + guildSettings.getTpAllShiftCount() + "次 &eShift键!");
+                                Util.sendColoredMessage(member.getBukkitPlayer(), "&e宗主 &c" + bukkitPlayer.getName() + " &e请求你传送到TA那, 如果要传送请在 &c" + mainSettings.getTpAllShiftTimeout() + "秒内 &e快速按 &c" + mainSettings.getTpAllShiftCount() + "次 &eShift键!");
                                 validCounter++;
                             } else {
                                 offlineCounter++;
@@ -99,7 +99,7 @@ public class GuildTpAllBuyGUI extends BaseGUI {
                             return;
                         }
 
-                        guildBank.withdraw(GuildBank.BalanceType.MONEY, guildSettings.getTpAllCostMoney());
+                        guildBank.withdraw(GuildBank.BalanceType.MONEY, mainSettings.getTpAllCostMoney());
 
                         Util.sendColoredMessage(bukkitPlayer, "&e成功向 &c" + validCounter + "个 &e成员发送了全员集结令, 请等待确认!");
 

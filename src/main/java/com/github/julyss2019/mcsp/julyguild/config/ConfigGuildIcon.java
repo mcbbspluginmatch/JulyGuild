@@ -1,11 +1,14 @@
 package com.github.julyss2019.mcsp.julyguild.config;
 
 
+import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import org.bukkit.Material;
 
 import java.util.List;
 
 public class ConfigGuildIcon {
+    private static JulyGuild plugin = JulyGuild.getInstance();
+
     @Deprecated
     public enum CostType {
         POINTS("点券"), MONEY("金币");
@@ -63,7 +66,7 @@ public class ConfigGuildIcon {
     }
 
     public boolean isPointsPayEnabled() {
-        return pointsPayEnabled;
+        return pointsPayEnabled && plugin.isPlayerPointsHooked();
     }
 
     public void setPointsPayEnabled(boolean pointsPayEnabled) {

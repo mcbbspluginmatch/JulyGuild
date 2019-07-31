@@ -1,7 +1,7 @@
 package com.github.julyss2019.mcsp.julyguild.gui.player;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
-import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
+import com.github.julyss2019.mcsp.julyguild.config.MainSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.BaseGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;
@@ -14,6 +14,7 @@ import com.github.julyss2019.mcsp.julylibrary.item.ItemBuilder;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import com.github.julyss2019.mcsp.julylibrary.message.TitleBuilder;
 import com.github.julyss2019.mcsp.julylibrary.utils.ItemUtil;
+import com.github.julyss2019.mcsp.julylibrary.utils.PlayerUtil;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Material;
@@ -23,12 +24,11 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class GuildCreateGUI extends BaseGUI {
     private static JulyGuild plugin = JulyGuild.getInstance();
-    private static GuildSettings settings = plugin.getGuildSettings();
+    private static MainSettings settings = plugin.getMainSettings();
     private static Economy vault = plugin.getVaultAPI();
     private static PlayerPointsAPI playerPointsAPI = plugin.getPlayerPointsAPI();
     private static GuildManager guildManager = plugin.getGuildManager();
@@ -60,8 +60,7 @@ public class GuildCreateGUI extends BaseGUI {
                 .material(settings.isGuildCreateCostMoneyEnabled() ? Material.GOLD_INGOT : Material.BARRIER)
                 .displayName("&f使用 &e金币x" + settings.getGuildCreateCostMoneyAmount() + " &f支付")
                 .addLore(settings.isGuildCreateCostMoneyEnabled() ? "&b>> &a点击支付" : "&b>> &c未启用")
-                .addLore("")
-                .addLore("&7- &e公会名 &b▹ &f" + guildName)
+                .addLore("&e公会名&f: &e" + guildName)
                 .colored()
                 .enchant(Enchantment.DURABILITY, 1)
                 .addItemFlag(ItemFlag.HIDE_ENCHANTS)
@@ -94,8 +93,7 @@ public class GuildCreateGUI extends BaseGUI {
                 .material(settings.isGuildCreateCostPointsEnabled() ? Material.DIAMOND : Material.BARRIER)
                 .displayName("&f使用 &e点券x" + settings.getGuildCreateCostPointsAmount() + " &f支付")
                 .addLore(settings.isGuildCreateCostPointsEnabled() ? "&b>> &a点击支付" : "&b>> &c未启用")
-                .addLore("")
-                .addLore("&7- &e公会名 &b▹ &f" + guildName)
+                .addLore("&e公会名&f: &e" + guildName)
                 .enchant(Enchantment.DURABILITY, 1)
                 .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                 .colored()
@@ -128,9 +126,7 @@ public class GuildCreateGUI extends BaseGUI {
                 .material(settings.isGuildCreateCostItemEnabled() ? Material.NAME_TAG : Material.BARRIER)
                 .displayName("&f使用 &e建帮令x" + settings.getGuildCreateCostItemAmount() + " &f支付")
                 .addLore(settings.isGuildCreateCostItemEnabled() ? "&b>> &a点击支付" : "&b>> &c未启用")
-                .addLore("")
-                .addLore("&7- &e公会名 &b▹ &f" + guildName)
-                .colored()
+                .addLore("&e公会名&f: &e" + guildName)
                 .enchant(Enchantment.DURABILITY, 1)
                 .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                 .build()
@@ -145,24 +141,11 @@ public class GuildCreateGUI extends BaseGUI {
                             return;
                         }
 
-                        for (ItemStack itemStack : bukkitPlayer.getInventory().getContents()) {
-                            if (ItemUtil.containsLore(itemStack, settings.getGuildCreateCostItemKeyLore())) {
-                                int amount = itemStack.getAmount();
-
-                                if (amount >= settings.getGuildCreateCostItemAmount()) {
-                                    if (amount - settings.getGuildCreateCostItemAmount() == 0) {
-                                        itemStack.setType(Material.AIR);
-                                    } else {
-                                        itemStack.setAmount(settings.getGuildCreateCostItemAmount() - amount);
-                                    }
-
-                                    createGuild(guildPlayer, guildName);
-                                    return;
-                                }
-                            }
+                        if (PlayerUtil.hasItem(bukkitPlayer, itemStack -> ItemUtil.containsLore(itemStack, mainSettings.getGuildCreateCostItemKeyLore()), mainSettings.getGuildCreateCostItemAmount())) {
+                            createGuild(guildPlayer, guildName);
+                        } else {
+                            Util.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e建帮令x" + settings.getGuildCreateCostItemAmount());
                         }
-
-                        Util.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e建帮令x" + settings.getGuildCreateCostItemAmount() + "&c(请重叠放置).");
                     }
                 } : null);
 

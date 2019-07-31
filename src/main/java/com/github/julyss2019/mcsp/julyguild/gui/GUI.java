@@ -23,4 +23,10 @@ public interface GUI {
     }
 
     GUIType getType();
+
+    default void update() {
+        close();
+        build();
+        open();
+    }
 }

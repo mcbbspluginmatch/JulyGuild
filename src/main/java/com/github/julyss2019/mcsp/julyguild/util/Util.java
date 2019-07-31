@@ -1,5 +1,6 @@
 package com.github.julyss2019.mcsp.julyguild.util;
 
+import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julylibrary.message.JulyMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -7,7 +8,6 @@ import org.bukkit.command.CommandSender;
 import java.text.SimpleDateFormat;
 
 public class Util {
-    public static final String PREFIX = "§a[宗门] §f";
     public static SimpleDateFormat YMD_SDF = new SimpleDateFormat("yyyy/MM/dd");
     public static SimpleDateFormat YMDHM_SDF = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
@@ -20,7 +20,7 @@ public class Util {
     }
 
     public static void sendColoredMessage(CommandSender cs, String msg) {
-        JulyMessage.sendColoredMessage(cs, PREFIX + msg);
+        JulyMessage.sendColoredMessage(cs, JulyGuild.getInstance().getMainSettings().getPrefix() + msg);
     }
 
     public static void sendColoredConsoleMessage(String msg) {

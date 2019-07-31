@@ -1,7 +1,7 @@
 package com.github.julyss2019.mcsp.julyguild.gui.player.pageable;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
-import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
+import com.github.julyss2019.mcsp.julyguild.config.MainSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.BasePageableGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
 import com.github.julyss2019.mcsp.julyguild.gui.GUI;
@@ -35,7 +35,7 @@ import java.util.List;
 
 public class MainGUI extends BasePageableGUI {
     private static JulyGuild plugin = JulyGuild.getInstance();
-    private static GuildSettings guildSettings = plugin.getGuildSettings();
+    private static MainSettings mainSettings = plugin.getMainSettings();
     private static CacheGuildManager cacheGuildManager = plugin.getCacheGuildManager();
     private Inventory inventory;
     private List<Guild> guilds = new ArrayList<>();
@@ -129,8 +129,8 @@ public class MainGUI extends BasePageableGUI {
 
                                     String guildName = event.getMessage();
 
-                                    if (!guildName.matches(guildSettings.getGuildCreateNameRegex())) {
-                                        Util.sendColoredMessage(bukkitPlayer, guildSettings.getGuildCreateNameNotValidMsg());
+                                    if (!guildName.matches(mainSettings.getGuildCreateNameRegex())) {
+                                        Util.sendColoredMessage(bukkitPlayer, mainSettings.getGuildCreateNameNotValidMsg());
                                         return;
                                     }
 
@@ -172,8 +172,8 @@ public class MainGUI extends BasePageableGUI {
             Guild guild = guilds.get(itemCounter++);
 
             inventoryBuilder.item(i, new ItemBuilder(guild.getCurrentIcon().getItemStack())
-                    .lores(PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(guild.getOwner().getName()), guildSettings.getMainGUIRankingListLores()))
-                    .displayName(PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(guild.getOwner().getName()), guildSettings.getMainGUIRankingListDisplayName()))
+                    .lores(PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(guild.getOwner().getName()), mainSettings.getMainGUIRankingListLores()))
+                    .displayName(PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(guild.getOwner().getName()), mainSettings.getMainGUIRankingListDisplayName()))
                     .colored()
                     .enchant(Enchantment.DURABILITY, 1)
                     .addItemFlag(ItemFlag.HIDE_ENCHANTS)

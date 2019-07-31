@@ -2,7 +2,6 @@ package com.github.julyss2019.mcsp.julyguild.gui.player.pageable;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.config.ConfigGuildIcon;
-import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
 import com.github.julyss2019.mcsp.julyguild.config.IconShopSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.BasePageableGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;

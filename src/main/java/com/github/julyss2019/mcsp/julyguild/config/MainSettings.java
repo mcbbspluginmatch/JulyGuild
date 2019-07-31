@@ -1,10 +1,16 @@
 package com.github.julyss2019.mcsp.julyguild.config;
 
+import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julylibrary.config.Config;
 
 import java.util.List;
 
-public class GuildSettings {
+public class MainSettings {
+    private static JulyGuild plugin = JulyGuild.getInstance();
+
+    @Config(path = "prefix")
+    private String prefix;
+
     @Config(path = "guild.create.name_regex")
     private String guildCreateNameRegex;
 
@@ -50,22 +56,34 @@ public class GuildSettings {
     @Config(path = "guild.def_max_admin_count")
     private int guildDefMaxAdminCount;
 
-    @Config(path = "guild.donate.min_money")
+    @Config(path = "guild.donate.money.enabled")
+    private boolean donateMoneyEnabled;
+
+    @Config(path = "guild.donate.points.enabled")
+    private boolean donatePointsEnabled;
+
+    @Config(path = "guild.donate.money.min")
     private int donateMinMoney;
 
-    @Config(path = "guild.donate.min_points")
+    @Config(path = "guild.donate.points.min")
     private int donateMinPoints;
 
-    @Config(path = "guild.promote.money_formula")
+    @Config(path = "guild.promote.money.enabled")
+    private boolean promoteMoneyEnabled;
+
+    @Config(path = "guild.promote.money.formula")
     private String promoteMoneyFormula;
 
-    @Config(path = "guild.promote.money_max_member_count")
+    @Config(path = "guild.promote.money.max_member_count")
     private int promoteMoneyMaxMemberCount;
 
-    @Config(path = "guild.promote.point_formula")
+    @Config(path = "guild.promote.points.enabled")
+    private boolean promotePointsEnabled;
+
+    @Config(path = "guild.promote.points.formula")
     private String promotePointFormula;
 
-    @Config(path = "guild.promote.point_max_member_count")
+    @Config(path = "guild.promote.points.max_member_count")
     private int promotePointMaxMemberCount;
 
     @Config(path = "guild.tp_all.interval")
@@ -95,11 +113,31 @@ public class GuildSettings {
     @Config(path = "guild.tp_all.allowed_receive_worlds")
     private List<String> tpAllAllowedReceiveWorlds;
 
-    public GuildSettings() {}
+    public MainSettings() {}
 
 
     public void reset() {
 
+    }
+
+    public boolean isDonateMoneyEnabled() {
+        return donateMoneyEnabled;
+    }
+
+    public boolean isDonatePointsEnabled() {
+        return donatePointsEnabled && plugin.isPlayerPointsHooked();
+    }
+
+    public boolean isPromoteMoneyEnabled() {
+        return promoteMoneyEnabled;
+    }
+
+    public boolean isPromotePointsEnabled() {
+        return promotePointsEnabled && plugin.isPlayerPointsHooked();
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 
     public String getRankingListFormula() {
@@ -183,7 +221,7 @@ public class GuildSettings {
     }
 
     public boolean isGuildCreateCostPointsEnabled() {
-        return guildCreateCostPointsEnabled;
+        return guildCreateCostPointsEnabled && plugin.isPlayerPointsHooked();
     }
 
     public String getGuildCreateCostItemKeyLore() {
@@ -222,17 +260,17 @@ public class GuildSettings {
         return guildDefMaxAdminCount;
     }
 
-    @Config(path = "gui.global.guild_info.display_name")
+    @Config(path = "guild.gui.global.guild_info.display_name")
     private String globalGuildInfoDisplayName;
-    @Config(path = "gui.global.guild_info.lores")
+    @Config(path = "guild.gui.global.guild_info.lores")
     private List<String> globalGuildInfoLores;
-    @Config(path = "gui.main_gui.ranking_list.display_name")
+    @Config(path = "guild.gui.main_gui.ranking_list.display_name")
     private String mainGUIRankingListDisplayName;
-    @Config(path = "gui.main_gui.ranking_list.lores")
+    @Config(path = "guild.gui.main_gui.ranking_list.lores")
     private List<String> mainGUIRankingListLores;
-    @Config(path = "gui.mine_gui.player_info.display_name")
+    @Config(path = "guild.gui.mine_gui.player_info.display_name")
     private String mineGUIPlayerInfoDisplayName;
-    @Config(path = "gui.mine_gui.player_info.lores")
+    @Config(path = "guild.gui.mine_gui.player_info.lores")
     private List<String> mineGUIPlayerInfoLores;
 
 

@@ -1,6 +1,5 @@
 package com.github.julyss2019.mcsp.julyguild.gui.player;
 
-import com.github.julyss2019.mcsp.julyguild.JulyGuild;
 import com.github.julyss2019.mcsp.julyguild.config.ConfigGuildIcon;
 import com.github.julyss2019.mcsp.julyguild.gui.BaseGUI;
 import com.github.julyss2019.mcsp.julyguild.gui.CommonItem;
@@ -18,22 +17,21 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
 public class GuildIconBuyGUI extends BaseGUI {
-    private static JulyGuild plugin = JulyGuild.getInstance();
     private ConfigGuildIcon configGuildIcon;
     private Inventory inventory;
     private Guild guild;
     private GuildBank guildBank;
-    private boolean isPointsPayEnabled;
-    private boolean isMoneyPayEnabled;
+    private boolean pointsPayEnabled;
+    private boolean moneyPayEnabled;
 
     public GuildIconBuyGUI(GuildPlayer guildPlayer, ConfigGuildIcon configGuildIcon) {
-        super(GUIType.ICON_BUY, guildPlayer);
+        super(GUIType.ICON_SHOP_BUY, guildPlayer);
 
         this.guild = guildPlayer.getGuild();
         this.configGuildIcon = configGuildIcon;
         this.guildBank = guild.getGuildBank();
-        this.isMoneyPayEnabled = configGuildIcon.isMoneyPayEnabled();
-        this.isPointsPayEnabled = configGuildIcon.isPointsPayEnabled();
+        this.moneyPayEnabled = configGuildIcon.isMoneyPayEnabled();
+        this.pointsPayEnabled = configGuildIcon.isPointsPayEnabled();
         build();
     }
 
@@ -54,12 +52,12 @@ public class GuildIconBuyGUI extends BaseGUI {
                 })
 
                 .item(1, 2, new ItemBuilder()
-                        .material(isMoneyPayEnabled ? Material.GOLD_INGOT : Material.BARRIER)
+                        .material(moneyPayEnabled ? Material.GOLD_INGOT : Material.BARRIER)
                         .displayName("&f使用 &e金币x" + configGuildIcon.getMoneyCost() + " &f支付")
-                        .addLore(isMoneyPayEnabled ? "&b>> &a点击支付" : "&b>> &c未启用")
+                        .addLore(moneyPayEnabled ? "&b>> &a点击支付" : "&b>> &c未启用")
                         .addLore("")
                         .colored()
-                        .build(), !isMoneyPayEnabled ? null : new ItemListener() {
+                        .build(), !moneyPayEnabled ? null : new ItemListener() {
                     @Override
                     public void onClicked(InventoryClickEvent event) {
                         close();
@@ -77,12 +75,12 @@ public class GuildIconBuyGUI extends BaseGUI {
                     }
                 })
                 .item(1, 6, new ItemBuilder()
-                        .material(isPointsPayEnabled ? Material.DIAMOND : Material.BARRIER)
+                        .material(pointsPayEnabled ? Material.DIAMOND : Material.BARRIER)
                         .displayName("&f使用 &e点券x" + configGuildIcon.getPointsCost() + " &f支付")
-                        .addLore(isPointsPayEnabled ? "&b>> &a点击支付" : "&b>> &c未启用")
+                        .addLore(pointsPayEnabled ? "&b>> &a点击支付" : "&b>> &c未启用")
                         .addLore("")
                         .colored()
-                        .build(), !isPointsPayEnabled ? null : new ItemListener() {
+                        .build(), !pointsPayEnabled ? null : new ItemListener() {
                     @Override
                     public void onClicked(InventoryClickEvent event) {
                         close();

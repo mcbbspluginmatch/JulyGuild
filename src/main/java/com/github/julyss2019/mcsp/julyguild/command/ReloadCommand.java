@@ -18,7 +18,7 @@ public class ReloadCommand implements Command {
             }
         }
 
-        Util.sendColoredMessage(cs, "&f重载配置完毕(Beta|不稳定).");
+        Util.sendColoredMessage(cs, "&f重载配置完毕(Beta).");
         return true;
     }
 

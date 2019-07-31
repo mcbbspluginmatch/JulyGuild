@@ -3,14 +3,14 @@ package com.github.julyss2019.mcsp.julyguild;
 import com.github.julyss2019.mcsp.julyguild.command.Command;
 import com.github.julyss2019.mcsp.julyguild.command.MainGUICommand;
 import com.github.julyss2019.mcsp.julyguild.command.ReloadCommand;
-import com.github.julyss2019.mcsp.julyguild.config.ConfigGuildIcon;
-import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
-import com.github.julyss2019.mcsp.julyguild.config.IconShopSettings;
+import com.github.julyss2019.mcsp.julyguild.config.*;
 import com.github.julyss2019.mcsp.julyguild.guild.CacheGuildManager;
 import com.github.julyss2019.mcsp.julyguild.guild.GuildManager;
 import com.github.julyss2019.mcsp.julyguild.listener.GUIListener;
+import com.github.julyss2019.mcsp.julyguild.listener.GuildShopListener;
 import com.github.julyss2019.mcsp.julyguild.listener.TpAllListener;
 import com.github.julyss2019.mcsp.julyguild.log.GuildLog;
+import com.github.julyss2019.mcsp.julyguild.player.GuildPlayer;
 import com.github.julyss2019.mcsp.julyguild.player.GuildPlayerManager;
 import com.github.julyss2019.mcsp.julyguild.tasks.RequestCleanTask;
 import com.github.julyss2019.mcsp.julyguild.util.Util;
@@ -28,20 +28,23 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 
 public class JulyGuild extends JavaPlugin {
-    public static final String CONFIG_VERSION = "1.3.9";
-    private static final Gson gson = new Gson();
     private static JulyGuild instance;
+    private static final Gson gson = new Gson();
     private GuildManager guildManager;
     private GuildPlayerManager guildPlayerManager;
     private CacheGuildManager cacheGuildManager;
-    private GuildSettings guildSettings;
+
+    private MainSettings mainSettings;
     private IconShopSettings iconShopSettings;
+    private GuildShopSettings guildShopSettings;
+
     private String[] initFolderPaths = new String[] {"players", "guilds", "logs"};
     private String[] initFilePaths = new String[] {"config.yml", "icon_shop.yml", "guild_shop.yml"};
     private JulyCommandExecutor julyCommandExecutor;
@@ -49,40 +52,66 @@ public class JulyGuild extends JavaPlugin {
     private Economy vaultAPI;
     private FileLogger fileLogger;
     private PlaceholderAPIExpansion placeholderAPIExpansion;
+    private PluginManager pluginManager;
 
     @Override
     public void onEnable() {
+        new Metrics(this);
+
         instance = this;
+        this.pluginManager = Bukkit.getPluginManager();
 
         init();
         loadConfig();
 
-        if (!selfCheck()) {
-            return;
-        }
-
-        this.playerPointsAPI = ((PlayerPoints) Bukkit.getPluginManager().getPlugin("PlayerPoints")).getAPI();
         this.fileLogger = JulyFileLogger.getLogger(new File(getDataFolder(), "logs"), null, 5);
         this.julyCommandExecutor = new JulyCommandExecutor(this);
         this.guildPlayerManager = new GuildPlayerManager();
         this.guildManager = new GuildManager();
         this.cacheGuildManager = new CacheGuildManager();
-        this.placeholderAPIExpansion = new PlaceholderAPIExpansion();
 
-        if (!placeholderAPIExpansion.register()) {
-            getLogger().warning("PlaceholderAPI Hook 失败!");
+        /*
+        第三方插件注入
+         */
+        if (!pluginManager.isPluginEnabled("Vault") || !setupEconomy()) {
+            Util.sendColoredConsoleMessage("&cVault: Hook失败.");
+            setEnabled(false);
+            return;
+        } else {
+            Util.sendColoredConsoleMessage("&eVault: Hook成功.");
+        }
+
+        if (pluginManager.isPluginEnabled("PlaceholderAPI")) {
+            this.placeholderAPIExpansion = new PlaceholderAPIExpansion();
+
+            if (!placeholderAPIExpansion.register()) {
+                getLogger().warning("&cPlaceholderAPI: Hook失败.");
+            } else {
+                Util.sendColoredConsoleMessage("&ePlaceholderAPI: Hook成功.");
+            }
+        } else {
+            Util.sendColoredConsoleMessage("&fPlaceholderAPI: 未启用.");
+        }
+
+        if (pluginManager.isPluginEnabled("PlayerPoints")) {
+            this.playerPointsAPI = ((PlayerPoints) Bukkit.getPluginManager().getPlugin("PlayerPoints")).getAPI();
+            Util.sendColoredConsoleMessage("&ePlayerPoints: Hook成功.");
+        } else {
+            Util.sendColoredConsoleMessage("&ePlayerPoints: 未启用.");
         }
 
         julyCommandExecutor.setPrefix("§a[宗门] §f");
         guildManager.loadGuilds();
         cacheGuildManager.startTask();
 
-        Util.sendColoredMessage(Bukkit.getConsoleSender(), "载入了 " + guildManager.getGuilds().size() + "个 宗门.");
         getCommand("jguild").setExecutor(julyCommandExecutor);
         registerCommands();
         registerListeners();
         runTasks();
-        Util.sendColoredMessage(Bukkit.getConsoleSender(), "插件初始化完毕, 作者QQ: 884633197.");
+        Util.sendColoredMessage(Bukkit.getConsoleSender(), "载入了 " + guildManager.getGuilds().size() + "个 宗门.");
+        Util.sendColoredMessage(Bukkit.getConsoleSender(), "载入了 " + iconShopSettings.getConfigGuildIcons().size() + "个 图标商店物品.");
+        Util.sendColoredMessage(Bukkit.getConsoleSender(), "载入了 " + guildShopSettings.getConfigGuildShopItems().size() + "个 宗门商店物品.");
+        Util.sendColoredMessage(Bukkit.getConsoleSender(), "插件初始化完毕.");
     }
 
     @Override
@@ -91,7 +120,17 @@ public class JulyGuild extends JavaPlugin {
             PlaceholderAPI.unregisterExpansion(placeholderAPIExpansion);
         }
 
+        for (GuildPlayer guildPlayer : getGuildPlayerManager().getOnlineGuildPlayers()) {
+            if (guildPlayer.getUsingGUI() != null) {
+                guildPlayer.getUsingGUI().close();
+            }
+        }
+
         Util.sendColoredMessage(Bukkit.getConsoleSender(), "插件被卸载.");
+    }
+
+    public GuildShopSettings getGuildShopSettings() {
+        return guildShopSettings;
     }
 
     private void runTasks() {
@@ -107,8 +146,9 @@ public class JulyGuild extends JavaPlugin {
     }
 
     private void registerListeners() {
-        Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
-        Bukkit.getPluginManager().registerEvents(new TpAllListener(), this);
+        pluginManager.registerEvents(new GUIListener(), this);
+        pluginManager.registerEvents(new TpAllListener(), this);
+        pluginManager.registerEvents(new GuildShopListener(), this);
     }
 
     public void writeGuildLog(FileLogger.LoggerLevel loggerLevel, GuildLog log) {
@@ -117,16 +157,6 @@ public class JulyGuild extends JavaPlugin {
 
     public FileLogger getFileLogger() {
         return fileLogger;
-    }
-
-    private boolean selfCheck() {
-        if (!setupEconomy()) {
-            getLogger().severe("Vault Hook 失败!");
-            setEnabled(false);
-            return false;
-        }
-
-        return true;
     }
 
     private boolean setupEconomy() {
@@ -170,10 +200,11 @@ public class JulyGuild extends JavaPlugin {
     }
 
     public void reloadPluginConfig() {
-        guildSettings.reset();
+        mainSettings.reset();
         iconShopSettings.reset();
+        guildShopSettings.reset();
 
-        JulyConfig.reloadConfig(this, YamlConfiguration.loadConfiguration(new File(getDataFolder(), "config.yml")), guildSettings);
+        JulyConfig.reloadConfig(this, YamlConfiguration.loadConfiguration(new File(getDataFolder(), "config.yml")), mainSettings);
         JulyConfig.reloadConfig(this, YamlConfiguration.loadConfiguration(new File(getDataFolder(), "icon_shop.yml")), iconShopSettings);
 
         loadSpecialConfig();
@@ -181,36 +212,44 @@ public class JulyGuild extends JavaPlugin {
 
     private void loadConfig() {
         reloadConfig(); // 必须先重读，否则将发生死循环
-        String oldConfigVersion = getConfig().getString("config_version", "0.0.0");
+        YamlConfiguration configYml = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "config.yml"));
+        String oldConfigVersion = configYml.getString("config_version", "0.0.0");
+        String currentConfigVersion = getConfig().getDefaultSection().getString("config_version"); // 最新版本
+
 
         // 如果配置版本不一样，重命名文件，创建新的配置
-        if (!CONFIG_VERSION.equals(oldConfigVersion)) {
+        if (!currentConfigVersion.equals(oldConfigVersion)) {
             File configFile = new File(getDataFolder(), "config.yml");
 
             if (configFile.exists() && !configFile.renameTo(new File(getDataFolder(), "config.yml." + oldConfigVersion))) {
                 throw new RuntimeException("&c配置文件更新失败.");
             }
 
-            getLogger().warning("配置文件版本不一致, 将重新生成(" + oldConfigVersion + "->" + CONFIG_VERSION + ")");
+            Util.sendColoredConsoleMessage("&e配置文件版本不一致, 将重新生成(" + oldConfigVersion + "->" + currentConfigVersion + ").");
             saveDefaultConfig();
             loadConfig();
             return;
         }
 
-        this.guildSettings = (GuildSettings) JulyConfig.loadConfig(this, YamlConfiguration.loadConfiguration(new File(getDataFolder(), "config.yml")), GuildSettings.class);
+        this.mainSettings = (MainSettings) JulyConfig.loadConfig(this, configYml, MainSettings.class);
         this.iconShopSettings = (IconShopSettings) JulyConfig.loadConfig(this, YamlConfiguration.loadConfiguration(new File(getDataFolder(), "icon_shop.yml")), IconShopSettings.class);
+        this.guildShopSettings = new GuildShopSettings();
 
         loadSpecialConfig();
+    }
+
+    public boolean isPlayerPointsHooked() {
+        return getPlayerPointsAPI() != null;
     }
 
     private void loadSpecialConfig() {
         FileConfiguration iconShopConfig = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "icon_shop.yml"));
 
         if (iconShopConfig.contains("items")) {
-            ConfigurationSection iconItemSection = iconShopConfig.getConfigurationSection("items");
+            ConfigurationSection itemsSection = iconShopConfig.getConfigurationSection("items");
 
-            for (String key : iconItemSection.getKeys(false)) {
-                ConfigurationSection itemSection = iconItemSection.getConfigurationSection(key);
+            for (String key : itemsSection.getKeys(false)) {
+                ConfigurationSection itemSection = iconShopConfig.getConfigurationSection("items").getConfigurationSection(key);
                 ConfigGuildIcon configGuildIcon = new ConfigGuildIcon();
 
                 configGuildIcon.setMaterial(Material.valueOf(itemSection.getString("material")));
@@ -225,10 +264,37 @@ public class JulyGuild extends JavaPlugin {
                 iconShopSettings.addConfigGuildIcon(configGuildIcon);
             }
         }
+
+        FileConfiguration guildShopConfig = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "guild_shop.yml"));
+
+        if (guildShopConfig.contains("items")) {
+            ConfigurationSection itemsSection = guildShopConfig.getConfigurationSection("items");
+
+            for (String shopItemName : itemsSection.getKeys(false)) {
+                ConfigurationSection itemSection = itemsSection.getConfigurationSection(shopItemName);
+                ConfigGuildShopItem item = new ConfigGuildShopItem();
+
+                item.setName(shopItemName);
+                item.setIndex(itemSection.getInt("index"));
+                item.setMaterial(Material.valueOf(itemSection.getString("material")));
+                item.setDurability((short) itemSection.getInt("durability"));
+                item.setDisplayName(itemSection.getString("display_name"));
+                item.setLores(itemSection.getStringList("lores"));
+                item.setTarget(ConfigGuildShopItem.Target.valueOf(itemSection.getString("target")));
+                item.setMoneyEnabled(itemSection.getBoolean("cost.money.enabled"));
+                item.setMoneyFormula(itemSection.getString("cost.money.formula"));
+                item.setPointsEnabled(itemSection.getBoolean("cost.points.enabled"));
+                item.setPointsFormula(itemSection.getString("cost.points.formula"));
+                item.setMessage(itemSection.getString("message"));
+                item.setRewardCommands(itemSection.getStringList("reward_commands"));
+
+                guildShopSettings.addItem(item);
+            }
+        }
     }
 
-    public GuildSettings getGuildSettings() {
-        return guildSettings;
+    public MainSettings getMainSettings() {
+        return mainSettings;
     }
 
     public GuildManager getGuildManager() {
@@ -250,4 +316,6 @@ public class JulyGuild extends JavaPlugin {
     public Economy getVaultAPI() {
         return vaultAPI;
     }
+
+
 }

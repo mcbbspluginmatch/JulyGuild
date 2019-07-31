@@ -1,7 +1,7 @@
 package com.github.julyss2019.mcsp.julyguild.guild;
 
 import com.github.julyss2019.mcsp.julyguild.JulyGuild;
-import com.github.julyss2019.mcsp.julyguild.config.GuildSettings;
+import com.github.julyss2019.mcsp.julyguild.config.MainSettings;
 import com.github.julyss2019.mcsp.julyguild.config.IconShopSettings;
 import com.github.julyss2019.mcsp.julyguild.gui.GUIType;
 import com.github.julyss2019.mcsp.julyguild.guild.exception.GuildLoadException;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 public class Guild {
     private static JulyGuild plugin = JulyGuild.getInstance();
-    private static GuildSettings guildSettings = plugin.getGuildSettings();
+    private static MainSettings mainSettings = plugin.getMainSettings();
     private static IconShopSettings iconShopSettings = plugin.getIconShopSettings();
     private static GuildPlayerManager guildPlayerManager = plugin.getGuildPlayerManager();
     private static GuildManager guildManager = plugin.getGuildManager();
@@ -81,14 +81,14 @@ public class Guild {
 
         this.owner = new GuildOwner(this, guildPlayerManager.getGuildPlayer(yml.getString("owner.name")));
         this.name = yml.getString("name");
-        this.maxMemberCount = yml.getInt("max_member_count", guildSettings.getGuildDefMaxMemberCount());
+        this.maxMemberCount = yml.getInt("max_member_count", mainSettings.getGuildDefMaxMemberCount());
         this.announcements = yml.getStringList("announcements");
         this.guildBank = new GuildBank(this).load();
 
         if (yml.isConfigurationSection("icon"))
 
         if (announcements.size() == 0) {
-            announcements.addAll(guildSettings.getAnnouncementDef());
+            announcements.addAll(mainSettings.getAnnouncementDef());
         }
 
         this.creationTime = yml.getLong("creation_time");
@@ -276,12 +276,20 @@ public class Guild {
         return getOwner().getName().equalsIgnoreCase(name);
     }
 
+    public GuildMember getMember(GuildPlayer guildPlayer) {
+        return getMember(guildPlayer.getName());
+    }
+
     /**
      * 得到成员
      * @param name
      * @return
      */
     public GuildMember getMember(String name) {
+        if (!memberMap.containsKey(name)) {
+            throw new IllegalArgumentException("成员不存在.");
+        }
+
         return memberMap.get(name);
     }
 
@@ -568,11 +576,11 @@ public class Guild {
 
     public int getRank() {
         try {
-            return (int) Parser.parse(guildSettings.getRankingListFormula()
+            return (int) Parser.parse(mainSettings.getRankingListFormula()
                     .replace("%GUILD_MONEY%", String.valueOf(getGuildBank().getBalance(GuildBank.BalanceType.MONEY)))
-                    .replace("%GUILD_POINTS%", String.valueOf(getGuildBank().getBalance(GuildBank.BalanceType.POINTS))
+                    .replace("%GUILD_POINTS%", String.valueOf(getGuildBank().getBalance(GuildBank.BalanceType.POINTS)))
                     .replace("%GUILD_MEMBER_COUNT%", String.valueOf(getMemberCount()))
-                    .replace("%GUILD_MAX_MEMBER_COUNT%", String.valueOf(getMaxMemberCount()))))
+                    .replace("%GUILD_MAX_MEMBER_COUNT%", String.valueOf(getMaxMemberCount())))
                     .evaluate();
         } catch (ParseException e) {
             e.printStackTrace();
@@ -590,5 +598,9 @@ public class Guild {
 
     public List<GuildMember> getOnlineMembers() {
         return getMembers().stream().filter(GuildMember::isOnline).collect(Collectors.toList());
+    }
+
+    public int getOnlineMemberCount() {
+        return getOnlineMembers().size();
     }
 }
