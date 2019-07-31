@@ -142,6 +142,7 @@ public class GuildCreateGUI extends BaseGUI {
                         }
 
                         if (PlayerUtil.hasItem(bukkitPlayer, itemStack -> ItemUtil.containsLore(itemStack, mainSettings.getGuildCreateCostItemKeyLore()), mainSettings.getGuildCreateCostItemAmount())) {
+                            PlayerUtil.takeItems(bukkitPlayer, itemStack -> ItemUtil.containsLore(itemStack, mainSettings.getGuildCreateCostItemKeyLore()), mainSettings.getGuildCreateCostItemAmount());
                             createGuild(guildPlayer, guildName);
                         } else {
                             Util.sendColoredMessage(bukkitPlayer, "&c要创建宗门, 你还需要 &e建帮令x" + settings.getGuildCreateCostItemAmount());
