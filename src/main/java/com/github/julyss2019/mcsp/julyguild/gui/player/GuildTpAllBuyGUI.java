@@ -83,8 +83,9 @@ public class GuildTpAllBuyGUI extends BaseGUI {
                                     diffWorldCounter++;
                                     continue;
                                 }
-
-                                member.getGuildPlayer().getGuildPlayer().addRequest(TpRequest.createNew(guildPlayer, bukkitPlayer.getLocation()));
+                                // 令人迷惑的方法命名，两次 getGuildPlayer() 调用 —— 754503921
+                                member.getGuildPlayer().getGuildPlayer()
+                                    .addRequest(TpRequest.createNew(guildPlayer, bukkitPlayer.getLocation()));
                                 TpAllListener.resetPlayer(member.getName()); // 重置
                                 JulyMessage.sendTitle(member.getBukkitPlayer(), new TitleBuilder().text("&b全员集结令").colored().build());
                                 Util.sendColoredMessage(member.getBukkitPlayer(), "&e宗主 &c" + bukkitPlayer.getName() + " &e请求你传送到TA那, 如果要传送请在 &c" + mainSettings.getTpAllShiftTimeout() + "秒内 &e快速按 &c" + mainSettings.getTpAllShiftCount() + "次 &eShift键!");

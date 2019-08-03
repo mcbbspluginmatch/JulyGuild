@@ -94,6 +94,7 @@ public class GuildPlayerRequestGUI extends BasePageableGUI {
                     @Override
                     public void onClicked(InventoryClickEvent event) {
                         close();
+                        // 不应在 InventoryClickEvent 中开启或关闭背包 —— 754503921
                         new GuildManageGUI(guildPlayer).open();
                     }
                 });

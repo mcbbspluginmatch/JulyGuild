@@ -7,6 +7,7 @@ import org.bukkit.Location;
 
 import java.util.UUID;
 
+// 请求超时后未移除，导致意外的行为 —— 754503921
 public class TpRequest extends BaseGuildPlayerRequest {
     private Location location;
     private static MainSettings mainSettings = JulyGuild.getInstance().getMainSettings();
